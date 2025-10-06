@@ -17,11 +17,6 @@ import {
 import {
   Menu as MenuIcon,
   Dashboard,
-  People,
-  Inventory,
-  Store,
-  PointOfSale,
-  AccountBalance,
   BusinessCenter,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
@@ -37,14 +32,7 @@ const Layout: React.FC = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/' },
-    { text: 'Users', icon: <People />, path: '/users' },
-    { text: 'Products', icon: <Inventory />, path: '/products' },
-    { text: 'Stock', icon: <Store />, path: '/stock' },
-    { text: 'Sales', icon: <PointOfSale />, path: '/sales' },
-    { text: 'Debts', icon: <AccountBalance />, path: '/debts' },
-  ];
+  const menuItems = [{ text: 'Dashboard', icon: <Dashboard />, path: '/' }];
 
   const drawer = (
     <Box>
@@ -59,7 +47,7 @@ const Layout: React.FC = () => {
       >
         <BusinessCenter sx={{ mr: 2 }} />
         <Typography variant="h6" noWrap component="div" fontWeight={600}>
-          StockManager
+          RRV Radio
         </Typography>
       </Box>
       <Divider />
@@ -98,9 +86,11 @@ const Layout: React.FC = () => {
               </ListItemIcon>
               <ListItemText
                 primary={item.text}
-                primaryTypographyProps={{
-                  fontSize: '0.9rem',
-                  fontWeight: location.pathname === item.path ? 600 : 400,
+                slotProps={{
+                  primary: {
+                    fontSize: '0.9rem',
+                    fontWeight: location.pathname === item.path ? 600 : 400,
+                  },
                 }}
               />
             </ListItemButton>
