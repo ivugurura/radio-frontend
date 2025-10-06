@@ -13,14 +13,12 @@ import { Copyright } from '../../components/Copyright';
 import { useEffect, useState } from 'react';
 import { loginSchema } from './schema';
 import { MFForm } from 'react-mui-form';
-import { useSelector } from 'react-redux';
 import { lStorage, notifier } from '../../libs/constants';
 
 const initialStates = {
   email: '',
   password: '',
 };
-const actions = {} as any;
 const redirectToDashboard = () => {
   setTimeout(() => {
     window.location.replace('/admin');
@@ -28,11 +26,13 @@ const redirectToDashboard = () => {
 };
 const Login = ({ shouldRedirect = false }) => {
   const [loginInfo, setLoginInfo] = useState(initialStates);
+  const [{ isSuccess, isLoading, data }] = useState({
+    isSuccess: false,
+    isLoading: false,
+    data: null,
+  } as any);
 
-  const [loginUser, { isLoading, isSuccess, data }] =
-    actions.useLoginAuthMutation();
-
-  const { isAuthenticated } = useSelector((state: any) => state.auth);
+  const { isAuthenticated } = {} as any;
 
   useEffect(() => {
     if (isAuthenticated && shouldRedirect) {
@@ -60,7 +60,7 @@ const Login = ({ shouldRedirect = false }) => {
 
   const handleSubmit = (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
-    loginUser(loginInfo);
+    // loginUser(loginInfo);
   };
   return (
     <Container component="main" maxWidth="xs">
