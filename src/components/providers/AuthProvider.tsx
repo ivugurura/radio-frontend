@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 import { jwtDecode } from 'jwt-decode';
-import { useDispatch } from 'react-redux';
 import { lStorage } from '../../libs/constants';
 import { validateUserAuthentication } from '../../libs/auth';
 import {
@@ -9,11 +8,8 @@ import {
   type AuthContextState,
   initialState,
 } from './AuthContext';
-import { setUser } from '../../redux/actions';
-
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<AuthContextState>(initialState);
-  const dispatch = useDispatch();
 
   const clearLocalStorage = () => {
     localStorage.removeItem('user-token');
@@ -32,7 +28,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (exp! > currentTime) {
           const { isAuthenticated, data } = await validateUserAuthentication();
           if (isAuthenticated) {
-            dispatch(setUser(data));
             setState((prev) => ({ ...prev, isLoading: false, user: data }));
           } else {
             setState((prev) => ({ ...prev, message: 'invalid token' }));

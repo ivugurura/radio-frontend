@@ -3,7 +3,7 @@ import { createContext, useContext } from 'react';
 export interface AuthContextState {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: AJA.IUser | null;
+  user: any;
   message: string;
   setState: (state: Partial<AuthContextState>) => void;
   refreshUserInfo: () => void;

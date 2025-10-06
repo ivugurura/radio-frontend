@@ -13,16 +13,14 @@ import { Copyright } from '../../components/Copyright';
 import { useEffect, useState } from 'react';
 import { loginSchema } from './schema';
 import { MFForm } from 'react-mui-form';
-import { actions, setUser } from '../../redux/actions';
-import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../../redux/store';
 import { lStorage, notifier } from '../../libs/constants';
 
 const initialStates = {
   email: '',
   password: '',
 };
+const actions = {} as any;
 const redirectToDashboard = () => {
   setTimeout(() => {
     window.location.replace('/admin');
@@ -34,9 +32,7 @@ const Login = ({ shouldRedirect = false }) => {
   const [loginUser, { isLoading, isSuccess, data }] =
     actions.useLoginAuthMutation();
 
-  const dispatch = useDispatch();
-
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated } = useSelector((state: any) => state.auth);
 
   useEffect(() => {
     if (isAuthenticated && shouldRedirect) {
@@ -48,7 +44,7 @@ const Login = ({ shouldRedirect = false }) => {
     if (isSuccess && data) {
       const {
         message,
-        data: { token, ...user },
+        data: { token },
       } = data;
       let messageToShow = message;
       if (shouldRedirect) {
@@ -56,7 +52,6 @@ const Login = ({ shouldRedirect = false }) => {
       }
       notifier.success(messageToShow);
       lStorage.save(token);
-      dispatch(setUser(user));
       if (!shouldRedirect) {
         window.location.reload();
       }

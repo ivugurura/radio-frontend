@@ -17,7 +17,6 @@
     "@mui/material": "^7.1.1",
     "@mui/system": "^7.1.1",
     "@mui/x-date-pickers": "^8.5.2",
-    "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.9.0",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
@@ -25,7 +24,6 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-mui-form": "^1.0.2-dev",
-    "react-redux": "^9.2.0",
     "react-router": "^7.6.2",
     "react-toastify": "^11.0.5"
   },
