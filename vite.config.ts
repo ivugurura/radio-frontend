@@ -15,6 +15,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@appTypes': path.resolve(__dirname, 'src/appTypes'),
+      '@libs': path.resolve(__dirname, 'src/libs'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@routes': path.resolve(__dirname, 'src/routes'),
+      '@graphql/client': path.resolve(__dirname, 'src/graphql/client.ts'),
+      '@graphql/mutations': path.resolve(__dirname, 'src/graphql/mutations'),
+      '@graphql/queries': path.resolve(__dirname, 'src/graphql/queries'),
     },
   },
 });
