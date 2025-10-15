@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify';
 
 export const currentYear = new Date().getFullYear();
+export const API_URL = `${import.meta.env.VITE_API_URL}/graphql/`;
 export const lStorage = {
   token: localStorage.getItem('user-token') || '',
   save: (token: string) => {
