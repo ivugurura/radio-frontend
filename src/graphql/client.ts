@@ -62,7 +62,7 @@ function parseRetryAfter(header: string | null): number | null {
 }
 
 export function createApolloClient(
-  options: CreateApolloClientOptions
+  options?: CreateApolloClientOptions
 ): ApolloClient {
   const {
     refreshAccessToken,
@@ -71,7 +71,7 @@ export function createApolloClient(
     onGraphQLError,
     onNetworkError,
     networkRetry,
-  } = options;
+  } = options || {};
 
   const {
     maxAttempts = 3,
@@ -243,8 +243,12 @@ export function createApolloClient(
     return token;
   }
 
+  // Use a relative URL in development so Vite's dev proxy can avoid CORS and preflight.
+  // In production, use the absolute API_URL from env.
+  const endpoint = import.meta.env.DEV ? '/graphql' : API_URL;
+
   const httpLink = new HttpLink({
-    uri: ({ operationName }) => `${API_URL}?${operationName}`,
+    uri: endpoint,
     // Use our custom fetch wrapper
     fetch: authAwareFetch,
     // credentials handled in wrapper to allow per-request overrides if needed

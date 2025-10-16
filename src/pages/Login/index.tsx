@@ -15,6 +15,7 @@ import { loginSchema } from './schema';
 import { MFForm } from 'react-mui-form';
 import { useLoginUserMutation } from '@graphql/hooks';
 import { lStorage, notifier } from '@libs/constants';
+import { useAuth } from '@components/providers/AuthContext';
 
 const initialStates = {
   email: '',
@@ -29,7 +30,7 @@ const Login = ({ shouldRedirect = false }) => {
   const [loginInfo, setLoginInfo] = useState(initialStates);
   const [loginUser, { loading, data }] = useLoginUserMutation();
 
-  const { isAuthenticated } = {} as any;
+  const { isAuthenticated, user: usr, setAuthUser } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated && shouldRedirect) {
@@ -44,8 +45,11 @@ const Login = ({ shouldRedirect = false }) => {
       if (shouldRedirect) {
         messageToShow += '. Be redirected in 3 seconds';
       }
+      console.log({ shouldRedirect, user });
+
       notifier.success(messageToShow);
       lStorage.save(token!);
+      setAuthUser(user);
       if (!shouldRedirect) {
         window.location.reload();
       }
@@ -54,8 +58,10 @@ const Login = ({ shouldRedirect = false }) => {
 
   const handleSubmit = (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
-    loginUser({ variables: loginInfo });
+    loginUser({ variables: { ...loginInfo } });
   };
+  console.log({ usr });
+
   return (
     <Container component="main" maxWidth="xs">
       <Box
