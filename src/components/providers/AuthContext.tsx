@@ -7,6 +7,7 @@ export interface AuthContextState {
   message: string;
   setState: (state: Partial<AuthContextState>) => void;
   refreshUserInfo: () => void;
+  setAuthUser: (user?: any) => void;
 }
 
 export const initialState = {
@@ -16,9 +17,13 @@ export const initialState = {
   message: '',
   setState: () => {},
   refreshUserInfo: () => {},
+  setAuthUser: () => {},
 };
 export const AuthContext = createContext<AuthContextState>(initialState);
 
 export function useAuth() {
+  if (!AuthContext) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return useContext(AuthContext);
 }

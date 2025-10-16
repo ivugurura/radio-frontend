@@ -13,7 +13,9 @@ import { Copyright } from '../../components/Copyright';
 import { useEffect, useState } from 'react';
 import { loginSchema } from './schema';
 import { MFForm } from 'react-mui-form';
-import { lStorage, notifier } from '../../libs/constants';
+import { useLoginUserMutation } from '@graphql/hooks';
+import { lStorage, notifier } from '@libs/constants';
+import { useAuth } from '@components/providers/AuthContext';
 
 const initialStates = {
   email: '',
@@ -26,13 +28,9 @@ const redirectToDashboard = () => {
 };
 const Login = ({ shouldRedirect = false }) => {
   const [loginInfo, setLoginInfo] = useState(initialStates);
-  const [{ isSuccess, isLoading, data }] = useState({
-    isSuccess: false,
-    isLoading: false,
-    data: null,
-  } as any);
+  const [loginUser, { loading, data }] = useLoginUserMutation();
 
-  const { isAuthenticated } = {} as any;
+  const { isAuthenticated, setAuthUser } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated && shouldRedirect) {
@@ -41,27 +39,27 @@ const Login = ({ shouldRedirect = false }) => {
   }, [isAuthenticated, shouldRedirect]);
 
   useEffect(() => {
-    if (isSuccess && data) {
-      const {
-        message,
-        data: { token },
-      } = data;
-      let messageToShow = message;
+    if (data?.loginUser) {
+      const { token, user } = data.loginUser;
+      let messageToShow = `Welcome back, ${user?.firstName}`;
       if (shouldRedirect) {
         messageToShow += '. Be redirected in 3 seconds';
       }
+
       notifier.success(messageToShow);
-      lStorage.save(token);
+      lStorage.save(token!);
+      setAuthUser(user);
       if (!shouldRedirect) {
         window.location.reload();
       }
     }
-  }, [isSuccess, shouldRedirect]);
+  }, [data?.loginUser, shouldRedirect]);
 
   const handleSubmit = (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
-    // loginUser(loginInfo);
+    loginUser({ variables: { ...loginInfo } });
   };
+
   return (
     <Container component="main" maxWidth="xs">
       <Box
@@ -94,9 +92,9 @@ const Login = ({ shouldRedirect = false }) => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
             onClick={handleSubmit}
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </Button>
         </Box>
       </Box>
