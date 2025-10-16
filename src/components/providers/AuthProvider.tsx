@@ -8,11 +8,12 @@ import {
   type AuthContextState,
   initialState,
 } from './AuthContext';
+import type { UserType } from '@graphql/graphql';
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<AuthContextState>(initialState);
 
   const clearLocalStorage = () => {
-    localStorage.removeItem('user-token');
+    lStorage.remove();
     setState((prev) => ({ ...prev, isLoading: false }));
   };
 
@@ -54,5 +55,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     validateAuth();
   }, []);
 
-  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
+  const setAuthUser = (user?: UserType) => {
+    console.log({ user }, 'from setAuthUser');
+
+    setState((prev) => ({
+      ...prev,
+      user,
+      isAuthenticated: !!user,
+      isLoading: false,
+    }));
+  };
+
+  return (
+    <AuthContext.Provider value={{ ...state, setAuthUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
