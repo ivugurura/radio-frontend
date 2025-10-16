@@ -30,7 +30,7 @@ const Login = ({ shouldRedirect = false }) => {
   const [loginInfo, setLoginInfo] = useState(initialStates);
   const [loginUser, { loading, data }] = useLoginUserMutation();
 
-  const { isAuthenticated, user: usr, setAuthUser } = useAuth();
+  const { isAuthenticated, setAuthUser } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated && shouldRedirect) {
@@ -45,7 +45,6 @@ const Login = ({ shouldRedirect = false }) => {
       if (shouldRedirect) {
         messageToShow += '. Be redirected in 3 seconds';
       }
-      console.log({ shouldRedirect, user });
 
       notifier.success(messageToShow);
       lStorage.save(token!);
@@ -60,7 +59,6 @@ const Login = ({ shouldRedirect = false }) => {
     ev.preventDefault();
     loginUser({ variables: { ...loginInfo } });
   };
-  console.log({ usr });
 
   return (
     <Container component="main" maxWidth="xs">
