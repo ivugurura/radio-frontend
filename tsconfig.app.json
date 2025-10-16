@@ -29,6 +29,9 @@
       "@graphql/types": [
         "src/graphql/generated/types.ts"
       ],
+      "@graphql/hooks": [
+        "src/graphql/generated/hooks.ts"
+      ],
       "@graphql/mutations": [
         "src/graphql/mutations/index.ts"
       ],

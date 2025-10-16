@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 // https://vite.dev/config/
+const resolvePath = (p: string) => path.resolve(__dirname, p);
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -14,13 +15,14 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@appTypes': path.resolve(__dirname, 'src/appTypes'),
-      '@libs': path.resolve(__dirname, 'src/libs'),
-      '@components': path.resolve(__dirname, 'src/components'),
-      '@routes': path.resolve(__dirname, 'src/routes'),
-      '@graphql/client': path.resolve(__dirname, 'src/graphql/client.ts'),
-      '@graphql/mutations': path.resolve(__dirname, 'src/graphql/mutations'),
-      '@graphql/queries': path.resolve(__dirname, 'src/graphql/queries'),
+      '@appTypes': resolvePath('src/appTypes'),
+      '@libs': resolvePath('src/libs'),
+      '@components': resolvePath('src/components'),
+      '@routes': resolvePath('src/routes'),
+      '@graphql/client': resolvePath('src/graphql/client.ts'),
+      '@graphql/mutations': resolvePath('src/graphql/mutations'),
+      '@graphql/queries': resolvePath('src/graphql/queries'),
+      '@graphql/hooks': resolvePath('src/graphql/generated/hooks.ts'),
     },
   },
 });
