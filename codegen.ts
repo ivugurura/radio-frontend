@@ -18,6 +18,9 @@ const config: CodegenConfig = {
         // gqlTagName: 'gql',
       },
     },
+    'src/graphql/generated/hooks.ts': {
+      plugins: [{ './codegen-plugins/apollo-v4-hooks.js': {} }],
+    },
   },
 };
 export default config;
