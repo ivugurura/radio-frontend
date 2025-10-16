@@ -26,8 +26,8 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
-      "@graphql/types": [
-        "src/graphql/generated/types.ts"
+      "@graphql/graphql": [
+        "src/graphql/generated/graphql.ts"
       ],
       "@graphql/hooks": [
         "src/graphql/generated/hooks.ts"
