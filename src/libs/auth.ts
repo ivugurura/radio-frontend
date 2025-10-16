@@ -1,28 +1,24 @@
-import { http } from './http';
-
-interface UserProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber?: string;
-}
+import { createApolloClient } from '@graphql/client';
+import type { UserProfileQuery } from '@graphql/graphql';
+import { USER_PROFILE } from '@graphql/queries';
 
 export const validateUserAuthentication = async () => {
   const result = {
     isAuthenticated: false,
     errorMessage: '',
-    data: null as UserProfile | null,
+    data: null as UserProfileQuery['me'] | null,
   };
 
-  return http
-    .get('/users/my-profile')
-    .then((response) => {
-      if (response.data.data) {
+  return createApolloClient()
+    .query<UserProfileQuery>({
+      query: USER_PROFILE,
+    })
+    .then(({ data, error }) => {
+      if (data) {
         result.isAuthenticated = true;
-        result.data = response.data.data;
+        result.data = data.me;
       } else {
-        result.errorMessage = response.data.message;
+        result.errorMessage = error?.message || 'Unknown error';
       }
       return result;
     })
