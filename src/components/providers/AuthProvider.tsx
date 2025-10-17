@@ -56,8 +56,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const setAuthUser = (user?: UserType) => {
-    console.log({ user }, 'from setAuthUser');
-
     setState((prev) => ({
       ...prev,
       user,
