@@ -97,7 +97,7 @@ export function createApolloClient(
       const headers = new Headers(reqInit.headers ?? {});
       // Inject Authorization header if we have a token
       let token = tokenOverride ?? null;
-      if (token === undefined) {
+      if (!token) {
         // undefined means "not provided" -> look it up
         token = lStorage.token;
       }
