@@ -31,3 +31,11 @@ export const FINALIZE_UPLOAD = graphql(`
     }
   }
 `);
+
+export const DELETE_TRACK = graphql(`
+  mutation DeleteTrack($trackId: UUID!) {
+    deleteTrack(trackId: $trackId) {
+      ok
+    }
+  }
+`);
