@@ -1,13 +1,29 @@
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+} from 'react';
 import {
   Box,
   Button,
   LinearProgress,
-  TextField,
   Typography,
   Paper,
   Dialog,
+  Stack,
+  List,
+  ListItem,
+  Tooltip,
+  IconButton,
+  ListItemText,
 } from '@mui/material';
+import {
+  PlayArrow as PlayArrowIcon,
+  Cancel as CancelIcon,
+  Replay as ReplayIcon,
+} from '@mui/icons-material';
 import {
   useFinalizeUploadMutation,
   useRequestUploadMutation,
@@ -35,259 +51,489 @@ import {
  * - GraphQL mutations below match the Django schema used in the backend.
  */
 
-const DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1MB
+const DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1 MB
+const MAX_CONCURRENCY = 3; // adjust as needed
+const MAX_CHECKSUM_SIZE = 32 * 1024 * 1024; // 32 MB: compute SHA-256 client-side up to this size
+
+function formatBytes(n: number) {
+  if (n < 1024) return `${n} B`;
+  const units = ['KB', 'MB', 'GB', 'TB'];
+  let i = -1;
+  do {
+    n = n / 1024;
+    i++;
+  } while (n >= 1024 && i < units.length - 1);
+  return `${n.toFixed(1)} ${units[i]}`;
+}
+
+async function computeSHA256(file: File): Promise<string | null> {
+  // Avoid large memory usage on big files; backend accepts checksum as optional
+  if (!('crypto' in window) || !('subtle' in window.crypto)) return null;
+  if (file.size > MAX_CHECKSUM_SIZE) return null;
+  const buf = await file.arrayBuffer();
+  const hash = await window.crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 interface UploadFormProps {
   open: boolean;
   onClose: () => void;
 }
+
+type UploadStatus =
+  | 'queued'
+  | 'requesting'
+  | 'uploading'
+  | 'finalizing'
+  | 'done'
+  | 'error'
+  | 'canceled';
+
+type UploadItem = {
+  id: string; // local UI id
+  file: File;
+  progress: number; // 0-100
+  bytesSent: number;
+  totalBytes: number;
+  status: UploadStatus;
+  message?: string;
+
+  // server session
+  uploadId?: string;
+  chunkUrl?: string;
+  uploadToken?: string;
+  trackId?: string;
+
+  // runtime
+  abort?: AbortController;
+};
+
 export const UploadForm = ({ open, onClose }: UploadFormProps) => {
-  const [studioSlug, setStudioSlug] = useState<string>('reformation-rw');
-  const [file, setFile] = useState<File | null>(null);
-  const [progress, setProgress] = useState<number>(0);
-  const [status, setStatus] = useState<string | null>(null);
-  const [uploading, setUploading] = useState<boolean>(false);
-  const [trackId, setTrackId] = useState<string | null>(null);
+  const [studioSlug] = useState<string>('reformation-rw');
+  const [items, setItems] = useState<UploadItem[]>([]);
+  const [running, setRunning] = useState(0);
+  const [autoStart, setAutoStart] = useState(false);
 
-  const [requestUploadMutation] = useRequestUploadMutation();
-  const [finalizeUploadMutation] = useFinalizeUploadMutation();
+  const [requestUpload] = useRequestUploadMutation();
+  const [finalizeUpload] = useFinalizeUploadMutation();
 
-  // Abort control for current upload
-  const abortCtrl = useRef<AbortController | null>(null);
+  const queueRef = useRef<UploadItem[]>([]);
+  const runningRef = useRef(0);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
-  const onSelectFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] ?? null;
-    setFile(f);
-    setProgress(0);
-    setStatus(null);
-    setTrackId(null);
+  const updateItem = useCallback((id: string, patch: Partial<UploadItem>) => {
+    setItems((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, ...patch } : it))
+    );
   }, []);
 
-  const computeSHA256 = useCallback(async (f: File) => {
-    const buffer = await f.arrayBuffer();
-    const hash = await crypto.subtle.digest('SHA-256', buffer);
-    const hex = Array.from(new Uint8Array(hash))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-    return hex;
+  const addFiles = useCallback((files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const newItems: UploadItem[] = Array.from(files).map((file) => ({
+      id: crypto.randomUUID(),
+      file,
+      status: 'queued',
+      progress: 0,
+      bytesSent: 0,
+      totalBytes: file.size,
+    }));
+    setItems((prev) => [...newItems, ...prev]);
+    queueRef.current = [...newItems, ...queueRef.current];
+    // Optional auto-start
+    // setAutoStart(true);
   }, []);
 
-  const doUpload = useCallback(
-    async (f: File) => {
-      setUploading(true);
-      setStatus('Requesting upload session...');
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      addFiles(e.target.files);
+      e.currentTarget.value = ''; // reset so same file can be chosen again
+    },
+    [addFiles]
+  );
 
-      // 1) Request upload session from GraphQL
-      const req = await requestUploadMutation({
-        variables: {
-          studioSlug,
-          fileName: f.name,
-          sizeBytes: f.size,
-          mimeType: f.type || 'application/octet-stream',
-        },
+  const startOne = useCallback(
+    async (item: UploadItem) => {
+      // avoid double start
+      if (item.status !== 'queued' && item.status !== 'error') return;
+
+      runningRef.current += 1;
+      setRunning(runningRef.current);
+
+      const id = item.id;
+      const file = item.file;
+      const abort = new AbortController();
+      updateItem(id, {
+        status: 'requesting',
+        message: 'Requesting session...',
+        abort,
+        progress: 0,
+        bytesSent: 0,
       });
 
-      const payload = req.data?.requestUpload;
-      if (!payload) {
-        setStatus('Failed to obtain upload session');
-        setUploading(false);
-        return;
-      }
-
-      const { uploadId, chunkUrl, uploadToken, trackId: tId } = payload;
-      setStatus('Upload session ready. Uploading...');
-      setTrackId(tId ?? null);
-
-      // We'll compute checksum at the end (before finalize)
-      // 2) Upload chunks
-      const total = f.size;
-      let start = 0;
-      const chunkSize = DEFAULT_CHUNK_SIZE;
-      abortCtrl.current = new AbortController();
-
       try {
+        // 1) Request upload session
+        const req = await requestUpload({
+          variables: {
+            studioSlug,
+            fileName: file.name,
+            sizeBytes: file.size,
+            mimeType: file.type || 'application/octet-stream',
+          },
+        });
+        const payload = req.data?.requestUpload;
+        if (!payload) throw new Error('Failed to obtain upload session');
+
+        updateItem(id, {
+          uploadId: payload.uploadId,
+          chunkUrl: payload.chunkUrl!,
+          uploadToken: payload.uploadToken!,
+          trackId: payload.trackId,
+          status: 'uploading',
+          message: 'Uploading...',
+        });
+
+        // 2) PUT chunks (linear append, server returns {received})
+        const total = file.size;
+        let start = 0;
+        const chunkSize = DEFAULT_CHUNK_SIZE;
+
         while (start < total) {
           const end = Math.min(start + chunkSize, total) - 1;
-          const blob = f.slice(start, end + 1);
+          const blob = file.slice(start, end + 1);
           const contentRange = `bytes ${start}-${end}/${total}`;
-          const uploadUrl = import.meta.env.VITE_API_URL + chunkUrl;
+
+          const uploadUrl = import.meta.env.VITE_API_URL + payload.chunkUrl;
+
           const resp = await fetch(uploadUrl, {
             method: 'PUT',
             headers: {
               'Content-Range': contentRange!,
-              'X-Upload-Token': uploadToken!,
-              'Content-Type': 'application/octet-stream',
+              'X-Upload-Token': payload.uploadToken!,
             },
             body: blob,
-            signal: abortCtrl.current.signal,
+            signal: abort.signal,
           });
 
           if (!resp.ok) {
-            // Try to parse server response for a helpful message
             let text = await resp.text().catch(() => '');
-
-            // Check for CORS-related issues
-            if (resp.status === 0) {
-              throw new Error(
-                'Network error - possibly a CORS issue. Check if the server allows PUT requests with custom headers.'
-              );
-            }
-
             throw new Error(
-              `Upload chunk failed: ${resp.status} ${resp.statusText} ${text}`
+              `Chunk failed: ${resp.status} ${resp.statusText} ${text}`
             );
           }
 
-          // server returns {"received": <bytes>}
-          const json = await resp.json().catch(() => ({}) as any);
+          const json = (await resp.json().catch(() => ({}))) as {
+            received?: number;
+          };
           const received =
             typeof json.received === 'number' ? json.received : end + 1;
-
-          // Update start to server-reported position (robust to partial writes)
           start = received;
-          setProgress(Math.round((start / total) * 100));
+
+          updateItem(id, {
+            bytesSent: start,
+            progress: Math.round((start / total) * 100),
+          });
         }
 
-        // 3) Compute checksum (SHA-256) and finalizeUpload
-        setStatus('Computing checksum...');
-        const checksum = await computeSHA256(f);
+        // 3) Optional checksum then finalize
+        updateItem(id, { status: 'finalizing', message: 'Finalizing...' });
+        const checksum = await computeSHA256(file).catch(() => null);
 
-        setStatus('Finalizing upload...');
-        const fin = await finalizeUploadMutation({
-          variables: {
-            uploadId,
-            checksumSha256: checksum,
-          },
+        const fin = await finalizeUpload({
+          variables: { uploadId: payload.uploadId, checksumSha256: checksum },
         });
+        if (!fin.data?.finalizeUpload?.ok) {
+          throw new Error('Finalize failed');
+        }
 
-        if (fin.data?.finalizeUpload?.ok) {
-          setStatus('Upload complete — file queued for processing.');
-          setProgress(100);
-          setUploading(false);
-          return;
-        } else {
-          setStatus('Finalize failed');
-          setUploading(false);
-          return;
-        }
+        updateItem(id, {
+          status: 'done',
+          message: 'Queued for processing',
+          progress: 100,
+        });
       } catch (err: any) {
-        if (err.name === 'AbortError') {
-          setStatus('Upload aborted by user');
+        if (err?.name === 'AbortError') {
+          updateItem(id, { status: 'canceled', message: 'Upload canceled' });
         } else {
-          setStatus(String(err.message || err));
+          updateItem(id, {
+            status: 'error',
+            message: err?.message || String(err),
+          });
         }
-        setUploading(false);
-        return;
       } finally {
-        abortCtrl.current = null;
+        runningRef.current -= 1;
+        setRunning(runningRef.current);
       }
     },
-    [studioSlug, requestUploadMutation, finalizeUploadMutation, computeSHA256]
+    [requestUpload, finalizeUpload, studioSlug, updateItem]
   );
 
-  const onStart = useCallback(() => {
-    if (!file) {
-      setStatus('Select a file first');
-      return;
-    }
-    doUpload(file);
-  }, [file, doUpload]);
+  const schedule = useCallback(() => {
+    // Start as many queued/error items as allowed by MAX_CONCURRENCY
+    if (runningRef.current >= MAX_CONCURRENCY) return;
+    const available = MAX_CONCURRENCY - runningRef.current;
 
-  const onCancel = useCallback(() => {
-    if (abortCtrl.current) {
-      abortCtrl.current.abort();
+    const candidates = itemsRef.current.filter(
+      (it) => it.status === 'queued' || it.status === 'error'
+    );
+    const nextBatch = candidates.slice(0, available);
+    nextBatch.forEach((it) => startOne(it));
+  }, [startOne]);
+
+  // Auto-scheduler: whenever items or running changes and autoStart enabled, schedule more
+  useEffect(() => {
+    if (autoStart) schedule();
+  }, [items, running, autoStart, schedule]);
+
+  const onStartAll = useCallback(() => {
+    setAutoStart(true);
+    schedule();
+  }, [schedule]);
+
+  const onPauseAll = useCallback(() => {
+    setAutoStart(false);
+    // cancel all running
+    itemsRef.current.forEach((it) => {
+      if (
+        (it.status === 'uploading' ||
+          it.status === 'finalizing' ||
+          it.status === 'requesting') &&
+        it.abort
+      ) {
+        it.abort.abort();
+      }
+    });
+  }, []);
+
+  const onStartOne = useCallback(
+    (id: string) => {
+      setAutoStart(false); // manual start
+      const it = itemsRef.current.find((x) => x.id === id);
+      if (it) startOne(it);
+    },
+    [startOne]
+  );
+
+  const onCancelOne = useCallback((id: string) => {
+    const it = itemsRef.current.find((x) => x.id === id);
+    if (it?.abort) {
+      it.abort.abort();
     }
   }, []);
 
-  const progressBar = useMemo(() => {
-    return (
-      <Box sx={{ width: '100%', mt: 2 }}>
-        <LinearProgress variant="determinate" value={progress} />
-        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-          {progress}% {status ? `— ${status}` : ''}
-        </Typography>
-      </Box>
-    );
-  }, [progress, status]);
+  const onRetryOne = useCallback(
+    (id: string) => {
+      // Reset to queued and schedule/start
+      setItems((prev) =>
+        prev.map((it) =>
+          it.id === id
+            ? {
+                ...it,
+                status: 'queued',
+                message: undefined,
+                progress: 0,
+                bytesSent: 0,
+                uploadId: undefined,
+                chunkUrl: undefined,
+                uploadToken: undefined,
+                trackId: undefined,
+                abort: undefined,
+              }
+            : it
+        )
+      );
+      setTimeout(() => {
+        const it = itemsRef.current.find((x) => x.id === id);
+        if (it) {
+          setAutoStart(true);
+          schedule();
+        }
+      }, 0);
+    },
+    [schedule]
+  );
+
+  const summary = useMemo(() => {
+    const total = items.length;
+    const done = items.filter((i) => i.status === 'done').length;
+    const errors = items.filter((i) => i.status === 'error').length;
+    const uploading = items.filter(
+      (i) =>
+        i.status === 'uploading' ||
+        i.status === 'finalizing' ||
+        i.status === 'requesting'
+    ).length;
+    return { total, done, errors, uploading, running };
+  }, [items, running]);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <Paper sx={{ p: 3, maxWidth: 720, mx: 'auto' }}>
-        <Typography variant="h6" gutterBottom>
-          Upload audio to studio
-        </Typography>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <Paper sx={{ p: 3, maxWidth: 980, mx: 'auto' }}>
+        <Stack spacing={2}>
+          <Typography variant="h6">Upload audio (multiple files)</Typography>
 
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <TextField
-            label="Studio slug"
-            value={studioSlug}
-            onChange={(e) => setStudioSlug(e.target.value)}
-            size="small"
-          />
-          <TextField
-            value={file ? file.name : ''}
-            label="Selected file"
-            size="small"
-            InputProps={{
-              readOnly: true,
-            }}
-            sx={{ flex: 1 }}
-          />
-          <Button variant="contained" component="label">
-            Choose
-            <input
-              hidden
-              type="file"
-              accept="audio/*"
-              onChange={onSelectFile}
-            />
-          </Button>
-        </Box>
+          <Stack direction="row" spacing={2}>
+            <Button variant="contained" component="label">
+              Select Files
+              <input
+                hidden
+                type="file"
+                accept="audio/*"
+                multiple
+                onChange={handleFileInput}
+              />
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={onStartAll}
+              disabled={
+                items.length === 0 ||
+                summary.uploading > 0 ||
+                summary.done === summary.total
+              }
+            >
+              Start All
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={onPauseAll}
+              disabled={summary.uploading === 0}
+            >
+              Cancel Running
+            </Button>
+          </Stack>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={onStart}
-            disabled={!file || uploading}
-          >
-            Start Upload
-          </Button>
-          <Button variant="outlined" onClick={onCancel} disabled={!uploading}>
-            Cancel
-          </Button>
-          {trackId && (
-            <Typography sx={{ alignSelf: 'center', ml: 2 }}>
-              Track id: <code>{trackId}</code>
-            </Typography>
-          )}
-        </Box>
-
-        {progressBar}
-
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="body2" color="textSecondary">
-            Notes:
+          <Typography variant="body2" color="text.secondary">
+            Concurrency: {MAX_CONCURRENCY} • Total: {summary.total} • Running:{' '}
+            {summary.running} • Done: {summary.done} • Errors: {summary.errors}
           </Typography>
-          <ul>
-            <li>
-              Files are uploaded in 1MB chunks using Content-Range PUT requests.
-            </li>
-            <li>
-              The server returns the number of bytes received after each chunk —
-              the client uses that to continue/resume upload.
-            </li>
-            <li>
-              When all chunks are uploaded the client computes a SHA-256
-              checksum and calls finalizeUpload to trigger server-side
-              processing.
-            </li>
-            <li>
-              Make sure your backend is reachable on the same origin or CORS is
-              configured to allow PUT to /api/uploads/&lt;upload_id&gt;/chunk.
-            </li>
-          </ul>
-        </Box>
+
+          <List
+            dense
+            sx={{
+              maxHeight: 520,
+              overflow: 'auto',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+            }}
+          >
+            {items.map((it) => (
+              <ListItem
+                key={it.id}
+                secondaryAction={
+                  <Stack direction="row" spacing={1}>
+                    {(it.status === 'queued' || it.status === 'error') && (
+                      <Tooltip
+                        title={it.status === 'queued' ? 'Start' : 'Retry'}
+                      >
+                        <IconButton
+                          onClick={() => onStartOne(it.id)}
+                          size="small"
+                        >
+                          {it.status === 'queued' ? (
+                            <PlayArrowIcon />
+                          ) : (
+                            <ReplayIcon />
+                          )}
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {(it.status === 'requesting' ||
+                      it.status === 'uploading' ||
+                      it.status === 'finalizing') && (
+                      <Tooltip title="Cancel">
+                        <IconButton
+                          onClick={() => onCancelOne(it.id)}
+                          size="small"
+                        >
+                          <CancelIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Stack>
+                }
+              >
+                <Box sx={{ width: '100%' }}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={2}
+                    sx={{ mb: 0.5 }}
+                  >
+                    <ListItemText
+                      primary={
+                        <Stack direction="row" spacing={1}>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {it.file.name}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            ({formatBytes(it.totalBytes)})
+                          </Typography>
+                        </Stack>
+                      }
+                      secondary={
+                        <Typography variant="caption" color="text.secondary">
+                          {it.status.toUpperCase()}
+                          {it.trackId ? ` • track ${it.trackId}` : ''}
+                          {it.message ? ` — ${it.message}` : ''}
+                        </Typography>
+                      }
+                      sx={{ mr: 2 }}
+                    />
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ minWidth: 120, textAlign: 'right' }}
+                    >
+                      {formatBytes(it.bytesSent)} / {formatBytes(it.totalBytes)}{' '}
+                      • {it.progress}%
+                    </Typography>
+                  </Stack>
+                  <LinearProgress
+                    variant="determinate"
+                    value={it.progress}
+                    color={
+                      it.status === 'error'
+                        ? 'error'
+                        : it.status === 'done'
+                          ? 'success'
+                          : 'primary'
+                    }
+                  />
+                </Box>
+              </ListItem>
+            ))}
+          </List>
+
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              Notes:
+            </Typography>
+            <ul>
+              <li>
+                Each file is uploaded using 1 MB chunks with Content-Range and
+                X-Upload-Token.
+              </li>
+              <li>
+                Up to {MAX_CONCURRENCY} uploads run in parallel; you can adjust
+                MAX_CONCURRENCY in the component.
+              </li>
+              <li>
+                SHA‑256 is computed client‑side only for files ≤{' '}
+                {formatBytes(MAX_CHECKSUM_SIZE)} to avoid excessive memory;
+                checksum is optional.
+              </li>
+              <li>
+                After finalize, the server enqueues processing (Celery + ffmpeg)
+                and publishes to your library directory.
+              </li>
+            </ul>
+          </Box>
+        </Stack>
       </Paper>
     </Dialog>
   );
