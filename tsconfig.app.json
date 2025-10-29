@@ -26,6 +26,9 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
+      "@appTypes/*": [
+        "src/appTypes/*"
+      ],
       "@graphql/graphql": [
         "src/graphql/generated/graphql.ts"
       ],
