@@ -83,7 +83,7 @@ export default function AudioTable({
                   indeterminate={someVisibleSelected}
                   checked={allVisibleSelected}
                   onChange={(e) => onToggleSelectAll(e.target.checked)}
-                  inputProps={{ 'aria-label': 'select all visible' }}
+                  slotProps={{ input: { 'aria-label': 'select all visible' } }}
                 />
               </TableCell>
               <TableCell>Title</TableCell>
