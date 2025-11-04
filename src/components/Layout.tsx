@@ -17,7 +17,7 @@ import {
 import {
   Menu as MenuIcon,
   Dashboard,
-  BusinessCenter,
+  MusicVideoOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
 
@@ -32,7 +32,14 @@ const Layout: React.FC = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const menuItems = [{ text: 'Dashboard', icon: <Dashboard />, path: '/' }];
+  const menuItems = [
+    { text: 'Dashboard', icon: <Dashboard />, path: '/' },
+    {
+      text: 'Audio Manager',
+      icon: <MusicVideoOutlined />,
+      path: '/admin/medias',
+    },
+  ];
 
   const drawer = (
     <Box>
@@ -45,7 +52,7 @@ const Layout: React.FC = () => {
           color: 'white',
         }}
       >
-        <BusinessCenter sx={{ mr: 2 }} />
+        <MusicVideoOutlined sx={{ mr: 2 }} />
         <Typography variant="h6" noWrap component="div" fontWeight={600}>
           RRV Radio
         </Typography>
