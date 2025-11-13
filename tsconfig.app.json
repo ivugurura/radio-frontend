@@ -24,34 +24,33 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
     "paths": {
       "@appTypes/*": [
-        "src/appTypes/*"
+        "./src/appTypes/*"
       ],
       "@graphql/graphql": [
-        "src/graphql/generated/graphql.ts"
+        "./src/graphql/generated/graphql.ts"
       ],
       "@graphql/hooks": [
-        "src/graphql/generated/hooks.ts"
+        "./src/graphql/generated/hooks.ts"
       ],
       "@graphql/mutations": [
-        "src/graphql/mutations/index.ts"
+        "./src/graphql/mutations/index.ts"
       ],
       "@graphql/queries": [
-        "src/graphql/queries/index.ts"
+        "./src/graphql/queries/index.ts"
       ],
       "@graphql/client": [
-        "src/graphql/client.ts"
+        "./src/graphql/client.ts"
       ],
       "@libs/*": [
-        "src/libs/*"
+        "./src/libs/*"
       ],
       "@components/*": [
-        "src/components/*"
+        "./src/components/*"
       ],
       "@routes/*": [
-        "src/routes/*"
+        "./src/routes/*"
       ]
     },
   },
