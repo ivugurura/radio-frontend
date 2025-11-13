@@ -18,6 +18,7 @@ import {
   Menu as MenuIcon,
   Dashboard,
   MusicVideoOutlined,
+  CommitOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
 
@@ -38,6 +39,11 @@ const Layout: React.FC = () => {
       text: 'Audio Manager',
       icon: <MusicVideoOutlined />,
       path: '/admin/medias',
+    },
+    {
+      text: 'Listener Statistics',
+      icon: <CommitOutlined />,
+      path: '/admin/listeners',
     },
   ];
 
