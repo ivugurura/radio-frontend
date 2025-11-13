@@ -54,8 +54,12 @@ export const ListenerStatsPage: React.FC = () => {
               <MenuItem value="LAST_7_DAYS">Last 7 days</MenuItem>
             </Select>
           </FormControl>
-          <Button variant="outlined" onClick={() => refetch()}>
-            Refresh
+          <Button
+            variant="outlined"
+            onClick={() => refetch()}
+            disabled={loading}
+          >
+            {loading ? 'Refreshing...' : 'Refresh'}
           </Button>
         </Stack>
       </Stack>
