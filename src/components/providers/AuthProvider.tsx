@@ -9,6 +9,7 @@ import {
   initialState,
 } from './AuthContext';
 import type { UserType } from '@graphql/graphql';
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<AuthContextState>(initialState);
 

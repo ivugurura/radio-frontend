@@ -13,6 +13,7 @@ import {
   ListItemIcon,
   ListItemText,
   useTheme,
+  CircularProgress,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -21,6 +22,8 @@ import {
   CommitOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
+import { useAuth } from './providers/AuthContext';
+import Login from '../pages/Login';
 
 const drawerWidth = 260;
 
@@ -28,13 +31,14 @@ const Layout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const location = useLocation();
+  const { isAuthenticated, isLoading } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/' },
+    { text: 'Dashboard', icon: <Dashboard />, path: '/admin' },
     {
       text: 'Audio Manager',
       icon: <MusicVideoOutlined />,
@@ -184,7 +188,9 @@ const Layout: React.FC = () => {
           backgroundColor: theme.palette.background.default,
         }}
       >
-        <Outlet />
+        {!isAuthenticated && !isLoading && <Login shouldRedirect={false} />}
+        {isLoading && <CircularProgress />}
+        {isAuthenticated && <Outlet />}
       </Box>
     </Box>
   );
