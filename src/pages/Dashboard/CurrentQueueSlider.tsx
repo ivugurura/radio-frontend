@@ -39,7 +39,7 @@ export const CurrentQueueSlider: React.FC<CurrentQueueSliderProps> = ({
               <Box
                 key={it.id}
                 sx={{
-                  minWidth: 160,
+                  maxWidth: 240,
                   border: '1px solid',
                   borderColor: it.isCurrent ? 'warning.main' : 'divider',
                   borderRadius: 2,
@@ -60,8 +60,12 @@ export const CurrentQueueSlider: React.FC<CurrentQueueSliderProps> = ({
                     <Typography
                       variant="caption"
                       fontWeight={600}
-                      noWrap
                       title={it.title}
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        width: 220,
+                      }}
                     >
                       {it.title}
                     </Typography>

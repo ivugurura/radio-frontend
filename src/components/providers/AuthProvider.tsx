@@ -30,7 +30,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (exp! > currentTime) {
           const { isAuthenticated, data } = await validateUserAuthentication();
           if (isAuthenticated) {
-            setState((prev) => ({ ...prev, isLoading: false, user: data }));
+            setState((prev) => ({
+              ...prev,
+              isLoading: false,
+              isAuthenticated,
+              user: data,
+            }));
           } else {
             setState((prev) => ({ ...prev, message: 'invalid token' }));
             clearLocalStorage();
@@ -64,6 +69,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       isLoading: false,
     }));
   };
+  console.log(state);
 
   return (
     <AuthContext.Provider value={{ ...state, setAuthUser }}>
