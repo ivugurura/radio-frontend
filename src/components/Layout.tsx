@@ -24,14 +24,18 @@ import {
 import { Link, Outlet, useLocation } from 'react-router';
 import { useAuth } from './providers/AuthContext';
 import Login from '../pages/Login';
+import { RadioPlayer } from './RadioPlayer';
 
 const drawerWidth = 260;
 
 const Layout: React.FC = () => {
+  const studioId = 'reformation-rw';
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const location = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
+
+  const listenUrl = `${import.meta.env.VITE_STUDIO_URL}/${studioId}/listen`;
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -140,6 +144,7 @@ const Layout: React.FC = () => {
             {menuItems.find((item) => item.path === location.pathname)?.text ||
               'Dashboard'}
           </Typography>
+          <RadioPlayer src={listenUrl} title={`Studio: ${studioId}`} />
         </Toolbar>
       </AppBar>
 
