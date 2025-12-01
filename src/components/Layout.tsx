@@ -117,6 +117,9 @@ const Layout: React.FC = () => {
             </ListItemButton>
           </ListItem>
         ))}
+        <ListItem>
+          <RadioPlayer src={listenUrl} title="R-RW" />
+        </ListItem>
       </List>
     </Box>
   );
@@ -144,7 +147,6 @@ const Layout: React.FC = () => {
             {menuItems.find((item) => item.path === location.pathname)?.text ||
               'Dashboard'}
           </Typography>
-          <RadioPlayer src={listenUrl} title={`Studio: ${studioId}`} />
         </Toolbar>
       </AppBar>
 

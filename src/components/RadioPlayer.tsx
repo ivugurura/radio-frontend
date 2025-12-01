@@ -28,6 +28,7 @@ type Props = {
   src: string; // Stream URL (MP3/ICY or HLS via a different player)
   title?: string; // Display name like "Studio RW"
   autoPlay?: boolean;
+  showVolumeControl?: boolean;
   onStatusChange?: (status: StateType) => void;
 };
 
@@ -35,6 +36,7 @@ export const RadioPlayer: React.FC<Props> = ({
   src,
   title = 'Radio Stream',
   autoPlay = false,
+  showVolumeControl = false,
   onStatusChange,
 }) => {
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
@@ -230,19 +232,21 @@ export const RadioPlayer: React.FC<Props> = ({
           </IconButton>
         </Tooltip>
 
-        <Slider
-          value={muted ? 0 : Math.round(volume * 100)}
-          min={0}
-          max={100}
-          step={1}
-          sx={{ width: 140 }}
-          onChange={(_, v) => {
-            const n = Array.isArray(v) ? v[0] : v;
-            setMuted(false);
-            setVolume(Math.max(0, Math.min(1, Number(n) / 100)));
-          }}
-          aria-label="Volume"
-        />
+        {showVolumeControl && (
+          <Slider
+            value={muted ? 0 : Math.round(volume * 100)}
+            min={0}
+            max={100}
+            step={1}
+            sx={{ width: 'auto' }}
+            onChange={(_, v) => {
+              const n = Array.isArray(v) ? v[0] : v;
+              setMuted(false);
+              setVolume(Math.max(0, Math.min(1, Number(n) / 100)));
+            }}
+            aria-label="Volume"
+          />
+        )}
 
         <Tooltip title="Reconnect">
           <IconButton onClick={handleReconnect} aria-label="Reconnect stream">
