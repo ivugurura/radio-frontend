@@ -19,9 +19,10 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDeleteTrackMutation, useTracksQuery } from '@graphql/hooks';
-import type { TracksQueryVariables } from '@graphql/graphql';
+import type { TracksQueryVariables, TrackType } from '@graphql/graphql';
+import { AudioPlayer } from '@components/AudioPlayer';
 
 export type AudioTableProps = {};
 
@@ -41,11 +42,12 @@ function secondsToClock(n?: number | null) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export default function AudioTable({}: AudioTableProps) {
+export const AudioTable: React.FC<AudioTableProps> = () => {
   const [studioSlug] = useState('reformation-rw');
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [after, setAfter] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [current, setCurrent] = React.useState<TrackType | null>(null);
   const searchDebounced = useDebounced(search, 400);
 
   const variables = useMemo<TracksQueryVariables>(
@@ -118,8 +120,25 @@ export default function AudioTable({}: AudioTableProps) {
     refetch(variables);
   }, [refetch, variables]);
 
+  const handleEndPlay = () => {
+    // Auto play next track when current ends
+    if (!rows || rows.length === 0) return;
+    if (!current) {
+      setCurrent(rows[0] as TrackType);
+      return;
+    }
+    const currentIndex = rows.findIndex((r) => r.id === current.id);
+    if (currentIndex === -1 || currentIndex === rows.length - 1) {
+      // not found or last track
+      setCurrent(null);
+      return;
+    }
+    setCurrent(rows[currentIndex + 1] as TrackType);
+  };
+
   return (
     <Paper sx={{ p: 3 }}>
+      <AudioPlayer source={current} autoPlay onEnded={handleEndPlay} />
       <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
         <Typography variant="h6">Tracks</Typography>
         <TextField
@@ -158,8 +177,16 @@ export default function AudioTable({}: AudioTableProps) {
           </TableHead>
           <TableBody>
             {rows?.map((r) => (
-              <TableRow key={r.id} hover>
-                <TableCell>{r.title || '—'}</TableCell>
+              <TableRow
+                key={r.id}
+                hover
+                sx={{
+                  bgcolor: current?.id === r.id ? 'lightgray' : 'transparent',
+                }}
+              >
+                <TableCell onClick={() => setCurrent(r as TrackType)}>
+                  {r.title || '—'}
+                </TableCell>
                 <TableCell>{r.artist || '—'}</TableCell>
                 <TableCell>{r.album || '—'}</TableCell>
                 <TableCell>{r.genre || '—'}</TableCell>
@@ -218,4 +245,4 @@ export default function AudioTable({}: AudioTableProps) {
       />
     </Paper>
   );
-}
+};

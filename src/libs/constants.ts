@@ -1,7 +1,8 @@
 import { toast } from 'react-toastify';
 
 export const currentYear = new Date().getFullYear();
-export const API_URL = `${import.meta.env.VITE_API_URL}/graphql`;
+const BASE_API_URL = import.meta.env.VITE_API_URL;
+export const API_URL = `${BASE_API_URL}/graphql`;
 export const lStorage = {
   token: localStorage.getItem('user-token') || '',
   save: (token: string) => {
@@ -27,4 +28,8 @@ export const notifier = {
       position: 'bottom-left',
       toastId: msgId,
     }),
+};
+
+export const getTrackUrl = (studioSlug: string, trackId: string) => {
+  return `${BASE_API_URL}/api/studios/${studioSlug}/tracks/${trackId}`;
 };

@@ -17,7 +17,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
-import AudioTable from './AudioTable';
+import { AudioTable } from './AudioTable';
 // import CreateAudioDialog from './CreateAudioDialog';
 import ConfirmDialog from './ConfirmDialog';
 import type { Audio } from './types';
@@ -225,17 +225,17 @@ export default function AudioManagerPage() {
       <Divider sx={{ mb: 2 }} />
 
       <AudioTable
-        rows={pagedAudios}
-        loading={loading}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        total={filteredAudios.length}
-        selectedIds={selected}
-        onChangePage={setPage}
-        onChangeRowsPerPage={(rpp) => setRowsPerPage(rpp)}
-        onToggleSelect={handleToggleSelect}
-        onToggleSelectAll={handleToggleSelectAll}
-        onDeleteOne={handleDeleteOne}
+      // rows={pagedAudios}
+      // loading={loading}
+      // page={page}
+      // rowsPerPage={rowsPerPage}
+      // total={filteredAudios.length}
+      // selectedIds={selected}
+      // onChangePage={setPage}
+      // onChangeRowsPerPage={(rpp) => setRowsPerPage(rpp)}
+      // onToggleSelect={handleToggleSelect}
+      // onToggleSelectAll={handleToggleSelectAll}
+      // onDeleteOne={handleDeleteOne}
       />
 
       <UploadForm open={createOpen} onClose={() => setCreateOpen(false)} />
