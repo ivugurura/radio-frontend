@@ -15,6 +15,7 @@ export const lStorage = {
   clear: () => {
     localStorage.clear();
   },
+  store: localStorage,
 };
 
 export const notifier = {

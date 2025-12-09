@@ -15,7 +15,7 @@ import type {
   GridRowId,
   GridRowSelectionModel,
 } from '@mui/x-data-grid';
-import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
+import { DataGrid, Toolbar as GridToolbarContainer } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -43,8 +43,8 @@ export type ServerTableProps<T> = {
 
   // Optional actions and states
   enableSelection?: boolean;
-  selectedIds?: Array<string | number>;
-  onSelectionChange?: (ids: Array<string | number>) => void;
+  selectedIds?: Set<GridRowId>;
+  onSelectionChange?: (ids: GridRowSelectionModel) => void;
 
   onRefresh?: () => void;
   onDeleteSelected?: (ids: Array<string | number>) => void;
@@ -66,7 +66,7 @@ export type ServerTableProps<T> = {
 function Toolbar<T>(props: {
   enableSelection?: boolean;
   selectedCount: number;
-  onDeleteSelected?: () => void;
+  onDeleteSelected?: (ids: Set<GridRowId>) => void;
   onRefresh?: () => void;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
@@ -87,53 +87,53 @@ function Toolbar<T>(props: {
   } = props;
 
   return (
-    <GridToolbarContainer
-      sx={{ p: 1, gap: 1, justifyContent: 'space-between' }}
-    >
-      <Stack direction="row" spacing={1} alignItems="center">
-        {typeof onAddClick === 'function' && (
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onAddClick}
-            sx={{ textTransform: 'none' }}
-          >
-            {addLabel}
-          </Button>
-        )}
-        {typeof onRefresh === 'function' && (
-          <Tooltip title="Refresh">
-            <IconButton color="primary" onClick={onRefresh}>
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-        {enableSelection &&
-          typeof onDeleteSelected === 'function' &&
-          selectedCount > 0 && (
+    <GridToolbarContainer>
+      <Box sx={{ p: 1, gap: 1, justifyContent: 'space-between' }}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          {typeof onAddClick === 'function' && (
             <Button
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteIcon />}
-              onClick={onDeleteSelected}
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={onAddClick}
               sx={{ textTransform: 'none' }}
             >
-              Delete ({selectedCount})
+              {addLabel}
             </Button>
           )}
-      </Stack>
-      <Box>
-        {typeof onSearchChange === 'function' && (
-          <TextField
-            size="small"
-            placeholder={searchPlaceholder ?? 'Search'}
-            value={searchValue ?? ''}
-            onChange={(e) => onSearchChange(e.target.value)}
-            InputProps={{
-              startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
-            }}
-          />
-        )}
+          {typeof onRefresh === 'function' && (
+            <Tooltip title="Refresh">
+              <IconButton color="primary" onClick={onRefresh}>
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+          {enableSelection &&
+            typeof onDeleteSelected === 'function' &&
+            selectedCount > 0 && (
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={() => onDeleteSelected(selectedIds)}
+                sx={{ textTransform: 'none' }}
+              >
+                Delete ({selectedCount})
+              </Button>
+            )}
+        </Stack>
+        <Box>
+          {typeof onSearchChange === 'function' && (
+            <TextField
+              size="small"
+              placeholder={searchPlaceholder ?? 'Search'}
+              value={searchValue ?? ''}
+              onChange={(e) => onSearchChange(e.target.value)}
+              InputProps={{
+                startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
+              }}
+            />
+          )}
+        </Box>
       </Box>
     </GridToolbarContainer>
   );
@@ -155,7 +155,7 @@ export function ServerTable<T>(props: ServerTableProps<T>) {
     sortDir,
     onSortChange,
     enableSelection = false,
-    selectedIds = [],
+    selectedIds,
     onSelectionChange,
     onRefresh,
     onDeleteSelected,
@@ -206,11 +206,6 @@ export function ServerTable<T>(props: ServerTableProps<T>) {
         return colDef;
       }),
     [columns]
-  );
-
-  const selectionModel = useMemo<GridRowId[]>(
-    () => selectedIds as GridRowId[],
-    [selectedIds]
   );
 
   // Sort model: DataGrid uses array of {field, sort}
@@ -278,20 +273,16 @@ export function ServerTable<T>(props: ServerTableProps<T>) {
         }}
         checkboxSelection={enableSelection}
         disableRowSelectionOnClick
-        rowSelectionModel={selectionModel}
+        rowSelectionModel={selectedIds?.ids}
         onRowSelectionModelChange={(model) => {
-          onSelectionChange?.(model as Array<string | number>);
+          onSelectionChange?.(model);
         }}
         slots={{
           toolbar: () => (
             <Toolbar
               enableSelection={enableSelection}
-              selectedCount={selectedIds.length}
-              onDeleteSelected={
-                enableSelection && onDeleteSelected && selectedIds.length > 0
-                  ? () => onDeleteSelected(selectedIds)
-                  : undefined
-              }
+              selectedCount={selectedIds?.ids.size ?? 0}
+              onDeleteSelected={onDeleteSelected}
               onRefresh={onRefresh}
               searchValue={searchValue}
               onSearchChange={onSearchChange}

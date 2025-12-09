@@ -27,7 +27,7 @@ export const DASHBOARD_OVERVIEW = graphql(`
       diskUsedGb
       diskQuotaGb
     }
-    currentQueue(studioId: $studioId, limit: 12) {
+    currentQueue(studioId: $studioId, limit: 4) {
       items {
         id
         title

@@ -101,7 +101,7 @@ export function createApolloClient(
         // undefined means "not provided" -> look it up
         token = lStorage.token;
       }
-      if (token) headers.set('Authorization', `JWT ${token}`);
+      if (token) headers.set('Authorization', `RRV ${token}`);
 
       reqInit.headers = headers;
       // Credentials handling
@@ -273,12 +273,21 @@ export function createApolloClient(
 // Example placeholder refresh function (adjust to your backend contract)
 export async function defaultRefreshAccessToken(): Promise<string | null> {
   // Example using a REST refresh endpoint
-  // const res = await fetch('/auth/refresh', { method: 'POST', credentials: 'include' });
+  // const res = await fetch('/api/auth/refresh', {
+  //   method: 'POST',
+  //   credentials: 'include',
+  //   body: JSON.stringify({
+  //     refreshToken: lStorage.store.getItem('r-token') || '',
+  //   }),
+  // });
   // if (!res.ok) return null;
   // const data = await res.json();
-  // const newToken = data.accessToken as string | undefined;
-  // await webTokenStore.setAccessToken(newToken ?? null);
-  // return newToken ?? null;
+  // console.log(data);
 
-  return null; // No-op by default
+  // const newToken = data.accessToken;
+
+  // lStorage.save(newToken ?? '');
+  // lStorage.store.setItem('r-token', data.refreshToken ?? '');
+  // return newToken ?? null;
+  return null;
 }

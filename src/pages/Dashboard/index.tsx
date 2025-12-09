@@ -21,7 +21,7 @@ export const DashboardPage: React.FC = () => {
   const studioId = 'reformation-rw';
   const { data, loading, error } = useDashboardOverviewQuery({
     variables: { studioId, range: 'LAST_90_MIN' },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
     pollInterval: 15000,
   });
 
