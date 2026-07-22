@@ -1,0 +1,83 @@
+name: Frontend Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run lint
+        run: yarn lint
+
+  deploy:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: lint
+    if: github.ref_type == 'branch'
+
+    steps:
+      - name: Deploy over SSH (server-side build)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            REPO_DIR="${DEPLOY_PATH:-/srv/apps/radio-frontend}"
+            BRANCH="${DEPLOY_BRANCH:-${{ github.ref_name }}}"
+            WEB_ROOT="${WEB_ROOT:-/var/www/radio-frontend}"
+
+            if [ ! -d "$REPO_DIR/.git" ]; then
+              echo "Missing git repository at $REPO_DIR"
+              exit 1
+            fi
+
+            cd "$REPO_DIR"
+            git fetch origin "$BRANCH"
+            git checkout "$BRANCH"
+            git pull --ff-only origin "$BRANCH"
+
+            if command -v corepack >/dev/null 2>&1; then
+              corepack enable
+            fi
+
+            if [ -f yarn.lock ]; then
+              yarn install --frozen-lockfile
+              yarn build
+            elif [ -f package-lock.json ]; then
+              npm ci
+              npm run build
+            else
+              echo "No supported lockfile found (yarn.lock or package-lock.json)."
+              exit 1
+            fi
+
+            mkdir -p "$WEB_ROOT"
+            rsync -a --delete build/ "$WEB_ROOT"/
+            sudo systemctl reload nginx
