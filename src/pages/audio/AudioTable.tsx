@@ -24,7 +24,9 @@ import { useDeleteTrackMutation, useTracksQuery } from '@graphql/hooks';
 import type { TracksQueryVariables, TrackType } from '@graphql/graphql';
 import { AudioPlayer } from '@components/AudioPlayer';
 
-export type AudioTableProps = {};
+export type AudioTableProps = {
+  paginate?: boolean;
+};
 
 function useDebounced<T>(value: T, delay = 400): T {
   const [v, setV] = useState(value);
@@ -57,7 +59,7 @@ export const AudioTable: React.FC<AudioTableProps> = () => {
       first: rowsPerPage,
       after,
     }),
-    [studioSlug, searchDebounced, rowsPerPage, after]
+    [studioSlug, searchDebounced, rowsPerPage, after],
   );
 
   const { data, loading, refetch, fetchMore } = useTracksQuery({
@@ -74,7 +76,10 @@ export const AudioTable: React.FC<AudioTableProps> = () => {
   const endCursor = data?.tracks?.pageInfo?.endCursor ?? null;
   const hasNextPage = data?.tracks?.pageInfo?.hasNextPage ?? false;
 
-  const rows = data?.tracks?.edges?.map((e) => e?.node!);
+  const rows =
+    data?.tracks?.edges
+      ?.map((e) => e?.node)
+      .filter((n): n is TrackType => !!n) ?? [];
 
   const handleChangePage = useCallback(
     (_: unknown, newPage: number) => {
@@ -91,7 +96,7 @@ export const AudioTable: React.FC<AudioTableProps> = () => {
         fetchMore({ variables: { ...variables, after: endCursor } });
       }
     },
-    [endCursor, hasNextPage, variables, fetchMore, refetch]
+    [endCursor, hasNextPage, variables, fetchMore, refetch],
   );
 
   const handleChangeRowsPerPage = useCallback(
@@ -99,13 +104,13 @@ export const AudioTable: React.FC<AudioTableProps> = () => {
       setRowsPerPage(parseInt(e.target.value, 10));
       setAfter(null);
     },
-    []
+    [],
   );
 
   const onDelete = useCallback(
     async (id: string) => {
       const confirm = window.confirm(
-        'Delete this track and remove files from disk?'
+        'Delete this track and remove files from disk?',
       );
       if (!confirm) return;
       await deleteTrack({ variables: { trackId: id } });
@@ -113,7 +118,7 @@ export const AudioTable: React.FC<AudioTableProps> = () => {
       setAfter(null);
       refetch({ ...variables, after: null });
     },
-    [deleteTrack, refetch, variables]
+    [deleteTrack, refetch, variables],
   );
 
   const onRefresh = useCallback(() => {

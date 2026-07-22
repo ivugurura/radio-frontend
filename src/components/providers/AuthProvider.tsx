@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               ...prev,
               isLoading: false,
               isAuthenticated,
-              user: data,
+              user: data as UserType,
             }));
           } else {
             setState((prev) => ({ ...prev, message: 'invalid token' }));
@@ -50,8 +50,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setState((prev) => ({ ...prev, message: 'invalid token' }));
         clearLocalStorage();
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // Logout
+      console.error('Error validating authentication:', error);
       setState((prev) => ({ ...prev, message: 'invalid token' }));
       clearLocalStorage();
     }
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const setAuthUser = (user?: UserType) => {
     setState((prev) => ({
       ...prev,
-      user,
+      user: user ?? null,
       isAuthenticated: !!user,
       isLoading: false,
     }));

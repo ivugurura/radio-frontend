@@ -17,11 +17,11 @@ const GEO_URL =
 export const WorldMap: React.FC<Props> = ({ data, height = 440 }) => {
   const max = useMemo(
     () => data.reduce((m, d) => Math.max(m, d.count), 0),
-    [data]
+    [data],
   );
   const color = useMemo(
     () => scaleSequential(interpolateBlues).domain([0, Math.max(5, max)]),
-    [max]
+    [max],
   );
 
   const byCode = useMemo(() => {
@@ -37,7 +37,7 @@ export const WorldMap: React.FC<Props> = ({ data, height = 440 }) => {
           <Geographies geography={GEO_URL}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                const props = geo.properties as any;
+                const props = geo.properties as Record<string, string>;
                 const code = (props.ISO_A2 || props.iso_a2 || '').toUpperCase();
                 const cnt = byCode.get(code) || 0;
                 return (

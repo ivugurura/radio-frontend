@@ -1,13 +1,14 @@
+import type { UserType } from '@graphql/graphql';
 import { createContext, useContext } from 'react';
 
 export interface AuthContextState {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: any;
+  user: UserType | null;
   message: string;
   setState: (state: Partial<AuthContextState>) => void;
   refreshUserInfo: () => void;
-  setAuthUser: (user?: any) => void;
+  setAuthUser: (user?: UserType) => void;
 }
 
 export const initialState = {

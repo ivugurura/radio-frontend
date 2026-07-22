@@ -95,7 +95,6 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       setCurrent(0);
       setDuration(0);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source?.processedRelPath]);
 
   React.useEffect(() => {
@@ -128,7 +127,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const handleSeekStart = () => setSeeking(true);
   const handleSeekCommit = (
     _: React.SyntheticEvent | Event,
-    value: number | number[]
+    value: number | number[],
   ) => {
     const audio = audioRef.current;
     if (!audio) return;

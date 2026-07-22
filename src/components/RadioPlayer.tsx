@@ -177,8 +177,9 @@ export const RadioPlayer: React.FC<Props> = ({
     }
     try {
       await audio.play();
-    } catch (err: any) {
-      setLastError(err?.message || 'Playback error');
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : 'Playback error';
+      setLastError(errMsg);
       setStatusText('Error');
       onStatusChange?.('error');
     }
@@ -196,8 +197,9 @@ export const RadioPlayer: React.FC<Props> = ({
     audio.src = currentSrc;
     try {
       await audio.play();
-    } catch (err: any) {
-      setLastError(err?.message || 'Reconnect failed');
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : 'Reconnect failed';
+      setLastError(errMsg);
       setStatusText('Error');
     }
   };

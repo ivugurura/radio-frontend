@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from 'react';
 import {
   Box,
@@ -86,7 +87,7 @@ export default function AudioManagerPage() {
 
   const handleToggleSelect = (id: string) => {
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
 
@@ -151,7 +152,7 @@ export default function AudioManagerPage() {
 
   const pagedAudios = filteredAudios.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   React.useEffect(() => {

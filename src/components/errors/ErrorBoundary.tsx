@@ -2,27 +2,31 @@ import React from 'react';
 
 import { Box, Button, Typography } from '@mui/material';
 
-export const isErrorLike = (value: any) =>
+export const isErrorLike = (value: unknown) =>
   typeof value === 'object' &&
   value !== null &&
   ('stack' in value || 'message' in value) &&
   !('__typename' in value);
-const isWebpackChunkError = (value: any) =>
+const isWebpackChunkError = (value: unknown) =>
   isErrorLike(value) &&
+  value instanceof Error &&
   (value.name === 'ChunkLoadError' ||
     /loading css chunk/gi.test(value.message));
-const asError = (value: any) => {
+const asError = (value: unknown) => {
   if (value instanceof Error) {
     return value;
   }
   if (isErrorLike(value)) {
-    return Object.assign(new Error(value.message), value);
+    return Object.assign(
+      new Error((value as Record<string, unknown>).message as string),
+      value,
+    );
   }
   return new Error(String(value));
 };
 
 export interface ErrorBoundaryProps {
-  location?: any;
+  location?: unknown;
   render?: (error: Error) => React.ReactNode;
   extraContext?: React.ReactNode;
   children?: React.ReactNode;
@@ -36,7 +40,6 @@ export class ErrorBoundary extends React.PureComponent<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  // eslint-disable-next-line react/state-in-constructor
   state: ErrorBoundaryState = { error: undefined };
 
   static getDerivedStateFromError(error: Error) {

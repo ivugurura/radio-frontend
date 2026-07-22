@@ -43,7 +43,7 @@ function computeBackoffDelay(
   attempt: number,
   initial: number,
   max: number,
-  jitter: boolean
+  jitter: boolean,
 ) {
   const base = Math.min(max, initial * Math.pow(2, attempt - 1));
   if (!jitter) return base;
@@ -62,7 +62,7 @@ function parseRetryAfter(header: string | null): number | null {
 }
 
 export function createApolloClient(
-  options?: CreateApolloClientOptions
+  options?: CreateApolloClientOptions,
 ): ApolloClient {
   const {
     refreshAccessToken,
@@ -88,10 +88,10 @@ export function createApolloClient(
   // - surfaces telemetry via onGraphQLError/onNetworkError
   const authAwareFetch: typeof fetch = async (
     input: RequestInfo | URL,
-    init?: RequestInit
+    init?: RequestInit,
   ) => {
     const makeRequest = async (
-      tokenOverride?: string | null
+      tokenOverride?: string | null,
     ): Promise<Response> => {
       const reqInit: RequestInit = { ...(init ?? {}) };
       const headers = new Headers(reqInit.headers ?? {});
@@ -125,7 +125,7 @@ export function createApolloClient(
         if (res.status === 401 && typeof refreshAccessToken === 'function') {
           const refreshed = await coordinateRefresh(
             refreshAccessToken,
-            onSignOut
+            onSignOut,
           );
           if (refreshed) {
             res = await makeRequest(refreshed);
@@ -154,12 +154,14 @@ export function createApolloClient(
               }
 
               const unauth = errors.some(
-                (e) => (e.extensions as any)?.code === 'UNAUTHENTICATED'
+                (e) =>
+                  (e.extensions as { code?: string })?.code ===
+                  'UNAUTHENTICATED',
               );
               if (unauth && typeof refreshAccessToken === 'function') {
                 const refreshed = await coordinateRefresh(
                   refreshAccessToken,
-                  onSignOut
+                  onSignOut,
                 );
                 if (refreshed) {
                   // Retry once with fresh token
@@ -183,7 +185,7 @@ export function createApolloClient(
             attempt,
             initialDelayMs,
             maxDelayMs,
-            jitter
+            jitter,
           );
           const delay =
             retryAfter != null ? Math.max(backoff, retryAfter) : backoff;
@@ -207,7 +209,7 @@ export function createApolloClient(
           attempt,
           initialDelayMs,
           maxDelayMs,
-          jitter
+          jitter,
         );
         await sleep(delay);
         continue;
@@ -218,7 +220,7 @@ export function createApolloClient(
   // Helper to coordinate refresh across concurrent requests
   async function coordinateRefresh(
     doRefresh: NonNullable<CreateApolloClientOptions['refreshAccessToken']>,
-    onSignOutCb?: () => void
+    onSignOutCb?: () => void,
   ): Promise<string | null> {
     if (!isRefreshing) {
       isRefreshing = true;

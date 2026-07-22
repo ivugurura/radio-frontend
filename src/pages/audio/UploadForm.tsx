@@ -126,7 +126,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
 
   const updateItem = useCallback((id: string, patch: Partial<UploadItem>) => {
     setItems((prev) =>
-      prev.map((it) => (it.id === id ? { ...it, ...patch } : it))
+      prev.map((it) => (it.id === id ? { ...it, ...patch } : it)),
     );
   }, []);
 
@@ -151,7 +151,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
       addFiles(e.target.files);
       e.currentTarget.value = ''; // reset so same file can be chosen again
     },
-    [addFiles]
+    [addFiles],
   );
 
   const startOne = useCallback(
@@ -218,9 +218,9 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
           });
 
           if (!resp.ok) {
-            let text = await resp.text().catch(() => '');
+            const text = await resp.text().catch(() => '');
             throw new Error(
-              `Chunk failed: ${resp.status} ${resp.statusText} ${text}`
+              `Chunk failed: ${resp.status} ${resp.statusText} ${text}`,
             );
           }
 
@@ -253,13 +253,18 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
           message: 'Queued for processing',
           progress: 100,
         });
-      } catch (err: any) {
-        if (err?.name === 'AbortError') {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
           updateItem(id, { status: 'canceled', message: 'Upload canceled' });
+        } else if (err instanceof Error) {
+          updateItem(id, {
+            status: 'error',
+            message: err.message,
+          });
         } else {
           updateItem(id, {
             status: 'error',
-            message: err?.message || String(err),
+            message: String(err),
           });
         }
       } finally {
@@ -267,7 +272,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
         setRunning(runningRef.current);
       }
     },
-    [requestUpload, finalizeUpload, studioSlug, updateItem]
+    [requestUpload, finalizeUpload, studioSlug, updateItem],
   );
 
   const schedule = useCallback(() => {
@@ -276,7 +281,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
     const available = MAX_CONCURRENCY - runningRef.current;
 
     const candidates = itemsRef.current.filter(
-      (it) => it.status === 'queued' || it.status === 'error'
+      (it) => it.status === 'queued' || it.status === 'error',
     );
     const nextBatch = candidates.slice(0, available);
     nextBatch.forEach((it) => startOne(it));
@@ -313,7 +318,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
       const it = itemsRef.current.find((x) => x.id === id);
       if (it) startOne(it);
     },
-    [startOne]
+    [startOne],
   );
 
   const onCancelOne = useCallback((id: string) => {
@@ -323,38 +328,6 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
     }
   }, []);
 
-  const onRetryOne = useCallback(
-    (id: string) => {
-      // Reset to queued and schedule/start
-      setItems((prev) =>
-        prev.map((it) =>
-          it.id === id
-            ? {
-                ...it,
-                status: 'queued',
-                message: undefined,
-                progress: 0,
-                bytesSent: 0,
-                uploadId: undefined,
-                chunkUrl: undefined,
-                uploadToken: undefined,
-                trackId: undefined,
-                abort: undefined,
-              }
-            : it
-        )
-      );
-      setTimeout(() => {
-        const it = itemsRef.current.find((x) => x.id === id);
-        if (it) {
-          setAutoStart(true);
-          schedule();
-        }
-      }, 0);
-    },
-    [schedule]
-  );
-
   const summary = useMemo(() => {
     const total = items.length;
     const done = items.filter((i) => i.status === 'done').length;
@@ -363,7 +336,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
       (i) =>
         i.status === 'uploading' ||
         i.status === 'finalizing' ||
-        i.status === 'requesting'
+        i.status === 'requesting',
     ).length;
     return { total, done, errors, uploading, running };
   }, [items, running]);
