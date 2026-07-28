@@ -16,6 +16,7 @@ import { MFForm } from 'react-mui-form';
 import { useLoginUserMutation } from '@graphql/hooks';
 import { lStorage, notifier } from '@libs/constants';
 import { useAuth } from '@components/providers/AuthContext';
+import type { UserType } from '@graphql/graphql';
 
 const initialStates = {
   email: '',
@@ -48,7 +49,7 @@ const Login = ({ shouldRedirect = false }) => {
 
       notifier.success(messageToShow);
       lStorage.save(token!);
-      setAuthUser(user);
+      setAuthUser(user as UserType);
       if (!shouldRedirect) {
         window.location.reload();
       }

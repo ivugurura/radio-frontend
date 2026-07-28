@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from 'react';
 import {
   Box,
@@ -57,12 +56,12 @@ const seedAudios: Audio[] = [
 
 export default function AudioManagerPage() {
   // UI state
-  const [loading, setLoading] = React.useState(false);
+  // const [loading, setLoading] = React.useState(false);
   const [audios, setAudios] = React.useState<Audio[]>(seedAudios);
   const [selected, setSelected] = React.useState<string[]>([]);
   const [search, setSearch] = React.useState('');
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  // const [page, setPage] = React.useState(0);
+  // const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
   const [createOpen, setCreateOpen] = React.useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = React.useState(false);
@@ -78,34 +77,34 @@ export default function AudioManagerPage() {
 
   // Simulated fetch
   const refresh = () => {
-    setLoading(true);
+    // setLoading(true);
     setTimeout(() => {
-      setLoading(false);
+      // setLoading(false);
       setSnackbar({ open: true, message: 'Refreshed', severity: 'info' });
     }, 600);
   };
 
-  const handleToggleSelect = (id: string) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  };
+  // const handleToggleSelect = (id: string) => {
+  //   setSelected((prev) =>
+  //     prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+  //   );
+  // };
 
-  const handleToggleSelectAll = (checked: boolean) => {
-    const visibleIds = filteredAudios
-      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-      .map((a) => a.id);
-    if (checked) {
-      setSelected((prev) => Array.from(new Set([...prev, ...visibleIds])));
-    } else {
-      setSelected((prev) => prev.filter((id) => !visibleIds.includes(id)));
-    }
-  };
+  // const handleToggleSelectAll = (checked: boolean) => {
+  //   const visibleIds = filteredAudios
+  //     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  //     .map((a) => a.id);
+  //   if (checked) {
+  //     setSelected((prev) => Array.from(new Set([...prev, ...visibleIds])));
+  //   } else {
+  //     setSelected((prev) => prev.filter((id) => !visibleIds.includes(id)));
+  //   }
+  // };
 
-  const handleDeleteOne = (id: string) => {
-    setSelected([id]);
-    setConfirmDeleteOpen(true);
-  };
+  // const handleDeleteOne = (id: string) => {
+  //   setSelected([id]);
+  //   setConfirmDeleteOpen(true);
+  // };
 
   const handleBulkDelete = () => {
     if (selected.length === 0) return;
@@ -139,26 +138,26 @@ export default function AudioManagerPage() {
   //   });
   // };
 
-  const filteredAudios = React.useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return audios;
-    return audios.filter((a) => {
-      const inTitle = a.title.toLowerCase().includes(q);
-      const inArtist = (a.artist ?? '').toLowerCase().includes(q);
-      const inTags = (a.tags ?? []).some((t) => t.toLowerCase().includes(q));
-      return inTitle || inArtist || inTags;
-    });
-  }, [audios, search]);
+  // const filteredAudios = React.useMemo(() => {
+  //   const q = search.trim().toLowerCase();
+  //   if (!q) return audios;
+  //   return audios.filter((a) => {
+  //     const inTitle = a.title.toLowerCase().includes(q);
+  //     const inArtist = (a.artist ?? '').toLowerCase().includes(q);
+  //     const inTags = (a.tags ?? []).some((t) => t.toLowerCase().includes(q));
+  //     return inTitle || inArtist || inTags;
+  //   });
+  // }, [audios, search]);
 
-  const pagedAudios = filteredAudios.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  );
+  // const pagedAudios = filteredAudios.slice(
+  //   page * rowsPerPage,
+  //   page * rowsPerPage + rowsPerPage,
+  // );
 
-  React.useEffect(() => {
-    // Reset page when filters change
-    setPage(0);
-  }, [search]);
+  // React.useEffect(() => {
+  //   // Reset page when filters change
+  //   setPage(0);
+  // }, [search]);
 
   // TODO: Replace mocks with Apollo Client
   // const { data, loading, refetch } = useQuery(GetAudiosDocument, { variables: { ... }});

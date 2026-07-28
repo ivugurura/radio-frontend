@@ -37,14 +37,14 @@ module.exports.plugin = (schema, documents) => {
 
   // Build imports
   const uniqueOps = Array.from(
-    new Map(ops.map((o) => [o.name + ':' + o.type, o])).values()
+    new Map(ops.map((o) => [o.name + ':' + o.type, o])).values(),
   );
 
   const docImports = uniqueOps.map((o) => `${o.name}Document`).join(', ');
   const typeImports = uniqueOps
     .map(
       (o) =>
-        `${o.name}${capitalize(opTypeSuffix(o.type))}, ${o.name}${capitalize(opTypeSuffix(o.type))}Variables`
+        `${o.name}${capitalize(opTypeSuffix(o.type))}, ${o.name}${capitalize(opTypeSuffix(o.type))}Variables`,
     )
     .join(', ');
 
@@ -56,6 +56,7 @@ module.exports.plugin = (schema, documents) => {
   const needSubscription = uniqueOps.some((o) => o.type === 'subscription');
   const hookImports = [
     needQuery ? 'useQuery' : null,
+    needQuery ? 'skipToken' : null,
     needLazyQuery ? 'useLazyQuery' : null,
     needMutation ? 'useMutation' : null,
     needSubscription ? 'useSubscription' : null,
@@ -71,13 +72,13 @@ module.exports.plugin = (schema, documents) => {
     const typeVars = `${o.name}${capitalize(opTypeSuffix(o.type))}Variables`;
     const docConst = `${o.name}Document`;
     if (o.type === 'mutation') {
-      return `export function use${o.name}Mutation(options?: Parameters<typeof useMutation<${typeBase}, ${typeVars}>>[1]) {\n  return useMutation<${typeBase}, ${typeVars}>(${docConst}, options);\n}\n`;
+      return `export function use${o.name}Mutation(options?: Parameters<typeof useMutation<${typeBase}, ${typeVars}>>[1]) {\n  return options === undefined\n    ? useMutation<${typeBase}, ${typeVars}>(${docConst})\n    : useMutation<${typeBase}, ${typeVars}>(${docConst}, options);\n}\n`;
     }
     if (o.type === 'query') {
-      return `export function use${o.name}Query(options?: Parameters<typeof useQuery<${typeBase}, ${typeVars}>>[1]) {\n  return useQuery<${typeBase}, ${typeVars}>(${docConst}, options);\n}\nexport function use${o.name}LazyQuery(options?: Parameters<typeof useLazyQuery<${typeBase}, ${typeVars}>>[1]) {\n  return useLazyQuery<${typeBase}, ${typeVars}>(${docConst}, options);\n}\n`;
+      return `export function use${o.name}Query(options?: Parameters<typeof useQuery<${typeBase}, ${typeVars}>>[1]) {\n  return useQuery<${typeBase}, ${typeVars}>(${docConst}, options ?? skipToken);\n}\nexport function use${o.name}LazyQuery(options?: Parameters<typeof useLazyQuery<${typeBase}, ${typeVars}>>[1]) {\n  return options === undefined\n    ? useLazyQuery<${typeBase}, ${typeVars}>(${docConst})\n    : useLazyQuery<${typeBase}, ${typeVars}>(${docConst}, options);\n}\n`;
     }
     if (o.type === 'subscription') {
-      return `export function use${o.name}Subscription(options?: Parameters<typeof useSubscription<${typeBase}, ${typeVars}>>[1]) {\n  return useSubscription<${typeBase}, ${typeVars}>(${docConst}, options);\n}\n`;
+      return `export function use${o.name}Subscription(options?: Parameters<typeof useSubscription<${typeBase}, ${typeVars}>>[1]) {\n  return options === undefined\n    ? useSubscription<${typeBase}, ${typeVars}>(${docConst})\n    : useSubscription<${typeBase}, ${typeVars}>(${docConst}, options);\n}\n`;
     }
     return '';
   });
