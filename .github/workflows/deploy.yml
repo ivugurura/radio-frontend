@@ -52,6 +52,11 @@ jobs:
             BRANCH="${DEPLOY_BRANCH:-main}"
             WEB_ROOT="${WEB_ROOT:-${{ secrets.APP_WEB_ROOT }}}"
 
+            # Safe fallback to match nginx root when APP_WEB_ROOT is unset.
+            if [ -z "${WEB_ROOT}" ]; then
+              WEB_ROOT="/app/radio/www"
+            fi
+
             if [ ! -d "$REPO_DIR/.git" ]; then
               echo "Missing git repository at $REPO_DIR"
               exit 1
@@ -77,6 +82,20 @@ jobs:
               exit 1
             fi
 
+            if [ ! -f "build/index.html" ]; then
+              echo "Build output missing build/index.html"
+              exit 1
+            fi
+
             mkdir -p "$WEB_ROOT"
             rsync -a --delete build/ "$WEB_ROOT"/
+
+            if [ ! -f "$WEB_ROOT/index.html" ]; then
+              echo "Deploy verification failed: $WEB_ROOT/index.html is missing"
+              exit 1
+            fi
+
+            # Ensure nginx worker can read frontend assets.
+            sudo chmod -R a+rX "$WEB_ROOT"
+            sudo nginx -t
             sudo systemctl reload nginx
