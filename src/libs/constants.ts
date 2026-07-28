@@ -32,5 +32,5 @@ export const notifier = {
 };
 
 export const getTrackUrl = (studioSlug: string, trackId: string) => {
-  return `${BASE_API_URL}/api/studios/${studioSlug}/tracks/${trackId}`;
+  return `${BASE_API_URL}/studios/${studioSlug}/tracks/${trackId}`;
 };
