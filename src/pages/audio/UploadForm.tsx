@@ -28,6 +28,7 @@ import {
   useFinalizeUploadMutation,
   useRequestUploadMutation,
 } from '@graphql/hooks';
+import { BASE_API_URL } from '@libs/constants';
 
 /**
  * UploadForm
@@ -205,7 +206,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
           const blob = file.slice(start, end + 1);
           const contentRange = `bytes ${start}-${end}/${total}`;
 
-          const uploadUrl = import.meta.env.VITE_API_URL + payload.chunkUrl;
+          const uploadUrl = BASE_API_URL + payload.chunkUrl;
 
           const resp = await fetch(uploadUrl, {
             method: 'PUT',

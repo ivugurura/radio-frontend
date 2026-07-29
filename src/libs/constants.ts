@@ -1,8 +1,8 @@
 import { toast } from 'react-toastify';
 
-const BASE_API_URL = import.meta.env.VITE_API_URL;
-
 export const currentYear = new Date().getFullYear();
+
+export const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 export const APP_SCHEMA = import.meta.env.VITE_APP_SCHEMA;
 
