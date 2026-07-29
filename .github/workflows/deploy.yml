@@ -77,7 +77,7 @@ jobs:
 
             if command -v corepack >/dev/null 2>&1; then
               corepack enable
-              corepack prepare yarn@stable --activate
+              corepack prepare yarn@1.22.22 --activate
             fi
 
             if ! command -v yarn >/dev/null 2>&1; then
@@ -86,7 +86,7 @@ jobs:
             fi
 
             if [ -f yarn.lock ]; then
-              yarn install --frozen-lockfile
+              yarn
               yarn build
             elif [ -f package-lock.json ]; then
               npm ci
