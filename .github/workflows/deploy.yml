@@ -52,11 +52,6 @@ jobs:
             BRANCH="${DEPLOY_BRANCH:-main}"
             WEB_ROOT="${WEB_ROOT:-${{ secrets.APP_WEB_ROOT }}}"
 
-            # Safe fallback to match nginx root when APP_WEB_ROOT is unset.
-            if [ -z "${WEB_ROOT}" ]; then
-              WEB_ROOT="/app/radio/www"
-            fi
-
             if [ ! -d "$REPO_DIR/.git" ]; then
               echo "Missing git repository at $REPO_DIR"
               exit 1
@@ -87,8 +82,15 @@ jobs:
               exit 1
             fi
 
+            SOURCE_BUILD_DIR="$(cd build && pwd -P)"
             mkdir -p "$WEB_ROOT"
-            rsync -a --delete build/ "$WEB_ROOT"/
+            TARGET_WEB_ROOT="$(cd "$WEB_ROOT" && pwd -P)"
+
+            if [ "$SOURCE_BUILD_DIR" = "$TARGET_WEB_ROOT" ]; then
+              echo "WEB_ROOT already points to build output directory; skipping rsync"
+            else
+              rsync -a --delete build/ "$WEB_ROOT"/
+            fi
 
             if [ ! -f "$WEB_ROOT/index.html" ]; then
               echo "Deploy verification failed: $WEB_ROOT/index.html is missing"
