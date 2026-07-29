@@ -1,5 +1,5 @@
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
-import { lStorage, API_URL } from '@libs/constants';
+import { lStorage, APP_SCHEMA } from '@libs/constants';
 import type { GraphQLError } from 'graphql';
 
 type CreateApolloClientOptions = {
@@ -245,12 +245,8 @@ export function createApolloClient(
     return token;
   }
 
-  // Use a relative URL in development so Vite's dev proxy can avoid CORS and preflight.
-  // In production, use the absolute API_URL from env.
-  const endpoint = import.meta.env.DEV ? '/graphql' : API_URL;
-
   const httpLink = new HttpLink({
-    uri: endpoint,
+    uri: APP_SCHEMA,
     // Use our custom fetch wrapper
     fetch: authAwareFetch,
     // credentials handled in wrapper to allow per-request overrides if needed
