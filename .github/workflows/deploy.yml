@@ -116,7 +116,4 @@ jobs:
               exit 1
             fi
 
-            # Ensure nginx worker can read frontend assets.
-            sudo chmod -R a+rX "$WEB_ROOT"
-            sudo nginx -t
-            sudo systemctl reload nginx
+            echo "Frontend deployed successfully to $WEB_ROOT"

@@ -1,0 +1,8 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="56" fill="#185DA8" />
+  <text x="40" y="164" fill="#F8FAFC" font-family="Impact, Arial Black, sans-serif" font-size="116" font-weight="900"
+    letter-spacing="1">RRV</text>
+  <path
+    d="M200 56V116C195 111 187 109 180 112C170 116 164 127 167 138C171 149 184 155 195 151C205 148 212 138 210 128V84H228V56H200Z"
+    fill="#F8FAFC" />
+</svg>
