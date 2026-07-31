@@ -22,7 +22,7 @@ export const DashboardPage: React.FC = () => {
   const { data, loading, error } = useDashboardOverviewQuery({
     variables: { studioId, range: 'LAST_90_MIN' },
     fetchPolicy: 'network-only',
-    pollInterval: 15000,
+    pollInterval: 5000,
   });
 
   const trend = data?.listeningTrend ?? null;

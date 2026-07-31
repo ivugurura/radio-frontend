@@ -35,16 +35,21 @@ export const CurrentQueueSlider: React.FC<CurrentQueueSliderProps> = ({
             const timeLabel = it.startedAt
               ? dayjs(it.startedAt).format('HH:mm')
               : '';
+            const itemKey = `${it.id}-${it.startedAt ?? 'na'}-${
+              it.isCurrent ? 'current' : 'past'
+            }`;
             return (
               <Box
-                key={it.id}
+                key={itemKey}
                 sx={{
+                  width: 240,
+                  minWidth: 240,
                   maxWidth: 240,
                   border: '1px solid',
                   borderColor: it.isCurrent ? 'warning.main' : 'divider',
                   borderRadius: 2,
                   p: 1,
-                  flexShrink: 0,
+                  flex: '0 0 240px',
                   bgcolor: it.isCurrent ? 'warning.light' : 'background.paper',
                 }}
               >
@@ -52,7 +57,7 @@ export const CurrentQueueSlider: React.FC<CurrentQueueSliderProps> = ({
                   <Avatar
                     src={it.coverUrl!}
                     variant="rounded"
-                    sx={{ width: 48, height: 48, fontSize: 12 }}
+                    sx={{ width: 24, height: 24, fontSize: 12 }}
                   >
                     {it.title?.slice(0, 1) || '?'}
                   </Avatar>
@@ -62,9 +67,11 @@ export const CurrentQueueSlider: React.FC<CurrentQueueSliderProps> = ({
                       fontWeight={600}
                       title={it.title}
                       sx={{
+                        display: 'block',
                         whiteSpace: 'nowrap',
+                        overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        width: 220,
+                        maxWidth: '100%',
                       }}
                     >
                       {it.title}
@@ -72,8 +79,14 @@ export const CurrentQueueSlider: React.FC<CurrentQueueSliderProps> = ({
                     <Typography
                       variant="caption"
                       color="text.secondary"
-                      noWrap
                       title={it.artist!}
+                      sx={{
+                        display: 'block',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '100%',
+                      }}
                     >
                       {it.artist}
                     </Typography>
