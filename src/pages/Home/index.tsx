@@ -14,26 +14,27 @@ import {
   StopRounded as StopRoundedIcon,
   MicOffRounded as MicOffRoundedIcon,
 } from '@mui/icons-material';
-import { useDashboardOverviewQuery } from '@graphql/hooks';
+// import { useDashboardOverviewQuery } from '@graphql/hooks';
 
 const STREAM_URL =
   'https://radio.reformationvoice.org/studios/reformation-rw/listen';
-const STUDIO_ID = 'reformation-rw';
+// const STUDIO_ID = 'reformation-rw';
 
 const HomePage: React.FC = () => {
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
 
-  const { data } = useDashboardOverviewQuery({
-    variables: { studioId: STUDIO_ID, range: 'LAST_90_MIN' },
-    fetchPolicy: 'network-only',
-    pollInterval: 5000,
-  });
+  // const { data } = useDashboardOverviewQuery({
+  //   variables: { studioId: STUDIO_ID, range: 'LAST_90_MIN' },
+  //   fetchPolicy: 'network-only',
+  //   pollInterval: 5000,
+  // });
 
-  const queueItems = data?.currentQueue?.items ?? [];
-  const currentTrack =
-    queueItems.find((item) => item.isCurrent) ?? queueItems[0];
-  const title = currentTrack?.title || 'No Track Selected';
+  // const queueItems = data?.currentQueue?.items ?? [];
+  // const currentTrack =
+  //   queueItems.find((item) => item.isCurrent) ?? queueItems[0];
+  // const title = currentTrack?.title || 'No Track Selected';
+  const title = 'Reformation Radio Voice';
   // const subtitle =
   //   currentTrack?.artist && currentTrack.artist.trim()
   //     ? currentTrack.artist
