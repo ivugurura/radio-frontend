@@ -6,15 +6,42 @@ export const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 export const APP_SCHEMA = import.meta.env.VITE_APP_SCHEMA;
 
+const ACCESS_TOKEN_KEY = 'user-token';
+const REFRESH_TOKEN_KEY = 'refresh-token';
+
 export const lStorage = {
-  token: localStorage.getItem('user-token') || '',
-  save: (token: string) => {
-    localStorage.setItem('user-token', token);
+  get token() {
+    return localStorage.getItem(ACCESS_TOKEN_KEY) || '';
+  },
+  get refreshToken() {
+    return localStorage.getItem(REFRESH_TOKEN_KEY) || '';
+  },
+  save: (token: string, refreshToken?: string) => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    if (typeof refreshToken === 'string') {
+      if (refreshToken) {
+        localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+      } else {
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
+      }
+    }
+  },
+  saveRefreshToken: (refreshToken: string) => {
+    if (refreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    } else {
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
   },
   remove: () => {
-    localStorage.removeItem('user-token');
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
   },
-  get: () => localStorage.getItem('user-token') || '',
+  removeAll: () => {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  },
+  get: () => localStorage.getItem(ACCESS_TOKEN_KEY) || '',
+  getRefreshToken: () => localStorage.getItem(REFRESH_TOKEN_KEY) || '',
   clear: () => {
     localStorage.clear();
   },

@@ -41,14 +41,14 @@ const Login = ({ shouldRedirect = false }) => {
 
   useEffect(() => {
     if (data?.loginUser) {
-      const { token, user } = data.loginUser;
+      const { token, restToken, user } = data.loginUser;
       let messageToShow = `Welcome back, ${user?.firstName}`;
       if (shouldRedirect) {
         messageToShow += '. Be redirected in 3 seconds';
       }
 
       notifier.success(messageToShow);
-      lStorage.save(token!);
+      lStorage.save(token!, restToken ?? undefined);
       setAuthUser(user as UserType);
       if (!shouldRedirect) {
         window.location.reload();

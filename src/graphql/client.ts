@@ -1,5 +1,5 @@
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
-import { lStorage, APP_SCHEMA } from '@libs/constants';
+import { lStorage, APP_SCHEMA, BASE_API_URL } from '@libs/constants';
 import type { GraphQLError } from 'graphql';
 
 type CreateApolloClientOptions = {
@@ -61,6 +61,27 @@ function parseRetryAfter(header: string | null): number | null {
   return Number.isFinite(ms) ? Math.max(0, ms) : null;
 }
 
+function sanitizeUrlPart(value: string): string {
+  return value.replace(/\/+$/, '');
+}
+
+function getRefreshEndpoint(): string {
+  if (BASE_API_URL) {
+    const baseApi = sanitizeUrlPart(BASE_API_URL);
+    if (baseApi.endsWith('/api')) {
+      return `${baseApi}/auth/refresh`;
+    }
+    return `${baseApi}/api/auth/refresh`;
+  }
+
+  if (APP_SCHEMA) {
+    const origin = new URL(APP_SCHEMA, window.location.origin).origin;
+    return `${sanitizeUrlPart(origin)}/api/auth/refresh`;
+  }
+
+  return '/api/auth/refresh';
+}
+
 export function createApolloClient(
   options?: CreateApolloClientOptions,
 ): ApolloClient {
@@ -99,7 +120,7 @@ export function createApolloClient(
       let token = tokenOverride ?? null;
       if (!token) {
         // undefined means "not provided" -> look it up
-        token = lStorage.token;
+        token = lStorage.get();
       }
       if (token) headers.set('Authorization', `RRV ${token}`);
 
@@ -270,22 +291,37 @@ export function createApolloClient(
 
 // Example placeholder refresh function (adjust to your backend contract)
 export async function defaultRefreshAccessToken(): Promise<string | null> {
-  // Example using a REST refresh endpoint
-  // const res = await fetch('/api/auth/refresh', {
-  //   method: 'POST',
-  //   credentials: 'include',
-  //   body: JSON.stringify({
-  //     refreshToken: lStorage.store.getItem('r-token') || '',
-  //   }),
-  // });
-  // if (!res.ok) return null;
-  // const data = await res.json();
-  // console.log(data);
+  const refreshToken = lStorage.getRefreshToken();
+  if (!refreshToken) return null;
 
-  // const newToken = data.accessToken;
+  try {
+    const response = await fetch(getRefreshEndpoint(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: 'same-origin',
+    });
 
-  // lStorage.save(newToken ?? '');
-  // lStorage.store.setItem('r-token', data.refreshToken ?? '');
-  // return newToken ?? null;
-  return null;
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 400) {
+        lStorage.removeAll();
+      }
+      return null;
+    }
+
+    const payload = (await response.json()) as {
+      token?: string;
+      refresh_token?: string;
+    };
+
+    const nextAccessToken = payload.token;
+    if (!nextAccessToken) return null;
+
+    lStorage.save(nextAccessToken, payload.refresh_token ?? refreshToken);
+    return nextAccessToken;
+  } catch {
+    return null;
+  }
 }
