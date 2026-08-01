@@ -64,7 +64,7 @@ const HomePage: React.FC = () => {
   const [nowError, setNowError] = React.useState('');
   const [elapsedSec, setElapsedSec] = React.useState(0);
 
-  const stationTitle = 'Reformation Radio Voice';
+  const stationTitle = 'Reformation Voice Radio';
   const currentTitle = cleanTrackName(nowData?.current);
   const nextTitle = cleanTrackName(nowData?.next);
 
