@@ -18,6 +18,9 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
 import { AudioTable } from './AudioTable';
+import { useTracksQuery } from '@graphql/hooks';
+import { STUDIO_ID } from '@libs/constants';
+import type { TracksQueryVariables, TrackType } from '@graphql/graphql';
 // import CreateAudioDialog from './CreateAudioDialog';
 import ConfirmDialog from './ConfirmDialog';
 import type { Audio } from './types';
@@ -54,7 +57,21 @@ const seedAudios: Audio[] = [
   },
 ];
 
+function useDebounced<T>(value: T, delay = 400): T {
+  const [v, setV] = React.useState(value);
+
+  React.useEffect(() => {
+    const t = window.setTimeout(() => setV(value), delay);
+    return () => window.clearTimeout(t);
+  }, [value, delay]);
+
+  return v;
+}
+
 export default function AudioManagerPage() {
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [after, setAfter] = React.useState<string | null>(null);
+
   // UI state
   // const [loading, setLoading] = React.useState(false);
   const [audios, setAudios] = React.useState<Audio[]>(seedAudios);
@@ -75,14 +92,66 @@ export default function AudioManagerPage() {
     severity: 'success',
   });
 
+  const searchDebounced = useDebounced(search, 400);
+
+  const variables = React.useMemo<TracksQueryVariables>(
+    () => ({
+      studioSlug: STUDIO_ID,
+      search: searchDebounced || null,
+      first: rowsPerPage,
+      after,
+    }),
+    [searchDebounced, rowsPerPage, after],
+  );
+
+  const { data, loading, refetch, fetchMore } = useTracksQuery({
+    variables,
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const endCursor = data?.tracks?.pageInfo?.endCursor ?? null;
+  const hasNextPage = data?.tracks?.pageInfo?.hasNextPage ?? false;
+  const totalCount = data?.tracks?.totalCount ?? 0;
+  const rows =
+    data?.tracks?.edges
+      ?.map((e) => e?.node)
+      .filter((n): n is TrackType => !!n) ?? [];
+
   // Simulated fetch
-  const refresh = () => {
-    // setLoading(true);
-    setTimeout(() => {
-      // setLoading(false);
-      setSnackbar({ open: true, message: 'Refreshed', severity: 'info' });
-    }, 600);
+  const refresh = async () => {
+    await refetch(variables);
+    setSnackbar({ open: true, message: 'Refreshed', severity: 'info' });
   };
+
+  const handleChangePage = React.useCallback(
+    async (newPage: number) => {
+      if (newPage === 0) {
+        setAfter(null);
+        await refetch({ ...variables, after: null });
+        return;
+      }
+
+      if (hasNextPage && endCursor) {
+        setAfter(endCursor);
+        await fetchMore({ variables: { ...variables, after: endCursor } });
+      }
+    },
+    [endCursor, hasNextPage, variables, fetchMore, refetch],
+  );
+
+  const handleRowsPerPageChange = React.useCallback(
+    async (nextRows: number) => {
+      setRowsPerPage(nextRows);
+      setAfter(null);
+      await refetch({
+        ...variables,
+        first: nextRows,
+        after: null,
+      });
+    },
+    [variables, refetch],
+  );
 
   // const handleToggleSelect = (id: string) => {
   //   setSelected((prev) =>
@@ -176,13 +245,14 @@ export default function AudioManagerPage() {
           <Typography variant="h5" fontWeight={700}>
             Audio Library
           </Typography>
-          <Chip label={`${audios.length} total`} size="small" />
+          <Chip label={`${totalCount || audios.length} total`} size="small" />
         </Stack>
         <Stack direction="row" spacing={1}>
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
-            onClick={refresh}
+            onClick={() => void refresh()}
+            disabled={loading}
           >
             Refresh
           </Button>
@@ -201,7 +271,10 @@ export default function AudioManagerPage() {
           size="small"
           placeholder="Search by title, artist, or tag"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setAfter(null);
+          }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -225,17 +298,20 @@ export default function AudioManagerPage() {
       <Divider sx={{ mb: 2 }} />
 
       <AudioTable
-      // rows={pagedAudios}
-      // loading={loading}
-      // page={page}
-      // rowsPerPage={rowsPerPage}
-      // total={filteredAudios.length}
-      // selectedIds={selected}
-      // onChangePage={setPage}
-      // onChangeRowsPerPage={(rpp) => setRowsPerPage(rpp)}
-      // onToggleSelect={handleToggleSelect}
-      // onToggleSelectAll={handleToggleSelectAll}
-      // onDeleteOne={handleDeleteOne}
+        rows={rows}
+        loading={loading}
+        totalCount={totalCount}
+        hasNextPage={hasNextPage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(nextRows) => {
+          void handleRowsPerPageChange(nextRows);
+        }}
+        onPageChange={(newPage) => {
+          void handleChangePage(newPage);
+        }}
+        onRefresh={() => {
+          void refresh();
+        }}
       />
 
       <UploadForm open={createOpen} onClose={() => setCreateOpen(false)} />
