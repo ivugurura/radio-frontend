@@ -23,6 +23,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDeleteTrackMutation, useTracksQuery } from '@graphql/hooks';
 import type { TracksQueryVariables, TrackType } from '@graphql/graphql';
 import { AudioPlayer } from '@components/AudioPlayer';
+import { STUDIO_ID } from '@libs/constants';
 
 export type AudioTableProps = {
   paginate?: boolean;
@@ -45,7 +46,6 @@ function secondsToClock(n?: number | null) {
 }
 
 export const AudioTable: React.FC<AudioTableProps> = () => {
-  const [studioSlug] = useState('reformation-rw');
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [after, setAfter] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -54,12 +54,12 @@ export const AudioTable: React.FC<AudioTableProps> = () => {
 
   const variables = useMemo<TracksQueryVariables>(
     () => ({
-      studioSlug,
+      studioSlug: STUDIO_ID,
       search: searchDebounced || null,
       first: rowsPerPage,
       after,
     }),
-    [studioSlug, searchDebounced, rowsPerPage, after],
+    [STUDIO_ID, searchDebounced, rowsPerPage, after],
   );
 
   const { data, loading, refetch, fetchMore } = useTracksQuery({

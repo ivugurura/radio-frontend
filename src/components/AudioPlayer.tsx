@@ -8,6 +8,7 @@ import {
   Typography,
   Paper,
 } from '@mui/material';
+import { STUDIO_ID } from '@libs/constants';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import PauseRoundedIcon from '@mui/icons-material/PauseRounded';
 import VolumeUpRoundedIcon from '@mui/icons-material/VolumeUpRounded';
@@ -33,7 +34,6 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   autoPlay = false,
   onEnded,
 }) => {
-  const studioId = 'reformation-rw';
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = React.useState(false);
   const [muted, setMuted] = React.useState(false);
@@ -45,7 +45,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   // Initialize/replace audio on source change
   React.useEffect(() => {
     if (!source?.processedRelPath) return;
-    const trackSrc = getTrackUrl(studioId, source.id);
+    const trackSrc = getTrackUrl(STUDIO_ID, source.id);
     const audio = new Audio();
     audioRef.current = audio;
     audio.src = trackSrc;

@@ -28,7 +28,7 @@ import {
   useFinalizeUploadMutation,
   useRequestUploadMutation,
 } from '@graphql/hooks';
-import { BASE_API_URL } from '@libs/constants';
+import { BASE_API_URL, STUDIO_ID } from '@libs/constants';
 
 /**
  * UploadForm
@@ -112,7 +112,6 @@ type UploadItem = {
 };
 
 export const UploadForm = ({ open, onClose }: UploadFormProps) => {
-  const [studioSlug] = useState<string>('reformation-rw');
   const [items, setItems] = useState<UploadItem[]>([]);
   const [running, setRunning] = useState(0);
   const [autoStart, setAutoStart] = useState(false);
@@ -178,7 +177,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
         // 1) Request upload session
         const req = await requestUpload({
           variables: {
-            studioSlug,
+            studioSlug: STUDIO_ID,
             fileName: file.name,
             sizeBytes: file.size,
             mimeType: file.type || 'application/octet-stream',
@@ -273,7 +272,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
         setRunning(runningRef.current);
       }
     },
-    [requestUpload, finalizeUpload, studioSlug, updateItem],
+    [requestUpload, finalizeUpload, STUDIO_ID, updateItem],
   );
 
   const schedule = useCallback(() => {

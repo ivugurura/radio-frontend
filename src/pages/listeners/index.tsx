@@ -1,4 +1,5 @@
 import React from 'react';
+import { STUDIO_ID } from '@libs/constants';
 import {
   Alert,
   Box,
@@ -23,7 +24,7 @@ export const ListenerStatsPage: React.FC = () => {
   const [range, setRange] = React.useState<TimeRange>('LAST_24_HOURS');
 
   const { data, loading, error, refetch } = useListenerOverviewQuery({
-    variables: { studioId: 'reformation-rw', range },
+    variables: { studioId: STUDIO_ID, range },
     fetchPolicy: 'cache-and-network',
   });
 

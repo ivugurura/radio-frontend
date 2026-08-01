@@ -8,16 +8,17 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { STUDIO_ID } from '@libs/constants';
 import {
   PlayArrowRounded as PlayArrowRoundedIcon,
   PauseRounded as PauseRoundedIcon,
   StopRounded as StopRoundedIcon,
   MicOffRounded as MicOffRoundedIcon,
 } from '@mui/icons-material';
+import { STUDIO_URL } from '@libs/constants';
 
-const STREAM_URL =
-  'https://radio.reformationvoice.org/studios/reformation-rw/listen';
-const NOW_URL = 'https://radio.reformationvoice.org/studios/reformation-rw/now';
+const STREAM_URL = `${STUDIO_URL}/${STUDIO_ID}/listen`;
+const NOW_URL = `${STUDIO_URL}/${STUDIO_ID}/now`;
 
 type NowResponse = {
   message?: string;

@@ -6,6 +6,10 @@ export const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 export const APP_SCHEMA = import.meta.env.VITE_APP_SCHEMA;
 
+export const STUDIO_URL = import.meta.env.VITE_STUDIO_URL;
+
+export const STUDIO_ID = 'reformation-rw';
+
 const ACCESS_TOKEN_KEY = 'user-token';
 const REFRESH_TOKEN_KEY = 'refresh-token';
 

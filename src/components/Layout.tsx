@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { STUDIO_ID, STUDIO_URL } from '@libs/constants';
 import {
   Box,
   Drawer,
@@ -29,13 +30,12 @@ import { RadioPlayer } from './RadioPlayer';
 const drawerWidth = 260;
 
 const Layout: React.FC = () => {
-  const studioId = 'reformation-rw';
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const location = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
 
-  const listenUrl = `${import.meta.env.VITE_STUDIO_URL}/${studioId}/listen`;
+  const listenUrl = `${STUDIO_URL}/${STUDIO_ID}/listen`;
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);

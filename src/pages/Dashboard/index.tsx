@@ -1,5 +1,6 @@
 import React from 'react';
 import { Container, Grid, Typography, Alert, Skeleton } from '@mui/material';
+import { STUDIO_ID } from '@libs/constants';
 import { TrendChart } from './TrendChart';
 import { CapacityPanel } from './CapacityPanel';
 import { SummaryStrip } from './SummaryStrip';
@@ -18,9 +19,8 @@ import type {
  */
 
 export const DashboardPage: React.FC = () => {
-  const studioId = 'reformation-rw';
   const { data, loading, error } = useDashboardOverviewQuery({
-    variables: { studioId, range: 'LAST_90_MIN' },
+    variables: { studioId: STUDIO_ID, range: 'LAST_90_MIN' },
     fetchPolicy: 'network-only',
     pollInterval: 5000,
   });
