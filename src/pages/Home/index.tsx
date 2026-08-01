@@ -132,7 +132,7 @@ const HomePage: React.FC = () => {
     audio.crossOrigin = 'anonymous';
 
     const handlePlaying = () => {
-      setElapsedSec(nowDataRef.current?.elapsed_sec ?? 0);
+      // setElapsedSec(nowDataRef.current?.elapsed_sec ?? 0);
       setIsBuffering(false);
       setIsPlaying(true);
     };
