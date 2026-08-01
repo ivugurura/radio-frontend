@@ -14,31 +14,73 @@ import {
   StopRounded as StopRoundedIcon,
   MicOffRounded as MicOffRoundedIcon,
 } from '@mui/icons-material';
-// import { useDashboardOverviewQuery } from '@graphql/hooks';
 
 const STREAM_URL =
   'https://radio.reformationvoice.org/studios/reformation-rw/listen';
-// const STUDIO_ID = 'reformation-rw';
+const NOW_URL = 'https://radio.reformationvoice.org/studios/reformation-rw/now';
+
+type NowResponse = {
+  message?: string;
+  success?: boolean;
+  data?: {
+    studio_id?: string;
+    current?: string;
+    next?: string;
+    started_at?: string;
+    elapsed_sec?: number;
+  };
+};
+
+const cleanTrackName = (value?: string) => {
+  if (!value) return '';
+  return value.replace(/\.[a-zA-Z0-9]+$/, '');
+};
 
 const HomePage: React.FC = () => {
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [nowData, setNowData] = React.useState<NowResponse['data'] | null>(
+    null,
+  );
+  const [nowError, setNowError] = React.useState('');
 
-  // const { data } = useDashboardOverviewQuery({
-  //   variables: { studioId: STUDIO_ID, range: 'LAST_90_MIN' },
-  //   fetchPolicy: 'network-only',
-  //   pollInterval: 5000,
-  // });
+  const stationTitle = 'Reformation Radio Voice';
+  const currentTitle = cleanTrackName(nowData?.current) || 'No Track Selected';
+  const nextTitle = cleanTrackName(nowData?.next) || 'No next track available';
 
-  // const queueItems = data?.currentQueue?.items ?? [];
-  // const currentTrack =
-  //   queueItems.find((item) => item.isCurrent) ?? queueItems[0];
-  // const title = currentTrack?.title || 'No Track Selected';
-  const title = 'Reformation Radio Voice';
-  // const subtitle =
-  //   currentTrack?.artist && currentTrack.artist.trim()
-  //     ? currentTrack.artist
-  //     : 'Waiting for stream metadata';
+  React.useEffect(() => {
+    let isMounted = true;
+
+    const fetchNow = async () => {
+      try {
+        const response = await fetch(NOW_URL, {
+          method: 'GET',
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch metadata');
+        }
+
+        const payload = (await response.json()) as NowResponse;
+        if (!isMounted) return;
+
+        setNowData(payload?.data ?? null);
+        setNowError('');
+      } catch {
+        if (!isMounted) return;
+        setNowError('Unable to load current/next metadata');
+      }
+    };
+
+    fetchNow();
+    const timer = window.setInterval(fetchNow, 5000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(timer);
+    };
+  }, []);
 
   React.useEffect(() => {
     const audio = new Audio(STREAM_URL);
@@ -116,18 +158,30 @@ const HomePage: React.FC = () => {
               R R V
             </IconButton>
             <Typography variant="h5" fontWeight={500} textAlign="center">
-              {title}
+              {stationTitle}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               {isPlaying ? 'Streaming live...' : 'Stream is stopped'}
             </Typography>
-            {/* <Typography
+            <Typography
               variant="h6"
               sx={{ color: '#6c82a3', fontWeight: 400 }}
               textAlign="center"
             >
-              {subtitle}
-            </Typography> */}
+              {currentTitle}
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ color: '#5f7598', fontWeight: 400 }}
+              textAlign="center"
+            >
+              Next: {nextTitle}
+            </Typography>
+            {nowError && (
+              <Typography variant="caption" color="error.main">
+                {nowError}
+              </Typography>
+            )}
           </Stack>
 
           <Stack direction="row" spacing={2}>
@@ -211,7 +265,7 @@ const HomePage: React.FC = () => {
             </Stack>
           </Paper>
 
-          {/* <Paper
+          <Paper
             elevation={0}
             sx={{
               width: '100%',
@@ -221,16 +275,12 @@ const HomePage: React.FC = () => {
             }}
           >
             <Typography variant="h6" mb={1}>
-              Enable Voice Control
+              Live Metadata
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Voice controls will be added later. For now, use Start and Stop.
+              Current track and next track update every 5 seconds.
             </Typography>
-          </Paper> */}
-
-          {/* <Typography variant="caption" color="text.secondary">
-            {isPlaying ? 'Streaming live...' : 'Stream is stopped'}
-          </Typography> */}
+          </Paper>
         </Stack>
       </Container>
     </Box>
