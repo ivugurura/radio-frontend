@@ -2,20 +2,19 @@ import React from 'react';
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
   IconButton,
   Paper,
   Stack,
   Typography,
 } from '@mui/material';
-import { STUDIO_ID } from '@libs/constants';
 import {
   PlayArrowRounded as PlayArrowRoundedIcon,
-  PauseRounded as PauseRoundedIcon,
   StopRounded as StopRoundedIcon,
   MicOffRounded as MicOffRoundedIcon,
 } from '@mui/icons-material';
-import { STUDIO_URL } from '@libs/constants';
+import { STUDIO_ID, STUDIO_URL } from '@libs/constants';
 
 const STREAM_URL = `${STUDIO_URL}/${STUDIO_ID}/listen`;
 const NOW_URL = `${STUDIO_URL}/${STUDIO_ID}/now`;
@@ -37,17 +36,41 @@ const cleanTrackName = (value?: string) => {
   return value.replace(/\.[a-zA-Z0-9]+$/, '');
 };
 
+const formatElapsed = (seconds?: number) => {
+  const safeSeconds = Math.max(0, Math.floor(seconds ?? 0));
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const secs = safeSeconds % 60;
+
+  if (hours > 0) {
+    return [hours, minutes, secs]
+      .map((value) => String(value).padStart(2, '0'))
+      .join(':');
+  }
+
+  return [minutes, secs]
+    .map((value) => String(value).padStart(2, '0'))
+    .join(':');
+};
+
 const HomePage: React.FC = () => {
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const nowDataRef = React.useRef<NowResponse['data'] | null>(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [isBuffering, setIsBuffering] = React.useState(false);
   const [nowData, setNowData] = React.useState<NowResponse['data'] | null>(
     null,
   );
   const [nowError, setNowError] = React.useState('');
+  const [elapsedSec, setElapsedSec] = React.useState(0);
 
   const stationTitle = 'Reformation Radio Voice';
-  const currentTitle = cleanTrackName(nowData?.current) || 'No Track Selected';
-  const nextTitle = cleanTrackName(nowData?.next) || 'No next track available';
+  const currentTitle = cleanTrackName(nowData?.current);
+  const nextTitle = cleanTrackName(nowData?.next);
+
+  React.useEffect(() => {
+    nowDataRef.current = nowData;
+  }, [nowData]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -67,6 +90,7 @@ const HomePage: React.FC = () => {
         if (!isMounted) return;
 
         setNowData(payload?.data ?? null);
+        nowDataRef.current = payload?.data ?? null;
         setNowError('');
       } catch {
         if (!isMounted) return;
@@ -84,26 +108,67 @@ const HomePage: React.FC = () => {
   }, []);
 
   React.useEffect(() => {
+    if (!nowData?.current) {
+      setElapsedSec(0);
+      return;
+    }
+
+    if (!isPlaying || isBuffering) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setElapsedSec((prev) => prev + 1);
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [isPlaying, isBuffering, nowData?.current]);
+
+  React.useEffect(() => {
     const audio = new Audio(STREAM_URL);
     audio.preload = 'none';
     audio.crossOrigin = 'anonymous';
 
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleError = () => setIsPlaying(false);
+    const handlePlaying = () => {
+      setElapsedSec(nowDataRef.current?.elapsed_sec ?? 0);
+      setIsBuffering(false);
+      setIsPlaying(true);
+    };
+    const handlePause = () => {
+      setIsBuffering(false);
+      setIsPlaying(false);
+    };
+    const handleError = () => {
+      setIsBuffering(false);
+      setIsPlaying(false);
+    };
+    const handleWaiting = () => {
+      setIsBuffering(true);
+      setIsPlaying(false);
+    };
+    const handleStalled = () => {
+      setIsBuffering(true);
+      setIsPlaying(false);
+    };
 
-    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('playing', handlePlaying);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('error', handleError);
+    audio.addEventListener('waiting', handleWaiting);
+    audio.addEventListener('stalled', handleStalled);
 
     audioRef.current = audio;
 
     return () => {
       audio.pause();
       audio.src = '';
-      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('playing', handlePlaying);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('error', handleError);
+      audio.removeEventListener('waiting', handleWaiting);
+      audio.removeEventListener('stalled', handleStalled);
       audioRef.current = null;
     };
   }, []);
@@ -113,8 +178,10 @@ const HomePage: React.FC = () => {
     if (!audio) return;
 
     try {
+      setIsBuffering(true);
       await audio.play();
     } catch {
+      setIsBuffering(false);
       setIsPlaying(false);
     }
   };
@@ -125,7 +192,16 @@ const HomePage: React.FC = () => {
 
     audio.pause();
     audio.currentTime = 0;
+    setIsBuffering(false);
     setIsPlaying(false);
+  };
+
+  const handleHeroToggle = () => {
+    if (isPlaying) {
+      handleStop();
+      return;
+    }
+    void handleStart();
   };
 
   return (
@@ -142,8 +218,8 @@ const HomePage: React.FC = () => {
         <Stack spacing={4} alignItems="center">
           <Stack spacing={1.5} alignItems="center">
             <IconButton
-              onClick={handleStart}
-              aria-label="Start radio"
+              onClick={handleHeroToggle}
+              aria-label={isPlaying ? 'Stop radio' : 'Start radio'}
               sx={{
                 width: 144,
                 height: 144,
@@ -156,74 +232,84 @@ const HomePage: React.FC = () => {
                 },
               }}
             >
-              R R V
+              <Stack spacing={0.25} alignItems="center">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.82)',
+                    letterSpacing: '0.22em',
+                    textTransform: 'uppercase',
+                    fontSize: '0.62rem',
+                  }}
+                >
+                  On Air
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 700,
+                    fontVariantNumeric: 'tabular-nums',
+                    lineHeight: 1,
+                    textShadow: '0 1px 8px rgba(13, 66, 112, 0.22)',
+                  }}
+                >
+                  {formatElapsed(elapsedSec)}
+                </Typography>
+                <Box
+                  sx={{
+                    width: 42,
+                    height: 42,
+                    mt: 0.5,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backdropFilter: 'blur(6px)',
+                  }}
+                >
+                  {isPlaying ? (
+                    <StopRoundedIcon sx={{ fontSize: 26 }} />
+                  ) : (
+                    <PlayArrowRoundedIcon sx={{ fontSize: 28, ml: 0.25 }} />
+                  )}
+                </Box>
+              </Stack>
             </IconButton>
             <Typography variant="h5" fontWeight={500} textAlign="center">
               {stationTitle}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {isPlaying ? 'Streaming live...' : 'Stream is stopped'}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{ color: '#6c82a3', fontWeight: 400 }}
-              textAlign="center"
-            >
-              {currentTitle}
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{ color: '#5f7598', fontWeight: 400 }}
-              textAlign="center"
-            >
-              Next: {nextTitle}
-            </Typography>
+            {isBuffering ? (
+              <Stack direction="row" spacing={1} alignItems="center">
+                <CircularProgress size={14} thickness={5} />
+                <Typography variant="caption" color="text.secondary">
+                  Buffering live stream...
+                </Typography>
+              </Stack>
+            ) : null}
+            {nowData?.current && (
+              <Typography
+                variant="h6"
+                sx={{ color: '#6c82a3', fontWeight: 400 }}
+                textAlign="center"
+              >
+                {currentTitle}
+              </Typography>
+            )}
+            {nowData?.next && (
+              <Typography
+                variant="body1"
+                sx={{ color: '#5f7598', fontWeight: 400 }}
+                textAlign="center"
+              >
+                Next: {nextTitle}
+              </Typography>
+            )}
             {nowError && (
               <Typography variant="caption" color="error.main">
                 {nowError}
               </Typography>
             )}
-          </Stack>
-
-          <Stack direction="row" spacing={2}>
-            <IconButton
-              onClick={handleStart}
-              aria-label="Start"
-              sx={{
-                width: 92,
-                height: 92,
-                background: '#8ec5ef',
-                color: '#fff',
-                '&:hover': { background: '#81bee9' },
-              }}
-            >
-              <PlayArrowRoundedIcon sx={{ fontSize: 48 }} />
-            </IconButton>
-            <IconButton
-              disabled
-              aria-label="Pause (coming soon)"
-              sx={{
-                width: 92,
-                height: 92,
-                background: '#d8e2ec',
-                color: '#8897a8',
-              }}
-            >
-              <PauseRoundedIcon sx={{ fontSize: 40 }} />
-            </IconButton>
-            <IconButton
-              onClick={handleStop}
-              aria-label="Stop"
-              sx={{
-                width: 92,
-                height: 92,
-                background: '#f2a5af',
-                color: '#fff',
-                '&:hover': { background: '#ea95a0' },
-              }}
-            >
-              <StopRoundedIcon sx={{ fontSize: 40 }} />
-            </IconButton>
           </Stack>
 
           <Paper
@@ -264,23 +350,6 @@ const HomePage: React.FC = () => {
                 Enable
               </Button>
             </Stack>
-          </Paper>
-
-          <Paper
-            elevation={0}
-            sx={{
-              width: '100%',
-              p: 2.5,
-              borderRadius: 3,
-              background: '#eaf1fa',
-            }}
-          >
-            <Typography variant="h6" mb={1}>
-              Live Metadata
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Current track and next track update every 5 seconds.
-            </Typography>
           </Paper>
         </Stack>
       </Container>
