@@ -9,6 +9,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { keyframes } from '@emotion/react';
 import {
   PlayArrowRounded as PlayArrowRoundedIcon,
   StopRounded as StopRoundedIcon,
@@ -18,6 +19,7 @@ import { STUDIO_ID, STUDIO_URL } from '@libs/constants';
 
 const STREAM_URL = `${STUDIO_URL}/${STUDIO_ID}/listen`;
 const NOW_URL = `${STUDIO_URL}/${STUDIO_ID}/now`;
+const STATUS_URL = `${STUDIO_URL}/${STUDIO_ID}/status`;
 
 type NowResponse = {
   message?: string;
@@ -30,6 +32,21 @@ type NowResponse = {
     elapsed_sec?: number;
   };
 };
+
+type StatusResponse = {
+  message?: string;
+  success?: boolean;
+  data?: {
+    studio?: string;
+    is_live?: boolean;
+    listeners_count?: number;
+  };
+};
+
+const pulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+`;
 
 const cleanTrackName = (value?: string) => {
   if (!value) return '';
@@ -63,6 +80,7 @@ const HomePage: React.FC = () => {
   );
   const [nowError, setNowError] = React.useState('');
   const [elapsedSec, setElapsedSec] = React.useState(0);
+  const [isLive, setIsLive] = React.useState(false);
 
   const stationTitle = 'Reformation Voice Radio';
   const currentTitle = cleanTrackName(nowData?.current);
@@ -98,8 +116,32 @@ const HomePage: React.FC = () => {
       }
     };
 
+    const fetchStatus = async () => {
+      try {
+        const response = await fetch(STATUS_URL, {
+          method: 'GET',
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch status');
+        }
+
+        const payload = (await response.json()) as StatusResponse;
+        if (!isMounted) return;
+
+        setIsLive(Boolean(payload?.data?.is_live));
+      } catch {
+        // Leave the last known live status in place on a transient failure.
+      }
+    };
+
     fetchNow();
-    const timer = window.setInterval(fetchNow, 5000);
+    fetchStatus();
+    const timer = window.setInterval(() => {
+      fetchNow();
+      fetchStatus();
+    }, 5000);
 
     return () => {
       isMounted = false;
@@ -179,6 +221,10 @@ const HomePage: React.FC = () => {
 
     try {
       setIsBuffering(true);
+      // Live stream: always (re)open a fresh connection rather than resuming
+      // whatever was previously buffered, so playback starts at the current
+      // live position instead of replaying stale audio from before a stop.
+      audio.src = STREAM_URL;
       await audio.play();
     } catch {
       setIsBuffering(false);
@@ -191,7 +237,8 @@ const HomePage: React.FC = () => {
     if (!audio) return;
 
     audio.pause();
-    audio.currentTime = 0;
+    audio.removeAttribute('src');
+    audio.load();
     setIsBuffering(false);
     setIsPlaying(false);
   };
@@ -279,6 +326,41 @@ const HomePage: React.FC = () => {
             <Typography variant="h5" fontWeight={500} textAlign="center">
               {stationTitle}
             </Typography>
+            <Stack
+              direction="row"
+              spacing={0.75}
+              alignItems="center"
+              sx={{
+                px: 1.25,
+                py: 0.4,
+                borderRadius: 999,
+                backgroundColor: isLive
+                  ? 'rgba(230, 57, 70, 0.1)'
+                  : 'rgba(108, 130, 163, 0.12)',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  backgroundColor: isLive ? '#e63946' : '#8191a4',
+                  animation: isLive ? `${pulse} 1.4s ease-in-out infinite` : 'none',
+                }}
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  fontSize: '0.68rem',
+                  color: isLive ? '#e63946' : '#6c82a3',
+                }}
+              >
+                {isLive ? 'Live' : 'AutoDJ'}
+              </Typography>
+            </Stack>
             {isBuffering ? (
               <Stack direction="row" spacing={1} alignItems="center">
                 <CircularProgress size={14} thickness={5} />
