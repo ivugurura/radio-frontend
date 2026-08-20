@@ -16,6 +16,7 @@ import {
   MicOffRounded as MicOffRoundedIcon,
 } from '@mui/icons-material';
 import { STUDIO_ID, STUDIO_URL } from '@libs/constants';
+import ListenerChat from '@components/ListenerChat';
 
 const STREAM_URL = `${STUDIO_URL}/${STUDIO_ID}/listen`;
 const NOW_URL = `${STUDIO_URL}/${STUDIO_ID}/now`;
@@ -435,6 +436,7 @@ const HomePage: React.FC = () => {
           </Paper>
         </Stack>
       </Container>
+      <ListenerChat />
     </Box>
   );
 };
