@@ -181,17 +181,27 @@ export const chatMessageFromQueryRow = (
  * Merges GraphQL-fetched message history with messages received live over
  * the socket this session, oldest-first, deduped by id (history wins ties
  * since it represents the persisted state as of page load).
+ *
+ * `hiddenOverrides` (from `useChatSocket`) is applied on top of every
+ * message regardless of whether it came from history or the live socket —
+ * a hide/unhide event can target a message that was seeded from history and
+ * never passed through the socket's own message list, so the override has
+ * to be layered in here rather than relying on either source alone.
  */
 export const mergeChatMessages = (
   history: ChatMessagePayload[],
   live: ChatMessagePayload[],
+  hiddenOverrides?: Map<string, boolean>,
 ): ChatMessagePayload[] => {
   const seen = new Set<string>();
   const merged: ChatMessagePayload[] = [];
   for (const message of [...history, ...live]) {
     if (seen.has(message.id)) continue;
     seen.add(message.id);
-    merged.push(message);
+    const override = hiddenOverrides?.get(message.id);
+    merged.push(
+      override === undefined ? message : { ...message, isHidden: override },
+    );
   }
   return merged;
 };

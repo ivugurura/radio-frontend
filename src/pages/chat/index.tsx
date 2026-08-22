@@ -68,9 +68,6 @@ const ChatPage: React.FC = () => {
   const [muteTarget, setMuteTarget] = React.useState<ChatMessagePayload | null>(
     null,
   );
-  const [hiddenOverrides, setHiddenOverrides] = React.useState<
-    Record<string, boolean>
-  >({});
   const [muteRows, setMuteRows] = React.useState<Map<string, MuteRow>>(
     new Map(),
   );
@@ -89,6 +86,7 @@ const ChatPage: React.FC = () => {
 
   const {
     messages: liveMessages,
+    hiddenOverrides,
     mutedListenerIds,
     sendMessage,
     hideMessage,
@@ -141,8 +139,9 @@ const ChatPage: React.FC = () => {
       mergeChatMessages(
         (historyData?.chatMessages ?? []).map(chatMessageFromQueryRow),
         liveMessages,
+        hiddenOverrides,
       ),
-    [historyData, liveMessages],
+    [historyData, liveMessages, hiddenOverrides],
   );
 
   React.useEffect(() => {
@@ -158,13 +157,10 @@ const ChatPage: React.FC = () => {
   };
 
   const handleToggleHide = (message: ChatMessagePayload) => {
-    const isHidden = hiddenOverrides[message.id] ?? message.isHidden ?? false;
-    const nextHidden = !isHidden;
-    setHiddenOverrides((prev) => ({ ...prev, [message.id]: nextHidden }));
-    if (nextHidden) {
-      hideMessage(message.id);
-    } else {
+    if (message.isHidden) {
       unhideMessage(message.id);
+    } else {
+      hideMessage(message.id);
     }
   };
 
@@ -272,8 +268,7 @@ const ChatPage: React.FC = () => {
                 </Typography>
               ) : (
                 messages.map((message) => {
-                  const isHidden =
-                    hiddenOverrides[message.id] ?? message.isHidden ?? false;
+                  const isHidden = message.isHidden ?? false;
                   const isListener = message.authorType === 'LISTENER';
 
                   return (

@@ -51,6 +51,7 @@ type UseChatSocketParams = {
 export type UseChatSocketResult = {
   status: ChatSocketStatus;
   messages: ChatMessagePayload[];
+  hiddenOverrides: Map<string, boolean>;
   mutedListenerIds: Set<string>;
   selfMuted: boolean;
   sendMessage: (body: string, quotedMessageId?: string) => void;
@@ -71,6 +72,15 @@ export function useChatSocket(
 
   const [status, setStatus] = React.useState<ChatSocketStatus>('connecting');
   const [messages, setMessages] = React.useState<ChatMessagePayload[]>([]);
+  // Keyed independently of `messages` because a hide/unhide event can target
+  // a message that was seeded from GraphQL history and never entered this
+  // session's live-received array, so patching that array alone can't reach
+  // it. Applied on top of history + live at the merge layer (see
+  // `mergeChatMessages`) so hide/unhide takes effect regardless of where the
+  // message came from.
+  const [hiddenOverrides, setHiddenOverrides] = React.useState<
+    Map<string, boolean>
+  >(() => new Map());
   const [mutedListenerIds, setMutedListenerIds] = React.useState<Set<string>>(
     () => new Set(),
   );
@@ -101,6 +111,7 @@ export function useChatSocket(
     reconnectAttemptRef.current = 0;
     pendingRef.current = [];
     setMessages([]);
+    setHiddenOverrides(new Map());
     setMutedListenerIds(new Set());
     setSelfMuted(false);
 
@@ -156,6 +167,7 @@ export function useChatSocket(
                 m.id === messageId ? { ...m, isHidden: true } : m,
               ),
             );
+            setHiddenOverrides((prev) => new Map(prev).set(messageId, true));
             break;
           }
           case 'message_unhidden': {
@@ -165,6 +177,7 @@ export function useChatSocket(
                 m.id === messageId ? { ...m, isHidden: false } : m,
               ),
             );
+            setHiddenOverrides((prev) => new Map(prev).set(messageId, false));
             break;
           }
           case 'listener_muted': {
@@ -286,6 +299,7 @@ export function useChatSocket(
   return {
     status,
     messages,
+    hiddenOverrides,
     mutedListenerIds,
     selfMuted,
     sendMessage,

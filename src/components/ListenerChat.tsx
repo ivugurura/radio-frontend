@@ -63,21 +63,28 @@ const ListenerChat: React.FC = () => {
       : undefined,
   );
 
-  const { messages: liveMessages, selfMuted, sendMessage } = useChatSocket({
+  const {
+    messages: liveMessages,
+    hiddenOverrides,
+    selfMuted,
+    sendMessage,
+  } = useChatSocket({
     studioSlug: STUDIO_ID,
     isAdmin: false,
     listenerClientId: hasName ? listenerClientId : undefined,
     listenerDisplayName: hasName ? listenerName : undefined,
   });
 
-  const messages = React.useMemo(
-    () =>
-      mergeChatMessages(
-        (historyData?.chatMessages ?? []).map(chatMessageFromQueryRow),
-        liveMessages,
-      ),
-    [historyData, liveMessages],
-  );
+  const messages = React.useMemo(() => {
+    const merged = mergeChatMessages(
+      (historyData?.chatMessages ?? []).map(chatMessageFromQueryRow),
+      liveMessages,
+      hiddenOverrides,
+    );
+    // Listeners never see moderated content, live or from history — only
+    // the admin view shows hidden messages (greyed out).
+    return merged.filter((message) => !message.isHidden);
+  }, [historyData, liveMessages, hiddenOverrides]);
 
   React.useEffect(() => {
     if (isOpen) {
