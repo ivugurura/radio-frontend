@@ -81,8 +81,7 @@ const ListenerChat: React.FC = () => {
       liveMessages,
       hiddenOverrides,
     );
-    // Listeners never see moderated content, live or from history — only
-    // the admin view shows hidden messages (greyed out).
+    // Listeners never see moderated content; the admin view greys it out instead.
     return merged.filter((message) => !message.isHidden);
   }, [historyData, liveMessages, hiddenOverrides]);
 

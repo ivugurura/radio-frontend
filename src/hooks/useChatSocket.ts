@@ -72,12 +72,8 @@ export function useChatSocket(
 
   const [status, setStatus] = React.useState<ChatSocketStatus>('connecting');
   const [messages, setMessages] = React.useState<ChatMessagePayload[]>([]);
-  // Keyed independently of `messages` because a hide/unhide event can target
-  // a message that was seeded from GraphQL history and never entered this
-  // session's live-received array, so patching that array alone can't reach
-  // it. Applied on top of history + live at the merge layer (see
-  // `mergeChatMessages`) so hide/unhide takes effect regardless of where the
-  // message came from.
+  // Separate from `messages` so a hide/unhide can reach a message that only
+  // exists in GraphQL history (see mergeChatMessages, which applies this).
   const [hiddenOverrides, setHiddenOverrides] = React.useState<
     Map<string, boolean>
   >(() => new Map());

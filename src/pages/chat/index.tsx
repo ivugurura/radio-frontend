@@ -95,9 +95,7 @@ const ChatPage: React.FC = () => {
     unmuteListener,
   } = useChatSocket({ studioSlug: STUDIO_ID, isAdmin: true });
 
-  // Seed the muted-listener panel from the persisted GraphQL list once it
-  // loads (the socket has no memory of mutes issued before this page
-  // connected).
+  // Seed muted-listener panel from GraphQL; the socket has no memory of past mutes.
   React.useEffect(() => {
     if (mutesData) {
       const mutes = mutesData.chatMutes ?? [];
@@ -105,8 +103,7 @@ const ChatPage: React.FC = () => {
     }
   }, [mutesData]);
 
-  // Keep the muted-listener panel in sync with live mute/unmute events that
-  // happen during this session (e.g. from another admin session).
+  // Keep the panel in sync with live mute/unmute events from any admin session.
   React.useEffect(() => {
     const prev = prevMutedIdsRef.current;
     setMuteRows((current) => {
@@ -204,9 +201,7 @@ const ChatPage: React.FC = () => {
     [muteRows],
   );
 
-  // ChatMute has no display name of its own; recover one from the most
-  // recent message we've seen from that listener, for a friendlier label
-  // than a raw client id.
+  // ChatMute has no display name; recover one from that listener's messages.
   const listenerNameByClientId = React.useMemo(() => {
     const map = new Map<string, string>();
     for (const message of messages) {

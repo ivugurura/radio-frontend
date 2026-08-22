@@ -2,13 +2,7 @@ import type { ChatMessagesQuery } from '@graphql/graphql';
 
 const LISTENER_CLIENT_ID_KEY = 'listener-chat-client-id';
 
-/**
- * Reads the persisted listener client id from localStorage, creating and
- * persisting a fresh UUID the first time this is called on a device.
- * Mirrors the try/catch-safety used for `listener-chat-name` in
- * ListenerChat.tsx so a locked-down localStorage (private browsing, etc.)
- * degrades to an in-memory id instead of throwing.
- */
+// Falls back to an in-memory id if localStorage is unavailable (private browsing, etc).
 export const getOrCreateListenerClientId = (): string => {
   try {
     const existing = window.localStorage.getItem(LISTENER_CLIENT_ID_KEY);
@@ -45,13 +39,11 @@ export type ChatMessagePayload = {
   body: string;
   quotedMessage: ChatQuotedMessage | null;
   createdAt: string;
-  /** Not present on the wire event; tracked/patched client-side from
-   * message_hidden / message_unhidden events (and seeded from the
-   * `isHidden` field on history fetched via GraphQL). */
+  /** Not on the wire event; patched client-side from hide/unhide events and history. */
   isHidden?: boolean;
 };
 
-// ---- Server -> client events ------------------------------------------------
+// Server -> client events
 
 export type ChatConnectedEvent = {
   type: 'connected';
@@ -101,7 +93,7 @@ export type ChatServerEvent =
   | ChatListenerUnmutedEvent
   | ChatErrorEvent;
 
-// ---- Client -> server events ------------------------------------------------
+// Client -> server events
 
 export type ChatSendMessageEvent = {
   type: 'send_message';
@@ -143,12 +135,7 @@ type ChatMessageQueryRow = NonNullable<
   ChatMessagesQuery['chatMessages']
 >[number];
 
-/**
- * Adapts a `chatMessages` GraphQL row (nullable/optional fields, as any
- * query result is) into the stricter `ChatMessagePayload` shape the chat UI
- * and the WebSocket layer share, so history and live messages can sit in
- * the same array.
- */
+// Normalizes a chatMessages GraphQL row into ChatMessagePayload so history and live messages share one shape.
 export const chatMessageFromQueryRow = (
   row: ChatMessageQueryRow,
 ): ChatMessagePayload => ({
@@ -177,17 +164,9 @@ export const chatMessageFromQueryRow = (
   isHidden: row.isHidden ?? false,
 });
 
-/**
- * Merges GraphQL-fetched message history with messages received live over
- * the socket this session, oldest-first, deduped by id (history wins ties
- * since it represents the persisted state as of page load).
- *
- * `hiddenOverrides` (from `useChatSocket`) is applied on top of every
- * message regardless of whether it came from history or the live socket —
- * a hide/unhide event can target a message that was seeded from history and
- * never passed through the socket's own message list, so the override has
- * to be layered in here rather than relying on either source alone.
- */
+// Merges history + live messages (oldest-first, deduped by id) and applies
+// hiddenOverrides to both, since a hide/unhide event may target a message
+// that only exists in history and never passed through the live socket.
 export const mergeChatMessages = (
   history: ChatMessagePayload[],
   live: ChatMessagePayload[],
