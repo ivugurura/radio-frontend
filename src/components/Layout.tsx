@@ -21,6 +21,7 @@ import {
   Dashboard,
   MusicVideoOutlined,
   CommitOutlined,
+  ForumOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
 import { useAuth } from './providers/AuthContext';
@@ -52,6 +53,11 @@ const Layout: React.FC = () => {
       text: 'Listener Statistics',
       icon: <CommitOutlined />,
       path: '/admin/listeners',
+    },
+    {
+      text: 'Live Chat',
+      icon: <ForumOutlined />,
+      path: '/admin/chat',
     },
   ];
 
