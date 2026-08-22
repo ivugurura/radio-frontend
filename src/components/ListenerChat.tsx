@@ -15,25 +15,35 @@ import {
   ForumRounded as ForumRoundedIcon,
   CloseRounded as CloseRoundedIcon,
   SendRounded as SendRoundedIcon,
+  BlockRounded as BlockRoundedIcon,
 } from '@mui/icons-material';
-
-type ChatMessage = {
-  id: string;
-  author: string;
-  text: string;
-  sentAt: number;
-  isSelf: boolean;
-};
+import { STUDIO_ID } from '@libs/constants';
+import {
+  getOrCreateListenerClientId,
+  mergeChatMessages,
+  chatMessageFromQueryRow,
+} from '@libs/chat';
+import type { ChatMessagePayload } from '@libs/chat';
+import { useChatMessagesQuery } from '@graphql/hooks';
+import { useChatSocket } from '../hooks/useChatSocket';
 
 const LISTENER_NAME_KEY = 'listener-chat-name';
 
-const formatTime = (timestamp: number) =>
-  new Date(timestamp).toLocaleTimeString([], {
+const formatTime = (isoOrTimestamp: string | number) =>
+  new Date(isoOrTimestamp).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
   });
 
 const getInitial = (name: string) => name.trim().charAt(0).toUpperCase() || '?';
+
+const authorLabel = (message: ChatMessagePayload) => {
+  if (message.authorType === 'ADMIN') {
+    const first = message.author?.firstName?.trim();
+    return first || 'Studio';
+  }
+  return message.listenerDisplayName || 'Listener';
+};
 
 const ListenerChat: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -42,10 +52,38 @@ const ListenerChat: React.FC = () => {
   );
   const [nameDraft, setNameDraft] = React.useState('');
   const [messageDraft, setMessageDraft] = React.useState('');
-  const [messages, setMessages] = React.useState<ChatMessage[]>([]);
+  const [listenerClientId] = React.useState(() => getOrCreateListenerClientId());
   const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
 
   const hasName = Boolean(listenerName);
+
+  const { data: historyData } = useChatMessagesQuery(
+    hasName
+      ? { variables: { studioSlug: STUDIO_ID }, fetchPolicy: 'network-only' }
+      : undefined,
+  );
+
+  const {
+    messages: liveMessages,
+    hiddenOverrides,
+    selfMuted,
+    sendMessage,
+  } = useChatSocket({
+    studioSlug: STUDIO_ID,
+    isAdmin: false,
+    listenerClientId: hasName ? listenerClientId : undefined,
+    listenerDisplayName: hasName ? listenerName : undefined,
+  });
+
+  const messages = React.useMemo(() => {
+    const merged = mergeChatMessages(
+      (historyData?.chatMessages ?? []).map(chatMessageFromQueryRow),
+      liveMessages,
+      hiddenOverrides,
+    );
+    // Listeners never see moderated content; the admin view greys it out instead.
+    return merged.filter((message) => !message.isHidden);
+  }, [historyData, liveMessages, hiddenOverrides]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -64,18 +102,9 @@ const ListenerChat: React.FC = () => {
 
   const handleSend = () => {
     const trimmed = messageDraft.trim();
-    if (!trimmed) return;
+    if (!trimmed || selfMuted) return;
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        author: listenerName,
-        text: trimmed,
-        sentAt: Date.now(),
-        isSelf: true,
-      },
-    ]);
+    sendMessage(trimmed);
     setMessageDraft('');
   };
 
@@ -163,63 +192,119 @@ const ListenerChat: React.FC = () => {
                     No messages yet. Say hi to the studio 👋
                   </Typography>
                 ) : (
-                  messages.map((message) => (
-                    <Stack
-                      key={message.id}
-                      direction="row"
-                      spacing={1}
-                      alignSelf={message.isSelf ? 'flex-end' : 'flex-start'}
-                      sx={{ maxWidth: '85%' }}
-                    >
-                      {!message.isSelf && (
-                        <Avatar
-                          sx={{
-                            width: 28,
-                            height: 28,
-                            fontSize: '0.75rem',
-                            bgcolor: '#53a9e7',
-                          }}
-                        >
-                          {getInitial(message.author)}
-                        </Avatar>
-                      )}
-                      <Box>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{
-                            display: 'block',
-                            textAlign: message.isSelf ? 'right' : 'left',
-                            mb: 0.25,
-                          }}
-                        >
-                          {message.isSelf ? 'You' : message.author} ·{' '}
-                          {formatTime(message.sentAt)}
-                        </Typography>
-                        <Box
-                          sx={{
-                            px: 1.5,
-                            py: 1,
-                            borderRadius: 2,
-                            backgroundColor: message.isSelf
-                              ? '#53a9e7'
-                              : '#fff',
-                            color: message.isSelf ? '#fff' : 'text.primary',
-                            border: message.isSelf
-                              ? 'none'
-                              : '1px solid #e1e9f3',
-                          }}
-                        >
-                          <Typography variant="body2">
-                            {message.text}
+                  messages.map((message) => {
+                    const isSelf =
+                      message.authorType === 'LISTENER' &&
+                      message.listenerDisplayName === listenerName;
+
+                    return (
+                      <Stack
+                        key={message.id}
+                        direction="row"
+                        spacing={1}
+                        alignSelf={isSelf ? 'flex-end' : 'flex-start'}
+                        sx={{ maxWidth: '85%' }}
+                      >
+                        {!isSelf && (
+                          <Avatar
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              fontSize: '0.75rem',
+                              bgcolor: '#53a9e7',
+                            }}
+                          >
+                            {getInitial(authorLabel(message))}
+                          </Avatar>
+                        )}
+                        <Box>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{
+                              display: 'block',
+                              textAlign: isSelf ? 'right' : 'left',
+                              mb: 0.25,
+                            }}
+                          >
+                            {isSelf ? 'You' : authorLabel(message)} ·{' '}
+                            {formatTime(message.createdAt)}
                           </Typography>
+                          {message.quotedMessage && (
+                            <Box
+                              sx={{
+                                px: 1.25,
+                                py: 0.5,
+                                mb: 0.5,
+                                borderLeft: '3px solid #b8d6f0',
+                                backgroundColor: 'rgba(83, 169, 231, 0.08)',
+                                borderRadius: 1,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ display: 'block', fontWeight: 600 }}
+                              >
+                                {message.quotedMessage.author
+                                  ? message.quotedMessage.author.firstName
+                                  : message.quotedMessage.listenerDisplayName}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden',
+                                }}
+                              >
+                                {message.quotedMessage.body}
+                              </Typography>
+                            </Box>
+                          )}
+                          <Box
+                            sx={{
+                              px: 1.5,
+                              py: 1,
+                              borderRadius: 2,
+                              backgroundColor: isSelf ? '#53a9e7' : '#fff',
+                              color: isSelf ? '#fff' : 'text.primary',
+                              border: isSelf ? 'none' : '1px solid #e1e9f3',
+                            }}
+                          >
+                            <Typography variant="body2">
+                              {message.body}
+                            </Typography>
+                          </Box>
                         </Box>
-                      </Box>
-                    </Stack>
-                  ))
+                      </Stack>
+                    );
+                  })
                 )}
                 <div ref={messagesEndRef} />
               </Box>
+
+              {selfMuted && (
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  sx={{
+                    px: 2,
+                    py: 1,
+                    borderTop: '1px solid #e1e9f3',
+                    backgroundColor: '#fff6f6',
+                  }}
+                >
+                  <BlockRoundedIcon fontSize="small" sx={{ color: '#c0392b' }} />
+                  <Typography variant="caption" color="#c0392b">
+                    You've been muted by the studio and can't send messages
+                    right now.
+                  </Typography>
+                </Stack>
+              )}
 
               <Stack
                 direction="row"
@@ -234,8 +319,11 @@ const ListenerChat: React.FC = () => {
                 <TextField
                   fullWidth
                   size="small"
-                  placeholder="Type your message..."
+                  placeholder={
+                    selfMuted ? 'You are muted' : 'Type your message...'
+                  }
                   value={messageDraft}
+                  disabled={selfMuted}
                   onChange={(event) => setMessageDraft(event.target.value)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' && !event.shiftKey) {
@@ -248,7 +336,7 @@ const ListenerChat: React.FC = () => {
                 />
                 <IconButton
                   onClick={handleSend}
-                  disabled={!messageDraft.trim()}
+                  disabled={!messageDraft.trim() || selfMuted}
                   aria-label="Send message"
                   sx={{
                     backgroundColor: '#53a9e7',

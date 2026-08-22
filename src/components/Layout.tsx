@@ -21,11 +21,12 @@ import {
   Dashboard,
   MusicVideoOutlined,
   CommitOutlined,
+  ForumOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
 import { useAuth } from './providers/AuthContext';
 import Login from '../pages/Login';
-import { RadioPlayer } from './RadioPlayer';
+import RadioStreamPlayer from './RadioStreamPlayer';
 
 const drawerWidth = 260;
 
@@ -52,6 +53,11 @@ const Layout: React.FC = () => {
       text: 'Listener Statistics',
       icon: <CommitOutlined />,
       path: '/admin/listeners',
+    },
+    {
+      text: 'Live Chat',
+      icon: <ForumOutlined />,
+      path: '/admin/chat',
     },
   ];
 
@@ -118,7 +124,7 @@ const Layout: React.FC = () => {
           </ListItem>
         ))}
         <ListItem>
-          <RadioPlayer src={listenUrl} title="R-RW" />
+          <RadioStreamPlayer variant="compact" streamUrl={listenUrl} title="R-RW" />
         </ListItem>
       </List>
     </Box>
