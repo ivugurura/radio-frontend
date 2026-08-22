@@ -3,7 +3,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 // Apollo Client v4+ recommendation: use the `client` preset instead of typescript-react-apollo.
 // This generates a typed `graphql()` tag and TypedDocumentNodes that work with @apollo/client v4 hooks.
 const config: CodegenConfig = {
-  schema: process.env.CODEGEN_SCHEMA,
+  schema: process.env.VITE_APP_SCHEMA,
   // Look for GraphQL operations in TS/TSX files and .graphql documents
   documents: ['src/**/*.{ts,tsx,graphql,gql}'],
   generates: {
