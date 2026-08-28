@@ -22,6 +22,7 @@ import {
   MusicVideoOutlined,
   CommitOutlined,
   ForumOutlined,
+  SettingsInputAntennaOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
 import { useAuth } from './providers/AuthContext';
@@ -58,6 +59,11 @@ const Layout: React.FC = () => {
       text: 'Live Chat',
       icon: <ForumOutlined />,
       path: '/admin/chat',
+    },
+    {
+      text: 'Streaming Apps',
+      icon: <SettingsInputAntennaOutlined />,
+      path: '/admin/streaming',
     },
   ];
 

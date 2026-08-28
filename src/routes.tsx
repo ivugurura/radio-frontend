@@ -6,6 +6,7 @@ import AudioManagerPage from './pages/audio';
 import ListenerStatsPage from './pages/listeners';
 import ChatPage from './pages/chat';
 import HomePage from './pages/Home';
+import StreamingConfigPage from './pages/StreamingConfig';
 
 export const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ export const AppRoutes = () => {
           <Route path="medias" element={<AudioManagerPage />} />
           <Route path="listeners" element={<ListenerStatsPage />} />
           <Route path="chat" element={<ChatPage />} />
+          <Route path="streaming" element={<StreamingConfigPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
