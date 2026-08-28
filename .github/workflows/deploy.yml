@@ -87,6 +87,7 @@ jobs:
 
             if [ -f yarn.lock ]; then
               yarn
+              yarn codegen
               yarn build
             elif [ -f package-lock.json ]; then
               npm ci
