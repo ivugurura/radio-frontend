@@ -1,6 +1,7 @@
 import React from 'react';
 import { BASE_API_URL } from '@libs/constants';
 import { lStorage } from '@libs/constants';
+import { currentLanguageTag } from '@graphql/client';
 import type {
   ChatClientEvent,
   ChatMessagePayload,
@@ -23,6 +24,8 @@ const buildWsUrl = (params: {
   const wsBase = httpBase.replace(/^http/i, 'ws').replace(/\/+$/, '');
 
   const url = new URL(`${wsBase}/ws/studios/${studioSlug}/chat/`);
+  // WebSocket can't send headers; pass the language the same way as the REST/GraphQL `Accept-Language`.
+  url.searchParams.set('lang', currentLanguageTag());
 
   if (isAdmin) {
     const token = lStorage.get();

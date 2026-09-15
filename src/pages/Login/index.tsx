@@ -11,6 +11,7 @@ import {
 
 import { Copyright } from '../../components/Copyright';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { loginSchema } from './schema';
 import { MFForm } from 'react-mui-form';
 import { useLoginUserMutation } from '@graphql/hooks';
@@ -28,6 +29,7 @@ const redirectToDashboard = () => {
   }, 5000);
 };
 const Login = ({ shouldRedirect = false }) => {
+  const { t } = useTranslation('auth');
   const [loginInfo, setLoginInfo] = useState(initialStates);
   const [loginUser, { loading, data }] = useLoginUserMutation();
 
@@ -42,10 +44,9 @@ const Login = ({ shouldRedirect = false }) => {
   useEffect(() => {
     if (data?.loginUser) {
       const { token, restToken, user } = data.loginUser;
-      let messageToShow = `Welcome back, ${user?.firstName}`;
-      if (shouldRedirect) {
-        messageToShow += '. Be redirected in 3 seconds';
-      }
+      const messageToShow = shouldRedirect
+        ? t('welcomeBackRedirect', { name: user?.firstName })
+        : t('welcomeBack', { name: user?.firstName });
 
       notifier.success(messageToShow);
       lStorage.save(token!, restToken ?? undefined);
@@ -75,7 +76,7 @@ const Login = ({ shouldRedirect = false }) => {
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign in
+          {t('signInTitle')}
         </Typography>
         <Box component="form" noValidate sx={{ mt: 1 }}>
           <MFForm
@@ -85,7 +86,7 @@ const Login = ({ shouldRedirect = false }) => {
           />
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
+            label={t('rememberMe')}
           />
           <Button
             type="submit"
@@ -95,7 +96,7 @@ const Login = ({ shouldRedirect = false }) => {
             onClick={handleSubmit}
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? t('signingIn') : t('signIn')}
           </Button>
         </Box>
       </Box>

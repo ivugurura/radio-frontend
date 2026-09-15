@@ -15,19 +15,23 @@ import {
 } from '@mui/material';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { useTranslation } from 'react-i18next';
 import {
   useStreamingConfigQuery,
   useRegenerateStreamingCredentialMutation,
 } from '@graphql/hooks';
-import { STUDIO_ID, notifier } from '@libs/constants';
+import { notifier } from '@libs/constants';
+import { useStudioId } from '@components/providers';
 import CopyField from './CopyField';
 import ConfirmDialog from '../audio/ConfirmDialog';
 
 export default function StreamingConfigPage() {
+  const { t } = useTranslation('streaming');
+  const studioId = useStudioId();
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   const { data, loading, error, refetch } = useStreamingConfigQuery({
-    variables: { studioId: STUDIO_ID },
+    variables: { studioId },
     fetchPolicy: 'cache-and-network',
   });
 
@@ -39,12 +43,10 @@ export default function StreamingConfigPage() {
   const handleRegenerate = async () => {
     setConfirmOpen(false);
     try {
-      await regenerate({ variables: { studioId: STUDIO_ID } });
-      notifier.success(
-        'Password regenerated. Update BUTT before reconnecting.',
-      );
+      await regenerate({ variables: { studioId } });
+      notifier.success(t('regenerateSuccess'));
     } catch {
-      notifier.error('Could not regenerate the password');
+      notifier.error(t('regenerateError'));
     }
   };
 
@@ -57,7 +59,7 @@ export default function StreamingConfigPage() {
         mb={2}
       >
         <Typography variant="h5" fontWeight={700}>
-          Streaming Apps
+          {t('title')}
         </Typography>
         <Button
           variant="outlined"
@@ -65,14 +67,12 @@ export default function StreamingConfigPage() {
           onClick={() => void refetch()}
           disabled={loading}
         >
-          Refresh
+          {t('refresh')}
         </Button>
       </Stack>
 
       <Typography variant="body2" color="text.secondary" mb={3}>
-        Connect a live encoder such as BUTT using the settings below. Enter the
-        server address and port on BUTT's "Main" tab, and match the format
-        settings on its "Stream" tab.
+        {t('intro')}
       </Typography>
 
       {loading && !config && (
@@ -82,7 +82,7 @@ export default function StreamingConfigPage() {
       )}
 
       {error && !config && (
-        <Alert severity="error">Could not load streaming configuration.</Alert>
+        <Alert severity="error">{t('loadFailed')}</Alert>
       )}
 
       {config && (
@@ -157,7 +157,7 @@ export default function StreamingConfigPage() {
               >
                 <Box>
                   <Typography variant="subtitle2">
-                    Regenerate password
+                    {t('regeneratePassword')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {config.rotatedAt
@@ -174,7 +174,7 @@ export default function StreamingConfigPage() {
                   onClick={() => setConfirmOpen(true)}
                   disabled={regenerating}
                 >
-                  Regenerate password
+                  {t('regeneratePassword')}
                 </Button>
               </Stack>
             </CardContent>
@@ -188,14 +188,13 @@ export default function StreamingConfigPage() {
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => void handleRegenerate()}
-        title="Regenerate streaming password?"
+        title={t('confirmTitle')}
         message={
           <Alert severity="warning" icon={false} sx={{ mb: 0 }}>
-            The current password will stop working immediately. Any live encoder
-            connected with the old password will be disconnected.
+            {t('confirmBody')}
           </Alert>
         }
-        confirmText="Regenerate"
+        confirmText={t('confirmAction')}
         confirmColor="warning"
       />
     </Container>

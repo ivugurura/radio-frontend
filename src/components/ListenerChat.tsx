@@ -17,7 +17,8 @@ import {
   SendRounded as SendRoundedIcon,
   BlockRounded as BlockRoundedIcon,
 } from '@mui/icons-material';
-import { STUDIO_ID } from '@libs/constants';
+import { useTranslation } from 'react-i18next';
+import { useStudioId } from '@components/providers';
 import {
   getOrCreateListenerClientId,
   mergeChatMessages,
@@ -37,15 +38,24 @@ const formatTime = (isoOrTimestamp: string | number) =>
 
 const getInitial = (name: string) => name.trim().charAt(0).toUpperCase() || '?';
 
-const authorLabel = (message: ChatMessagePayload) => {
+const authorLabel = (
+  message: ChatMessagePayload,
+  labels: { studio: string; listener: string },
+) => {
   if (message.authorType === 'ADMIN') {
     const first = message.author?.firstName?.trim();
-    return first || 'Studio';
+    return first || labels.studio;
   }
-  return message.listenerDisplayName || 'Listener';
+  return message.listenerDisplayName || labels.listener;
 };
 
 const ListenerChat: React.FC = () => {
+  const { t } = useTranslation('chat');
+  const studioSlug = useStudioId();
+  const roleLabels = {
+    studio: t('roleStudio'),
+    listener: t('roleListener'),
+  };
   const [isOpen, setIsOpen] = React.useState(false);
   const [listenerName, setListenerName] = React.useState(
     () => window.localStorage.getItem(LISTENER_NAME_KEY) || '',
@@ -59,7 +69,7 @@ const ListenerChat: React.FC = () => {
 
   const { data: historyData } = useChatMessagesQuery(
     hasName
-      ? { variables: { studioSlug: STUDIO_ID }, fetchPolicy: 'network-only' }
+      ? { variables: { studioSlug }, fetchPolicy: 'network-only' }
       : undefined,
   );
 
@@ -69,7 +79,7 @@ const ListenerChat: React.FC = () => {
     selfMuted,
     sendMessage,
   } = useChatSocket({
-    studioSlug: STUDIO_ID,
+    studioSlug,
     isAdmin: false,
     listenerClientId: hasName ? listenerClientId : undefined,
     listenerDisplayName: hasName ? listenerName : undefined,
@@ -149,18 +159,18 @@ const ListenerChat: React.FC = () => {
           >
             <Box>
               <Typography variant="subtitle1" fontWeight={700} lineHeight={1.2}>
-                Listener Chat
+                {t('widget.title')}
               </Typography>
               <Typography
                 variant="caption"
                 sx={{ color: 'rgba(255, 255, 255, 0.85)' }}
               >
-                Questions, comments &amp; feedback
+                {t('widget.subtitle')}
               </Typography>
             </Box>
             <IconButton
               onClick={handleToggle}
-              aria-label="Close chat"
+              aria-label={t('widget.close')}
               size="small"
               sx={{ color: '#fff' }}
             >
@@ -189,7 +199,7 @@ const ListenerChat: React.FC = () => {
                     textAlign="center"
                     sx={{ mt: 4 }}
                   >
-                    No messages yet. Say hi to the studio 👋
+                    {t('noMessagesListener')}
                   </Typography>
                 ) : (
                   messages.map((message) => {
@@ -214,7 +224,7 @@ const ListenerChat: React.FC = () => {
                               bgcolor: '#53a9e7',
                             }}
                           >
-                            {getInitial(authorLabel(message))}
+                            {getInitial(authorLabel(message, roleLabels))}
                           </Avatar>
                         )}
                         <Box>
@@ -227,8 +237,10 @@ const ListenerChat: React.FC = () => {
                               mb: 0.25,
                             }}
                           >
-                            {isSelf ? 'You' : authorLabel(message)} ·{' '}
-                            {formatTime(message.createdAt)}
+                            {isSelf
+                              ? t('widget.you')
+                              : authorLabel(message, roleLabels)}{' '}
+                            · {formatTime(message.createdAt)}
                           </Typography>
                           {message.quotedMessage && (
                             <Box
@@ -300,8 +312,7 @@ const ListenerChat: React.FC = () => {
                 >
                   <BlockRoundedIcon fontSize="small" sx={{ color: '#c0392b' }} />
                   <Typography variant="caption" color="#c0392b">
-                    You've been muted by the studio and can't send messages
-                    right now.
+                    {t('widget.mutedNow')}
                   </Typography>
                 </Stack>
               )}
@@ -320,7 +331,9 @@ const ListenerChat: React.FC = () => {
                   fullWidth
                   size="small"
                   placeholder={
-                    selfMuted ? 'You are muted' : 'Type your message...'
+                    selfMuted
+                      ? t('widget.youAreMuted')
+                      : t('widget.typeYourMessage')
                   }
                   value={messageDraft}
                   disabled={selfMuted}
@@ -337,7 +350,7 @@ const ListenerChat: React.FC = () => {
                 <IconButton
                   onClick={handleSend}
                   disabled={!messageDraft.trim() || selfMuted}
-                  aria-label="Send message"
+                  aria-label={t('sendMessage')}
                   sx={{
                     backgroundColor: '#53a9e7',
                     color: '#fff',
@@ -358,15 +371,15 @@ const ListenerChat: React.FC = () => {
               sx={{ flex: 1, p: 2.5, justifyContent: 'center' }}
             >
               <Typography variant="body1" fontWeight={600}>
-                Join the chat
+                {t('widget.joinTitle')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Tell us your name so the studio knows who's talking.
+                {t('identityPrompt')}
               </Typography>
               <TextField
                 autoFocus
                 size="small"
-                label="Your name"
+                label={t('widget.yourName')}
                 value={nameDraft}
                 onChange={(event) => setNameDraft(event.target.value)}
                 onKeyDown={(event) => {
@@ -379,7 +392,7 @@ const ListenerChat: React.FC = () => {
               <IconButton
                 onClick={handleSaveName}
                 disabled={!nameDraft.trim()}
-                aria-label="Continue"
+                aria-label={t('widget.continue')}
                 sx={{
                   alignSelf: 'flex-start',
                   px: 2,
@@ -394,7 +407,7 @@ const ListenerChat: React.FC = () => {
                 }}
               >
                 <Typography variant="body2" fontWeight={600} sx={{ px: 0.5 }}>
-                  Continue
+                  {t('widget.continue')}
                 </Typography>
               </IconButton>
             </Stack>
@@ -405,7 +418,7 @@ const ListenerChat: React.FC = () => {
       <Badge color="error" variant="dot" invisible={isOpen || messages.length === 0}>
         <Fab
           onClick={handleToggle}
-          aria-label={isOpen ? 'Close chat' : 'Open chat'}
+          aria-label={isOpen ? t('widget.close') : t('widget.open')}
           sx={{
             background: 'linear-gradient(180deg, #66b6ef 0%, #53a9e7 100%)',
             color: '#fff',

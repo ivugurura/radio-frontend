@@ -1,6 +1,12 @@
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 import { lStorage, APP_SCHEMA, BASE_API_URL } from '@libs/constants';
 import type { GraphQLError } from 'graphql';
+import i18n from '../i18n';
+import { DEFAULT_LANGUAGE, normalizeLanguage } from '../i18n/config';
+
+/** Language tag sent to the backend on every request (`Accept-Language: en`). */
+export const currentLanguageTag = (): string =>
+  normalizeLanguage(i18n.language ?? DEFAULT_LANGUAGE);
 
 type CreateApolloClientOptions = {
   // Optional: refresh the access token; return new token or null if refresh failed
@@ -123,6 +129,8 @@ export function createApolloClient(
         token = lStorage.get();
       }
       if (token) headers.set('Authorization', `RRV ${token}`);
+      // Stations are language specific; the backend also localises messages from this.
+      headers.set('Accept-Language', currentLanguageTag());
 
       reqInit.headers = headers;
       // Credentials handling
@@ -299,6 +307,7 @@ export async function defaultRefreshAccessToken(): Promise<string | null> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept-Language': currentLanguageTag(),
       },
       body: JSON.stringify({ refresh_token: refreshToken }),
       credentials: 'same-origin',

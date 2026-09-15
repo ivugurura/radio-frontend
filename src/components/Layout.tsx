@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { STUDIO_ID, STUDIO_URL } from '@libs/constants';
+import { useTranslation } from 'react-i18next';
+import { STUDIO_URL } from '@libs/constants';
 import {
   Box,
   Drawer,
@@ -26,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
 import { useAuth } from './providers/AuthContext';
+import { useStudioId } from './providers/LanguageContext';
 import Login from '../pages/Login';
 import RadioStreamPlayer from './RadioStreamPlayer';
 import LanguageSelector from './LanguageSelector';
@@ -36,33 +38,35 @@ const Layout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const location = useLocation();
+  const { t } = useTranslation('layout');
   const { isAuthenticated, isLoading } = useAuth();
+  const studioId = useStudioId();
 
-  const listenUrl = `${STUDIO_URL}/${STUDIO_ID}/listen`;
+  const listenUrl = `${STUDIO_URL}/${studioId}/listen`;
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/admin' },
+    { text: t('nav.dashboard'), icon: <Dashboard />, path: '/admin' },
     {
-      text: 'Audio Manager',
+      text: t('nav.audioManager'),
       icon: <MusicVideoOutlined />,
       path: '/admin/medias',
     },
     {
-      text: 'Listener Statistics',
+      text: t('nav.listenerStatistics'),
       icon: <CommitOutlined />,
       path: '/admin/listeners',
     },
     {
-      text: 'Live Chat',
+      text: t('nav.liveChat'),
       icon: <ForumOutlined />,
       path: '/admin/chat',
     },
     {
-      text: 'Streaming Apps',
+      text: t('nav.streamingApps'),
       icon: <SettingsInputAntennaOutlined />,
       path: '/admin/streaming',
     },
@@ -81,7 +85,7 @@ const Layout: React.FC = () => {
       >
         <MusicVideoOutlined sx={{ mr: 2 }} />
         <Typography variant="h6" noWrap component="div" fontWeight={600}>
-          RRV Radio
+          {t('brand')}
         </Typography>
       </Box>
       <Divider />
@@ -131,7 +135,11 @@ const Layout: React.FC = () => {
           </ListItem>
         ))}
         <ListItem>
-          <RadioStreamPlayer variant="compact" streamUrl={listenUrl} title="R-RW" />
+          <RadioStreamPlayer
+            variant="compact"
+            streamUrl={listenUrl}
+            title={t('player.compactTitle')}
+          />
         </ListItem>
       </List>
     </Box>
@@ -156,9 +164,15 @@ const Layout: React.FC = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" color="text.primary">
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            color="text.primary"
+            sx={{ flexGrow: 1 }}
+          >
             {menuItems.find((item) => item.path === location.pathname)?.text ||
-              'Dashboard'}
+              t('nav.dashboard')}
           </Typography>
           <LanguageSelector variant="short" />
         </Toolbar>

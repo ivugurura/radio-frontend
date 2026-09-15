@@ -23,7 +23,8 @@ import {
   LockOpenRounded as LockOpenRoundedIcon,
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
-import { STUDIO_ID } from '@libs/constants';
+import { useTranslation } from 'react-i18next';
+import { useStudioId } from '@components/providers';
 import { mergeChatMessages, chatMessageFromQueryRow } from '@libs/chat';
 import type { ChatMessagePayload } from '@libs/chat';
 import { useChatMessagesQuery, useChatMutesQuery } from '@graphql/hooks';
@@ -49,18 +50,27 @@ const toMuteRow = (mute: ChatMuteResult): MuteRow => ({
     : null,
 });
 
-const authorLabel = (message: ChatMessagePayload) => {
+const authorLabel = (
+  message: ChatMessagePayload,
+  labels: { studio: string; listener: string },
+) => {
   if (message.authorType === 'ADMIN') {
     const name = [message.author?.firstName, message.author?.lastName]
       .filter(Boolean)
       .join(' ')
       .trim();
-    return name || 'Studio';
+    return name || labels.studio;
   }
-  return message.listenerDisplayName || 'Listener';
+  return message.listenerDisplayName || labels.listener;
 };
 
 const ChatPage: React.FC = () => {
+  const { t } = useTranslation('chat');
+  const studioSlug = useStudioId();
+  const roleLabels = {
+    studio: t('roleStudio'),
+    listener: t('roleListener'),
+  };
   const [messageDraft, setMessageDraft] = React.useState('');
   const [replyTarget, setReplyTarget] = React.useState<ChatMessagePayload | null>(
     null,
@@ -75,12 +85,12 @@ const ChatPage: React.FC = () => {
   const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
 
   const { data: historyData, error: historyError } = useChatMessagesQuery({
-    variables: { studioSlug: STUDIO_ID },
+    variables: { studioSlug },
     fetchPolicy: 'network-only',
   });
 
   const { data: mutesData, error: mutesError } = useChatMutesQuery({
-    variables: { studioSlug: STUDIO_ID },
+    variables: { studioSlug },
     fetchPolicy: 'network-only',
   });
 
@@ -93,7 +103,7 @@ const ChatPage: React.FC = () => {
     unhideMessage,
     muteListener,
     unmuteListener,
-  } = useChatSocket({ studioSlug: STUDIO_ID, isAdmin: true });
+  } = useChatSocket({ studioSlug, isAdmin: true });
 
   // Seed muted-listener panel from GraphQL; the socket has no memory of past mutes.
   React.useEffect(() => {
@@ -215,17 +225,17 @@ const ChatPage: React.FC = () => {
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Typography variant="h5" fontWeight={700} mb={2}>
-        Live Chat
+        {t('title')}
       </Typography>
 
       {historyError && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          Failed to load chat history: {historyError.message}
+          {t('historyLoadFailed', { message: historyError.message })}
         </Alert>
       )}
       {mutesError && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          Failed to load muted listeners: {mutesError.message}
+          {t('mutesLoadFailed', { message: mutesError.message })}
         </Alert>
       )}
 
@@ -259,7 +269,7 @@ const ChatPage: React.FC = () => {
                   textAlign="center"
                   sx={{ mt: 4 }}
                 >
-                  No messages yet.
+                  {t('noMessages')}
                 </Typography>
               ) : (
                 messages.map((message) => {
@@ -292,10 +302,12 @@ const ChatPage: React.FC = () => {
                         <Box sx={{ minWidth: 0 }}>
                           <Stack direction="row" spacing={1} alignItems="center">
                             <Typography variant="subtitle2" fontWeight={700}>
-                              {authorLabel(message)}
+                              {authorLabel(message, roleLabels)}
                             </Typography>
                             <Chip
-                              label={isListener ? 'Listener' : 'Admin'}
+                              label={
+                                isListener ? t('roleListener') : t('roleAdmin')
+                              }
                               size="small"
                               color={isListener ? 'default' : 'primary'}
                               variant="outlined"
@@ -306,7 +318,7 @@ const ChatPage: React.FC = () => {
                             </Typography>
                             {isHidden && (
                               <Chip
-                                label="Hidden"
+                                label={t('hiddenBadge')}
                                 size="small"
                                 color="warning"
                                 sx={{ height: 18, fontSize: '0.65rem' }}
@@ -362,7 +374,7 @@ const ChatPage: React.FC = () => {
                         </Box>
 
                         <Stack direction="row" spacing={0.5} flexShrink={0}>
-                          <Tooltip title="Reply">
+                          <Tooltip title={t('actions.reply')}>
                             <IconButton
                               size="small"
                               onClick={() => setReplyTarget(message)}
@@ -370,7 +382,11 @@ const ChatPage: React.FC = () => {
                               <ReplyRoundedIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title={isHidden ? 'Unhide' : 'Hide'}>
+                          <Tooltip
+                            title={
+                              isHidden ? t('actions.unhide') : t('actions.hide')
+                            }
+                          >
                             <IconButton
                               size="small"
                               onClick={() => handleToggleHide(message)}
@@ -383,7 +399,7 @@ const ChatPage: React.FC = () => {
                             </IconButton>
                           </Tooltip>
                           {isListener && (
-                            <Tooltip title="Mute listener">
+                            <Tooltip title={t('actions.mute')}>
                               <IconButton
                                 size="small"
                                 onClick={() => setMuteTarget(message)}
@@ -417,7 +433,9 @@ const ChatPage: React.FC = () => {
                 <ReplyRoundedIcon fontSize="small" color="action" />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="caption" fontWeight={600} display="block">
-                    Replying to {authorLabel(replyTarget)}
+                    {t('replyingTo', {
+                      name: authorLabel(replyTarget, roleLabels),
+                    })}
                   </Typography>
                   <Typography
                     variant="caption"
@@ -443,7 +461,7 @@ const ChatPage: React.FC = () => {
               <TextField
                 fullWidth
                 size="small"
-                placeholder="Type a message..."
+                placeholder={t('typeMessage')}
                 value={messageDraft}
                 onChange={(event) => setMessageDraft(event.target.value)}
                 onKeyDown={(event) => {
@@ -459,7 +477,7 @@ const ChatPage: React.FC = () => {
                 onClick={handleSend}
                 disabled={!messageDraft.trim()}
                 color="primary"
-                aria-label="Send message"
+                aria-label={t('sendMessage')}
               >
                 <SendRoundedIcon fontSize="small" />
               </IconButton>
@@ -474,12 +492,12 @@ const ChatPage: React.FC = () => {
             sx={{ p: 2, borderRadius: 2 }}
           >
             <Typography variant="h6" fontWeight={600} mb={1}>
-              Muted listeners
+              {t('mutedListeners')}
             </Typography>
             <Divider sx={{ mb: 1.5 }} />
             {muteRowsList.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
-                No muted listeners.
+                {t('noMutedListeners')}
               </Typography>
             ) : (
               <Stack spacing={1.5}>
@@ -502,7 +520,7 @@ const ChatPage: React.FC = () => {
                         </Typography>
                         {row.reason && (
                           <Typography variant="caption" color="text.secondary">
-                            Reason: {row.reason}
+                            {t('reason', { reason: row.reason })}
                           </Typography>
                         )}
                         <Typography
@@ -511,12 +529,16 @@ const ChatPage: React.FC = () => {
                           display="block"
                         >
                           {row.expiresAt
-                            ? `Until ${dayjs(row.expiresAt).format('MMM D, HH:mm')}`
-                            : 'Permanent'}
+                            ? t('mutedUntil', {
+                                date: dayjs(row.expiresAt).format(
+                                  'MMM D, HH:mm',
+                                ),
+                              })
+                            : t('mutedPermanent')}
                           {row.mutedByName ? ` · by ${row.mutedByName}` : ''}
                         </Typography>
                       </Box>
-                      <Tooltip title="Unmute">
+                      <Tooltip title={t('actions.unmute')}>
                         <IconButton
                           size="small"
                           onClick={() => handleUnmute(row.listenerClientId)}
@@ -535,7 +557,7 @@ const ChatPage: React.FC = () => {
 
       <MuteDialog
         open={Boolean(muteTarget)}
-        listenerName={muteTarget ? authorLabel(muteTarget) : ''}
+        listenerName={muteTarget ? authorLabel(muteTarget, roleLabels) : ''}
         onClose={() => setMuteTarget(null)}
         onConfirm={handleConfirmMute}
       />

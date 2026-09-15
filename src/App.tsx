@@ -6,7 +6,7 @@ import { AppRoutes } from './routes';
 import { ErrorBoundary } from './components/errors';
 import { ToastContainer } from 'react-toastify';
 import { ApolloAppProvider } from './graphql/ApolloAppProvider';
-import { AuthProvider } from '@components/providers';
+import { AuthProvider, LanguageProvider } from '@components/providers';
 
 const App: React.FC = () => (
   <ApolloAppProvider>
@@ -15,9 +15,11 @@ const App: React.FC = () => (
         <CssBaseline />
         <ToastContainer />
         <Suspense fallback={<LinearProgress />}>
-          <AuthProvider>
-            <AppRoutes />
-          </AuthProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <AppRoutes />
+            </AuthProvider>
+          </LanguageProvider>
         </Suspense>
       </ErrorBoundary>
     </ThemeProvider>

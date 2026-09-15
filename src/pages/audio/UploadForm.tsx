@@ -28,7 +28,8 @@ import {
   useFinalizeUploadMutation,
   useRequestUploadMutation,
 } from '@graphql/hooks';
-import { BASE_API_URL, STUDIO_ID } from '@libs/constants';
+import { BASE_API_URL } from '@libs/constants';
+import { useStudioId } from '@components/providers';
 
 /**
  * UploadForm
@@ -112,6 +113,7 @@ type UploadItem = {
 };
 
 export const UploadForm = ({ open, onClose }: UploadFormProps) => {
+  const studioId = useStudioId();
   const [items, setItems] = useState<UploadItem[]>([]);
   const [running, setRunning] = useState(0);
   const [autoStart, setAutoStart] = useState(false);
@@ -177,7 +179,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
         // 1) Request upload session
         const req = await requestUpload({
           variables: {
-            studioSlug: STUDIO_ID,
+            studioSlug: studioId,
             fileName: file.name,
             sizeBytes: file.size,
             mimeType: file.type || 'application/octet-stream',
@@ -272,7 +274,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
         setRunning(runningRef.current);
       }
     },
-    [requestUpload, finalizeUpload, STUDIO_ID, updateItem],
+    [requestUpload, finalizeUpload, studioId, updateItem],
   );
 
   const schedule = useCallback(() => {

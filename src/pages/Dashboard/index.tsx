@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Grid, Typography, Alert, Skeleton } from '@mui/material';
-import { STUDIO_ID } from '@libs/constants';
+import { useTranslation } from 'react-i18next';
+import { useStudioId } from '@components/providers';
 import { TrendChart } from './TrendChart';
 import { CapacityPanel } from './CapacityPanel';
 import { SummaryStrip } from './SummaryStrip';
@@ -19,8 +20,10 @@ import type {
  */
 
 export const DashboardPage: React.FC = () => {
+  const { t } = useTranslation('dashboard');
+  const studioId = useStudioId();
   const { data, loading, error } = useDashboardOverviewQuery({
-    variables: { studioId: STUDIO_ID, range: 'LAST_90_MIN' },
+    variables: { studioId, range: 'LAST_90_MIN' },
     fetchPolicy: 'network-only',
     pollInterval: 5000,
   });
@@ -33,11 +36,11 @@ export const DashboardPage: React.FC = () => {
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Typography variant="h5" fontWeight={700} mb={2}>
-        Dashboard
+        {t('title')}
       </Typography>
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          Failed to load dashboard: {error.message}
+          {t('loadFailed', { message: error.message })}
         </Alert>
       )}
 
@@ -65,7 +68,7 @@ export const DashboardPage: React.FC = () => {
 
         <Grid size={{ xs: 12, md: 12 }} mt={2}>
           <Typography variant="h6" fontWeight={600} mb={1}>
-            Summary of your listening
+            {t('summaryTitle')}
           </Typography>
           {loading && !summary ? (
             <Skeleton variant="rounded" height={120} />
@@ -79,7 +82,7 @@ export const DashboardPage: React.FC = () => {
 
         <Grid size={{ xs: 12, md: 12 }} mt={2}>
           <Typography variant="h6" fontWeight={600} mb={1}>
-            Currently
+            {t('currentlyTitle')}
           </Typography>
           {loading && queueItems.length === 0 ? (
             <Skeleton variant="rounded" height={140} />
