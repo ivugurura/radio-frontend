@@ -1,0 +1,6 @@
+{
+  "title": "Dashboard",
+  "loadFailed": "Failed to load dashboard: {{message}}",
+  "summaryTitle": "Summary of your listening",
+  "currentlyTitle": "Currently"
+}

@@ -1,0 +1,49 @@
+{
+  "title": "Ikiganiro",
+  "listenerChatTitle": "Ikiganiro na sitidiyo",
+  "historyLoadFailed": "Kuzana amateka y'ikiganiro byanze: {{message}}",
+  "mutesLoadFailed": "Kuzana abumva baciwe byanze: {{message}}",
+  "noMessages": "Nta butumwa burahaba.",
+  "noMessagesListener": "Nta butumwa burahaba. Ramutsa sitidiyo 👋",
+  "roleListener": "Uwumva",
+  "roleAdmin": "Umuyobozi",
+  "roleStudio": "Sitidiyo",
+  "hiddenBadge": "Byahishwe",
+  "replyingTo": "Wasubiza {{name}}",
+  "typeMessage": "Andika ubutumwa...",
+  "sendMessage": "Ohereza ubutumwa",
+  "mutedListeners": "Abumva baciwe",
+  "noMutedListeners": "Nta bumva baciwe.",
+  "reason": "Impamvu: {{reason}}",
+  "mutedUntil": "Kugeza {{date}}",
+  "mutedPermanent": "Burundu",
+  "actions": {
+    "reply": "Subiza",
+    "hide": "Hisha",
+    "unhide": "Garura",
+    "mute": "Ciraho uwumva",
+    "unmute": "Subiza uwumva"
+  },
+  "identityPrompt": "Tubwire izina ryawe kugira ngo sitidiyo imenye uvuga.",
+  "widget": {
+    "title": "Ikiganiro n'Abumva",
+    "subtitle": "Ibibazo, ibitekerezo n'ibyifuzo",
+    "joinTitle": "Injira mu kiganiro",
+    "yourName": "Izina ryawe",
+    "continue": "Komeza",
+    "you": "Wowe",
+    "typeYourMessage": "Andika ubutumwa bwawe...",
+    "youAreMuted": "Waciwe",
+    "mutedNow": "Waciwe na sitidiyo, ntushobora kohereza ubutumwa kuri iyi saha.",
+    "open": "Fungura ikiganiro",
+    "close": "Funga ikiganiro"
+  },
+  "mutedNotice": "Waciwe na sitidiyo, ntushobora kohereza ubutumwa",
+  "errors": {
+    "muted": "Waciwe na sitidiyo, ntushobora kohereza ubutumwa",
+    "invalid_body": "Ubwo butumwa ntibushobora koherezwa.",
+    "forbidden": "Ntabwo wemerewe kubikora.",
+    "not_found": "Ubwo butumwa ntibukiriho.",
+    "invalid_listener": "Uwumva utazwi."
+  }
+}

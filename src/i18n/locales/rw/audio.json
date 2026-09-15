@@ -1,0 +1,13 @@
+{
+  "title": "Ububiko bw'Amajwi",
+  "totalCount": "{{count}} yose",
+  "refresh": "Vugurura",
+  "refreshed": "Byavuguruwe",
+  "newAudio": "Ijwi Rishya",
+  "search": "Shakisha ku mutwe, umuhanzi, cyangwa ikirango",
+  "deleteSelected": "Siba ibyatoranyijwe ({{count}})",
+  "audioDeleted": "Ijwi ryasibwe",
+  "confirmDeleteTitle": "Siba ijwi",
+  "confirmDeleteBody": "Ugiye gusiba dosiye z'amajwi {{count}}. Ibi ntibisubirwaho.",
+  "confirmDeleteAction": "Siba"
+}

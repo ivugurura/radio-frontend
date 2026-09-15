@@ -1,0 +1,13 @@
+{
+  "brand": "RRV Radio",
+  "nav": {
+    "dashboard": "Imbonerahamwe",
+    "audioManager": "Gucunga Amajwi",
+    "listenerStatistics": "Imibare y'abumva",
+    "liveChat": "Ikiganiro",
+    "streamingApps": "Porogaramu zo gutambutsa"
+  },
+  "player": {
+    "compactTitle": "R-RW"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "stationTitle": "Radio Ijwi ry'Ivugurura",
+  "voiceControl": "Kugenzura Ijwi",
+  "voiceControlStatus": {
+    "disabled": "Ntibikora",
+    "enabled": "Birakora"
+  },
+  "enable": "Shoboza",
+  "listenLive": "Umva ubu",
+  "nowPlaying": "Iri kumvikana"
+}

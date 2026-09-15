@@ -1,0 +1,13 @@
+{
+  "brand": "RRV Radio",
+  "nav": {
+    "dashboard": "Dashboard",
+    "audioManager": "Audio Manager",
+    "listenerStatistics": "Listener Statistics",
+    "liveChat": "Live Chat",
+    "streamingApps": "Streaming Apps"
+  },
+  "player": {
+    "compactTitle": "R-RW"
+  }
+}
