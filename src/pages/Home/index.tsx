@@ -24,6 +24,10 @@ const HomePage: React.FC = () => {
     >
       <Container maxWidth="sm" sx={{ py: 6 }}>
         <Stack spacing={4} alignItems="center">
+          <Box sx={{ alignSelf: 'flex-end' }}>
+            <LanguageSelector />
+          </Box>
+
           <RadioStreamPlayer
             variant="hero"
             streamUrl={STREAM_URL}
