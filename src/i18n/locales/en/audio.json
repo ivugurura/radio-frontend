@@ -1,0 +1,13 @@
+{
+  "title": "Audio Library",
+  "totalCount": "{{count}} total",
+  "refresh": "Refresh",
+  "refreshed": "Refreshed",
+  "newAudio": "New Audio",
+  "search": "Search by title, artist, or tag",
+  "deleteSelected": "Delete selected ({{count}})",
+  "audioDeleted": "Audio deleted",
+  "confirmDeleteTitle": "Delete audio",
+  "confirmDeleteBody": "You are about to delete {{count}} audio file(s). This action cannot be undone.",
+  "confirmDeleteAction": "Delete"
+}

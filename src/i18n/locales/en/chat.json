@@ -1,0 +1,49 @@
+{
+  "title": "Live Chat",
+  "listenerChatTitle": "Studio chat",
+  "historyLoadFailed": "Failed to load chat history: {{message}}",
+  "mutesLoadFailed": "Failed to load muted listeners: {{message}}",
+  "noMessages": "No messages yet.",
+  "noMessagesListener": "No messages yet. Say hi to the studio 👋",
+  "roleListener": "Listener",
+  "roleAdmin": "Admin",
+  "roleStudio": "Studio",
+  "hiddenBadge": "Hidden",
+  "replyingTo": "Replying to {{name}}",
+  "typeMessage": "Type a message...",
+  "sendMessage": "Send message",
+  "mutedListeners": "Muted listeners",
+  "noMutedListeners": "No muted listeners.",
+  "reason": "Reason: {{reason}}",
+  "mutedUntil": "Until {{date}}",
+  "mutedPermanent": "Permanent",
+  "actions": {
+    "reply": "Reply",
+    "hide": "Hide",
+    "unhide": "Unhide",
+    "mute": "Mute listener",
+    "unmute": "Unmute"
+  },
+  "identityPrompt": "Tell us your name so the studio knows who's talking.",
+  "widget": {
+    "title": "Listener Chat",
+    "subtitle": "Questions, comments & feedback",
+    "joinTitle": "Join the chat",
+    "yourName": "Your name",
+    "continue": "Continue",
+    "you": "You",
+    "typeYourMessage": "Type your message...",
+    "youAreMuted": "You are muted",
+    "mutedNow": "You've been muted by the studio and can't send messages right now.",
+    "open": "Open chat",
+    "close": "Close chat"
+  },
+  "mutedNotice": "You've been muted by the studio and can't send messages",
+  "errors": {
+    "muted": "You've been muted by the studio and can't send messages",
+    "invalid_body": "That message can't be sent.",
+    "forbidden": "You're not allowed to do that.",
+    "not_found": "That message no longer exists.",
+    "invalid_listener": "Unknown listener."
+  }
+}

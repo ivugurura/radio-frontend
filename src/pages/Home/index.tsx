@@ -1,16 +1,20 @@
 import React from 'react';
 import { Box, Button, Container, Paper, Stack, Typography } from '@mui/material';
 import { MicOffRounded as MicOffRoundedIcon } from '@mui/icons-material';
-import { STUDIO_ID, STUDIO_URL } from '@libs/constants';
+import { useTranslation } from 'react-i18next';
+import { STUDIO_URL } from '@libs/constants';
+import { useStudioId } from '@components/providers';
+import LanguageSelector from '@components/LanguageSelector';
 import ListenerChat from '@components/ListenerChat';
 import RadioStreamPlayer from '@components/RadioStreamPlayer';
 
-const STREAM_URL = `${STUDIO_URL}/${STUDIO_ID}/listen`;
-const NOW_URL = `${STUDIO_URL}/${STUDIO_ID}/now`;
-const STATUS_URL = `${STUDIO_URL}/${STUDIO_ID}/status`;
-
 const HomePage: React.FC = () => {
-  const stationTitle = 'Reformation Voice Radio';
+  const { t } = useTranslation('home');
+  const studioId = useStudioId();
+
+  const streamUrl = `${STUDIO_URL}/${studioId}/listen`;
+  const nowUrl = `${STUDIO_URL}/${studioId}/now`;
+  const statusUrl = `${STUDIO_URL}/${studioId}/status`;
 
   return (
     <Box
@@ -24,12 +28,16 @@ const HomePage: React.FC = () => {
     >
       <Container maxWidth="sm" sx={{ py: 6 }}>
         <Stack spacing={4} alignItems="center">
+          <Box sx={{ alignSelf: 'flex-end' }}>
+            <LanguageSelector />
+          </Box>
+
           <RadioStreamPlayer
             variant="hero"
-            streamUrl={STREAM_URL}
-            nowUrl={NOW_URL}
-            statusUrl={STATUS_URL}
-            title={stationTitle}
+            streamUrl={streamUrl}
+            nowUrl={nowUrl}
+            statusUrl={statusUrl}
+            title={t('stationTitle')}
           />
 
           <Paper
@@ -51,10 +59,10 @@ const HomePage: React.FC = () => {
                 <MicOffRoundedIcon sx={{ color: '#8191a4' }} />
                 <Box>
                   <Typography variant="h6" sx={{ lineHeight: 1.2 }}>
-                    Voice Control
+                    {t('voiceControl')}
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
-                    Disabled
+                    {t('voiceControlStatus.disabled')}
                   </Typography>
                 </Box>
               </Stack>
@@ -67,7 +75,7 @@ const HomePage: React.FC = () => {
                   color: '#2e3f57',
                 }}
               >
-                Enable
+                {t('enable')}
               </Button>
             </Stack>
           </Paper>

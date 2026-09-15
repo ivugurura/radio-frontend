@@ -1,0 +1,14 @@
+{
+  "title": "Listener Statistics",
+  "range": "Range",
+  "rangeOptions": {
+    "last24h": "Last 24 hours",
+    "last7d": "Last 7 days"
+  },
+  "refresh": "Refresh",
+  "refreshing": "Refreshing...",
+  "loadFailed": "Error loading stats: {{message}}",
+  "noStats": "No statistics available.",
+  "byCountry": "Listeners by Country",
+  "noMapData": "No map data to display."
+}

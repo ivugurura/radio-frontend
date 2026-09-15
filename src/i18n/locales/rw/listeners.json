@@ -1,0 +1,14 @@
+{
+  "title": "Imibare y'abumva",
+  "range": "Igihe",
+  "rangeOptions": {
+    "last24h": "Amasaha 24 ashize",
+    "last7d": "Iminsi 7 ishize"
+  },
+  "refresh": "Vugurura",
+  "refreshing": "Biravugururwa...",
+  "loadFailed": "Ikibazo mu kuzana imibare: {{message}}",
+  "noStats": "Nta mibare iboneka.",
+  "byCountry": "Abumva ku gihugu",
+  "noMapData": "Nta makuru y'ikarita yo kwerekana."
+}

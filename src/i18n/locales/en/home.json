@@ -1,0 +1,11 @@
+{
+  "stationTitle": "Reformation Voice Radio",
+  "voiceControl": "Voice Control",
+  "voiceControlStatus": {
+    "disabled": "Disabled",
+    "enabled": "Enabled"
+  },
+  "enable": "Enable",
+  "listenLive": "Listen live",
+  "nowPlaying": "Now playing"
+}

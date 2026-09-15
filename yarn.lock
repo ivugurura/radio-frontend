@@ -525,6 +525,11 @@
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.27.6.tgz#ec4070a04d76bae8ddbb10770ba55714a417b7c6"
   integrity sha512-vbavdySgbTTrmFE+EsiqUTzlOr5bzlnJtUv9PynGCAKvfQqjIXbvFdumPM/GxMDfyuGMJaJAU6TO4zc1Jf1i8Q==
 
+"@babel/runtime@^7.23.2", "@babel/runtime@^7.29.7":
+  version "7.29.7"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.29.7.tgz#12022450c45a4da6d8d8287b18a4ff2ddb23f768"
+  integrity sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==
+
 "@babel/template@^7.18.10", "@babel/template@^7.20.7", "@babel/template@^7.27.1", "@babel/template@^7.27.2":
   version "7.27.2"
   resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.27.2.tgz#fa78ceed3c4e7b63ebf6cb39e5852fca45f6809d"
@@ -4411,6 +4416,23 @@ hoist-non-react-statics@^3.3.0, hoist-non-react-statics@^3.3.1:
   dependencies:
     react-is "^16.7.0"
 
+html-parse-stringify@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/html-parse-stringify/-/html-parse-stringify-4.0.1.tgz#7264be901df0fef8829eb04632191be0aa94f55e"
+  integrity sha512-0zHsZJrK7S3K2aucXWL6ycoYJ/iNtIcFHC/nYQgFklPtrv5LpJctIiSCroWZWeuoXvuyFdzp6KzjJQ+OT5MfFw==
+
+i18next-browser-languagedetector@^8.2.1:
+  version "8.2.1"
+  resolved "https://registry.yarnpkg.com/i18next-browser-languagedetector/-/i18next-browser-languagedetector-8.2.1.tgz#f17a918d376a97aa12a5b63fd8ea559a6231935b"
+  integrity sha512-bZg8+4bdmaOiApD7N7BPT9W8MLZG+nPTOFlLiJiT8uzKXFjhxw4v2ierCXOwB5sFDMtuA5G4kgYZ0AznZxQ/cw==
+  dependencies:
+    "@babel/runtime" "^7.23.2"
+
+i18next@^26.4.2:
+  version "26.4.2"
+  resolved "https://registry.yarnpkg.com/i18next/-/i18next-26.4.2.tgz#824233630f147359296bcaddf1404945d2b211bf"
+  integrity sha512-RX+R0VLg13IbvRuJSxnqykUFS9vQZTl8wYpWPCIUDWVrSGjsQywB5Y+pjzrkboxGAuYfJZVH1InFTdgBdxq6ug==
+
 iconv-lite@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.7.0.tgz#c50cd80e6746ca8115eb98743afa81aa0e147a3e"
@@ -5316,6 +5338,15 @@ react-dom@^19.2.0:
   integrity sha512-UlbRu4cAiGaIewkPyiRGJk0imDN2T3JjieT6spoL2UeSf5od4n5LB/mQ4ejmxhCFT1tYe8IvaFulzynWovsEFQ==
   dependencies:
     scheduler "^0.27.0"
+
+react-i18next@^17.0.14:
+  version "17.0.14"
+  resolved "https://registry.yarnpkg.com/react-i18next/-/react-i18next-17.0.14.tgz#a895ff593e461877953732c194a242fa3895ed61"
+  integrity sha512-ZpMBfJL3BiXPuYHj5QMY1GwvKJNhE1vCxOJQ8BoMBdHP5XONTfi/Qss1nuRlnFdIl72PKo2jPmw+fxuLjRFgaQ==
+  dependencies:
+    "@babel/runtime" "^7.29.7"
+    html-parse-stringify "^4.0.1"
+    use-sync-external-store "^1.6.0"
 
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"

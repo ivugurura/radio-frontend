@@ -1,0 +1,12 @@
+{
+  "title": "Porogaramu zo gutambutsa",
+  "refresh": "Vugurura",
+  "intro": "Huza porogaramu itambutsa nka BUTT ukoresheje amagenamiterere akurikira. Andika aderesi ya seriveri na porudi ku gikubo cya BUTT cya \"Main\", uhuze n'amagenamiterere y'imiterere ku gikubo cyayo cya \"Stream\".",
+  "loadFailed": "Ntibyashobotse kuzana amagenamiterere yo gutambutsa.",
+  "regenerateSuccess": "Ijambobanga ryongeye gukorwa. Vugurura BUTT mbere yo kongera guhuza.",
+  "regenerateError": "Ntibyashobotse kongera gukora ijambobanga",
+  "regeneratePassword": "Ongera ukore ijambobanga",
+  "confirmTitle": "Ongera ukore ijambobanga ryo gutambutsa?",
+  "confirmBody": "Ijambobanga rihari rihita ritagira icyo rimaze. Porogaramu itambutsa yose ihujwe n'iryambere izacibwa.",
+  "confirmAction": "Ongera ukore"
+}

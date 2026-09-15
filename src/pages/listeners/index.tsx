@@ -1,5 +1,6 @@
 import React from 'react';
-import { STUDIO_ID } from '@libs/constants';
+import { useTranslation } from 'react-i18next';
+import { useStudioId } from '@components/providers';
 import {
   Alert,
   Box,
@@ -21,10 +22,12 @@ import { StatsHeader } from './StatsHeader';
 import { WorldMap } from './WorldMap';
 
 export const ListenerStatsPage: React.FC = () => {
+  const { t } = useTranslation('listeners');
+  const studioId = useStudioId();
   const [range, setRange] = React.useState<TimeRange>('LAST_24_HOURS');
 
   const { data, loading, error, refetch } = useListenerOverviewQuery({
-    variables: { studioId: STUDIO_ID, range },
+    variables: { studioId, range },
     fetchPolicy: 'cache-and-network',
   });
 
@@ -40,19 +43,23 @@ export const ListenerStatsPage: React.FC = () => {
         mb={2}
       >
         <Typography variant="h5" fontWeight={700}>
-          Listener Statistics
+          {t('title')}
         </Typography>
         <Stack direction="row" spacing={2}>
           <FormControl size="small">
-            <InputLabel id="range-label">Range</InputLabel>
+            <InputLabel id="range-label">{t('range')}</InputLabel>
             <Select
               labelId="range-label"
-              label="Range"
+              label={t('range')}
               value={range}
               onChange={(e) => setRange(e.target.value as TimeRange)}
             >
-              <MenuItem value="LAST_24_HOURS">Last 24 hours</MenuItem>
-              <MenuItem value="LAST_7_DAYS">Last 7 days</MenuItem>
+              <MenuItem value="LAST_24_HOURS">
+                {t('rangeOptions.last24h')}
+              </MenuItem>
+              <MenuItem value="LAST_7_DAYS">
+                {t('rangeOptions.last7d')}
+              </MenuItem>
             </Select>
           </FormControl>
           <Button
@@ -60,13 +67,15 @@ export const ListenerStatsPage: React.FC = () => {
             onClick={() => refetch()}
             disabled={loading}
           >
-            {loading ? 'Refreshing...' : 'Refresh'}
+            {loading ? t('refreshing') : t('refresh')}
           </Button>
         </Stack>
       </Stack>
 
       {error && (
-        <Alert severity="error">Error loading stats: {error.message}</Alert>
+        <Alert severity="error">
+          {t('loadFailed', { message: error.message })}
+        </Alert>
       )}
 
       <Box mb={2}>
@@ -93,21 +102,21 @@ export const ListenerStatsPage: React.FC = () => {
             listenerMinutes24h={ov.listenerMinutesLast24h!}
           />
         ) : (
-          <Alert severity="info">No statistics available.</Alert>
+          <Alert severity="info">{t('noStats')}</Alert>
         )}
       </Box>
 
       <Divider sx={{ my: 2 }} />
 
       <Typography variant="h6" mb={1}>
-        Listeners by Country
+        {t('byCountry')}
       </Typography>
       {loading && !ov ? (
         <Skeleton variant="rounded" height={440} />
       ) : ov ? (
         <WorldMap data={ov.countries! as CountryCount[]} height={720} />
       ) : (
-        <Alert severity="info">No map data to display.</Alert>
+        <Alert severity="info">{t('noMapData')}</Alert>
       )}
     </Container>
   );

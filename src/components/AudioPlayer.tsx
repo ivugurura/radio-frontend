@@ -8,7 +8,7 @@ import {
   Typography,
   Paper,
 } from '@mui/material';
-import { STUDIO_ID } from '@libs/constants';
+import { useStudioId } from '@components/providers';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import PauseRoundedIcon from '@mui/icons-material/PauseRounded';
 import VolumeUpRoundedIcon from '@mui/icons-material/VolumeUpRounded';
@@ -34,6 +34,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   autoPlay = false,
   onEnded,
 }) => {
+  const studioId = useStudioId();
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = React.useState(false);
   const [muted, setMuted] = React.useState(false);
@@ -45,7 +46,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   // Initialize/replace audio on source change
   React.useEffect(() => {
     if (!source?.processedRelPath) return;
-    const trackSrc = getTrackUrl(STUDIO_ID, source.id);
+    const trackSrc = getTrackUrl(studioId, source.id);
     const audio = new Audio();
     audioRef.current = audio;
     audio.src = trackSrc;
@@ -95,7 +96,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       setCurrent(0);
       setDuration(0);
     };
-  }, [source?.processedRelPath]);
+  }, [source?.processedRelPath, studioId]);
 
   React.useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;

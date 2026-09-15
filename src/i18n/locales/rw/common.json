@@ -1,0 +1,26 @@
+{
+  "appName": "Radio Ijwi ry'Ivugurura",
+  "appShortName": "RRV Radio",
+  "language": "Ururimi",
+  "station": "Sitasiyo",
+  "selectLanguage": "Hitamo ururimi",
+  "loading": "Biramutegurwa...",
+  "retry": "Ongera ugerageze",
+  "cancel": "Reka",
+  "save": "Bika",
+  "close": "Funga",
+  "enabled": "Birakora",
+  "disabled": "Ntibikora",
+  "enable": "Shoboza",
+  "disable": "Hagarika",
+  "yes": "Yego",
+  "no": "Oya",
+  "error": {
+    "generic": "Hari ikitagenze neza. Ongera ugerageze.",
+    "network": "Ikibazo cy'umuyoboro. Reba interineti yawe wongere ugerageze."
+  },
+  "languageName": {
+    "rw": "Ikinyarwanda",
+    "en": "Icyongereza"
+  }
+}

@@ -17,9 +17,10 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
+import { useTranslation } from 'react-i18next';
 import { AudioTable } from './AudioTable';
 import { useTracksQuery } from '@graphql/hooks';
-import { STUDIO_ID } from '@libs/constants';
+import { useStudioId } from '@components/providers';
 import type { TracksQueryVariables, TrackType } from '@graphql/graphql';
 // import CreateAudioDialog from './CreateAudioDialog';
 import ConfirmDialog from './ConfirmDialog';
@@ -69,6 +70,8 @@ function useDebounced<T>(value: T, delay = 400): T {
 }
 
 export default function AudioManagerPage() {
+  const { t } = useTranslation('audio');
+  const studioId = useStudioId();
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [after, setAfter] = React.useState<string | null>(null);
 
@@ -96,12 +99,12 @@ export default function AudioManagerPage() {
 
   const variables = React.useMemo<TracksQueryVariables>(
     () => ({
-      studioSlug: STUDIO_ID,
+      studioSlug: studioId,
       search: searchDebounced || null,
       first: rowsPerPage,
       after,
     }),
-    [searchDebounced, rowsPerPage, after],
+    [studioId, searchDebounced, rowsPerPage, after],
   );
 
   const { data, loading, refetch, fetchMore } = useTracksQuery({
@@ -121,7 +124,7 @@ export default function AudioManagerPage() {
   // Simulated fetch
   const refresh = async () => {
     await refetch(variables);
-    setSnackbar({ open: true, message: 'Refreshed', severity: 'info' });
+    setSnackbar({ open: true, message: t('refreshed'), severity: 'info' });
   };
 
   const handleChangePage = React.useCallback(
@@ -184,7 +187,11 @@ export default function AudioManagerPage() {
     setAudios((prev) => prev.filter((a) => !selected.includes(a.id)));
     setSelected([]);
     setConfirmDeleteOpen(false);
-    setSnackbar({ open: true, message: 'Audio deleted', severity: 'success' });
+    setSnackbar({
+      open: true,
+      message: t('audioDeleted'),
+      severity: 'success',
+    });
   };
 
   // const handleCreate = (
@@ -243,9 +250,12 @@ export default function AudioManagerPage() {
       >
         <Stack direction="row" alignItems="baseline" spacing={1}>
           <Typography variant="h5" fontWeight={700}>
-            Audio Library
+            {t('title')}
           </Typography>
-          <Chip label={`${totalCount || audios.length} total`} size="small" />
+          <Chip
+            label={t('totalCount', { count: totalCount || audios.length })}
+            size="small"
+          />
         </Stack>
         <Stack direction="row" spacing={1}>
           <Button
@@ -254,14 +264,14 @@ export default function AudioManagerPage() {
             onClick={() => void refresh()}
             disabled={loading}
           >
-            Refresh
+            {t('refresh')}
           </Button>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setCreateOpen(true)}
           >
-            New Audio
+            {t('newAudio')}
           </Button>
         </Stack>
       </Stack>
@@ -269,7 +279,7 @@ export default function AudioManagerPage() {
       <Toolbar disableGutters sx={{ mb: 1 }}>
         <TextField
           size="small"
-          placeholder="Search by title, artist, or tag"
+          placeholder={t('search')}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -291,7 +301,7 @@ export default function AudioManagerPage() {
           disabled={selected.length === 0}
           onClick={handleBulkDelete}
         >
-          Delete selected ({selected.length})
+          {t('deleteSelected', { count: selected.length })}
         </Button>
       </Toolbar>
 
@@ -320,14 +330,13 @@ export default function AudioManagerPage() {
         open={confirmDeleteOpen}
         onClose={() => setConfirmDeleteOpen(false)}
         onConfirm={confirmDelete}
-        title="Delete audio"
+        title={t('confirmDeleteTitle')}
         message={
           <Alert severity="warning" icon={false} sx={{ mb: 0 }}>
-            You are about to delete {selected.length} audio file(s). This action
-            cannot be undone.
+            {t('confirmDeleteBody', { count: selected.length })}
           </Alert>
         }
-        confirmText="Delete"
+        confirmText={t('confirmDeleteAction')}
         confirmColor="error"
       />
 

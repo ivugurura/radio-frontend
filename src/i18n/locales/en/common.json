@@ -1,0 +1,26 @@
+{
+  "appName": "Reformation Voice Radio",
+  "appShortName": "RRV Radio",
+  "language": "Language",
+  "station": "Station",
+  "selectLanguage": "Select language",
+  "loading": "Loading...",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "save": "Save",
+  "close": "Close",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
+  "enable": "Enable",
+  "disable": "Disable",
+  "yes": "Yes",
+  "no": "No",
+  "error": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Check your connection and try again."
+  },
+  "languageName": {
+    "rw": "Kinyarwanda",
+    "en": "English"
+  }
+}
