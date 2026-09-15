@@ -66,7 +66,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         clearLocalStorage();
       }
     } catch (error: unknown) {
-      // Logout
       console.error('Error validating authentication:', error);
       setState((prev) => ({ ...prev, message: 'invalid token' }));
       clearLocalStorage();

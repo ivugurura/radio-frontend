@@ -79,7 +79,6 @@ export const AudioTable: React.FC<AudioTableProps> = ({
   );
 
   const handleEndPlay = () => {
-    // Auto play next track when current ends
     if (!rows || rows.length === 0) return;
     if (!current) {
       setCurrent(rows[0] as TrackType);
@@ -87,7 +86,6 @@ export const AudioTable: React.FC<AudioTableProps> = ({
     }
     const currentIndex = rows.findIndex((r) => r.id === current.id);
     if (currentIndex === -1 || currentIndex === rows.length - 1) {
-      // not found or last track
       setCurrent(null);
       return;
     }

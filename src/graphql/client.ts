@@ -29,7 +29,6 @@ type CreateApolloClientOptions = {
     initialDelayMs?: number; // default 300
     maxDelayMs?: number; // default 2000
     jitter?: boolean; // default true
-    // Retry on HTTP status
     shouldRetryStatus?: (status: number) => boolean; // default: 5xx or 429
   };
 };
@@ -108,11 +107,6 @@ export function createApolloClient(
     shouldRetryStatus = (status: number) => status === 429 || status >= 500,
   } = networkRetry ?? {};
 
-  // Custom fetch that:
-  // - injects Authorization
-  // - retries on 401/UNAUTHENTICATED with refreshAccessToken
-  // - provides network retry/backoff for transient failures
-  // - surfaces telemetry via onGraphQLError/onNetworkError
   const authAwareFetch: typeof fetch = async (
     input: RequestInfo | URL,
     init?: RequestInit,
@@ -122,10 +116,8 @@ export function createApolloClient(
     ): Promise<Response> => {
       const reqInit: RequestInit = { ...(init ?? {}) };
       const headers = new Headers(reqInit.headers ?? {});
-      // Inject Authorization header if we have a token
       let token = tokenOverride ?? null;
       if (!token) {
-        // undefined means "not provided" -> look it up
         token = lStorage.get();
       }
       if (token) headers.set('Authorization', `RRV ${token}`);
@@ -133,7 +125,6 @@ export function createApolloClient(
       headers.set('Accept-Language', currentLanguageTag());
 
       reqInit.headers = headers;
-      // Credentials handling
       if (includeCookies && !reqInit.credentials) {
         reqInit.credentials = 'include';
       } else if (!reqInit.credentials) {
@@ -143,14 +134,12 @@ export function createApolloClient(
       return fetch(input, reqInit);
     };
 
-    // Network-level retry for transient failures (e.g., DNS hiccups)
     let attempt = 0;
     while (true) {
       attempt++;
       try {
         let res = await makeRequest();
 
-        // If HTTP 401, attempt refresh (if configured) then retry once with new token
         if (res.status === 401 && typeof refreshAccessToken === 'function') {
           const refreshed = await coordinateRefresh(
             refreshAccessToken,
@@ -159,23 +148,18 @@ export function createApolloClient(
           if (refreshed) {
             res = await makeRequest(refreshed);
           } else {
-            // refresh failed -> propagate original 401
             return res;
           }
         }
 
-        // Inspect GraphQL response to optionally refresh/retry on UNAUTHENTICATED
         try {
           const clone = res.clone();
-          // Only parse JSON if content-type hints JSON
           const ct = clone.headers.get('content-type') || '';
           if (ct.includes('application/json')) {
             const body = await clone.json().catch(() => null);
             const errors: GraphQLError[] | undefined = body?.errors;
             if (errors?.length) {
-              // Telemetry callback
               if (onGraphQLError) {
-                // Best-effort operation name: extract from extensions if present
                 const opName = body?.extensions?.operationName as
                   | string
                   | undefined;
@@ -193,20 +177,17 @@ export function createApolloClient(
                   onSignOut,
                 );
                 if (refreshed) {
-                  // Retry once with fresh token
                   return makeRequest(refreshed);
                 } else {
-                  // refresh failed -> let GraphQL error propagate
                   return res;
                 }
               }
             }
           }
         } catch {
-          // Ignore JSON/inspection errors and just return original response
+          // JSON parsing failed or body wasn't GraphQL; fall through with the original response.
         }
 
-        // Use shouldRetryStatus to retry transient HTTP statuses (e.g., 429/5xx)
         if (shouldRetryStatus(res.status) && attempt < maxAttempts) {
           // Honor Retry-After when present (take the larger of backoff vs header)
           const retryAfter = parseRetryAfter(res.headers.get('retry-after'));
@@ -224,16 +205,12 @@ export function createApolloClient(
 
         return res;
       } catch (e) {
-        // Fetch threw before we got a response (network error, CORS, etc.)
+        // Thrown fetch usually has no Response to check shouldRetryStatus against, so treat as transient.
         if (onNetworkError) {
-          // No operation name here (transport-level), so pass undefined
           onNetworkError(e, undefined);
         }
-        // Decide to retry
         if (attempt >= maxAttempts) throw e;
 
-        // If there is a Response with status we can inspect (rare on thrown fetch), we could use shouldRetryStatus
-        // But generally thrown fetch has no Response, so treat as transient and retry
         const delay = computeBackoffDelay(
           attempt,
           initialDelayMs,
@@ -246,7 +223,6 @@ export function createApolloClient(
     }
   };
 
-  // Helper to coordinate refresh across concurrent requests
   async function coordinateRefresh(
     doRefresh: NonNullable<CreateApolloClientOptions['refreshAccessToken']>,
     onSignOutCb?: () => void,
@@ -266,7 +242,6 @@ export function createApolloClient(
       }
     }
 
-    // Wait for the in-flight refresh to complete
     const token = await new Promise<string | null>((resolve) => {
       refreshWaiters.push(resolve);
     });
@@ -276,24 +251,15 @@ export function createApolloClient(
 
   const httpLink = new HttpLink({
     uri: APP_SCHEMA,
-    // Use our custom fetch wrapper
     fetch: authAwareFetch,
-    // credentials handled in wrapper to allow per-request overrides if needed
+    // credentials are set inside authAwareFetch, not here, so per-request overrides still work
   });
 
-  const cache = new InMemoryCache({
-    // Add your typePolicies as needed
-  });
+  const cache = new InMemoryCache();
 
   return new ApolloClient({
     link: httpLink,
     cache,
-    // You can still set default errorPolicy here if you prefer 'all'
-    // defaultOptions: {
-    //   watchQuery: { errorPolicy: 'all' },
-    //   query: { errorPolicy: 'all' },
-    //   mutate: { errorPolicy: 'all' },
-    // },
   });
 }
 

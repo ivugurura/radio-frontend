@@ -135,7 +135,6 @@ type ChatMessageQueryRow = NonNullable<
   ChatMessagesQuery['chatMessages']
 >[number];
 
-// Normalizes a chatMessages GraphQL row into ChatMessagePayload so history and live messages share one shape.
 export const chatMessageFromQueryRow = (
   row: ChatMessageQueryRow,
 ): ChatMessagePayload => ({
@@ -164,9 +163,8 @@ export const chatMessageFromQueryRow = (
   isHidden: row.isHidden ?? false,
 });
 
-// Merges history + live messages (oldest-first, deduped by id) and applies
-// hiddenOverrides to both, since a hide/unhide event may target a message
-// that only exists in history and never passed through the live socket.
+// hiddenOverrides must apply to both lists: a hide/unhide event can target a
+// message that only exists in history and never passed through the live socket.
 export const mergeChatMessages = (
   history: ChatMessagePayload[],
   live: ChatMessagePayload[],

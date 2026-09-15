@@ -26,7 +26,6 @@ export function ApolloAppProvider({
       refreshAccessToken,
       onSignOut,
       includeCookies,
-      // Optional: wire up telemetry/toasts/logging here
       onGraphQLError: (err, opName) => {
         notifier.error(err.message);
         if (process.env.NODE_ENV !== 'production') {

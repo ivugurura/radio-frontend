@@ -158,7 +158,6 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
 
   const startOne = useCallback(
     async (item: UploadItem) => {
-      // avoid double start
       if (item.status !== 'queued' && item.status !== 'error') return;
 
       runningRef.current += 1;
@@ -176,7 +175,6 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
       });
 
       try {
-        // 1) Request upload session
         const req = await requestUpload({
           variables: {
             studioSlug: studioId,
@@ -197,7 +195,6 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
           message: 'Uploading...',
         });
 
-        // 2) PUT chunks (linear append, server returns {received})
         const total = file.size;
         let start = 0;
         const chunkSize = DEFAULT_CHUNK_SIZE;
@@ -239,7 +236,6 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
           });
         }
 
-        // 3) Optional checksum then finalize
         updateItem(id, { status: 'finalizing', message: 'Finalizing...' });
         const checksum = await computeSHA256(file).catch(() => null);
 
@@ -278,7 +274,6 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
   );
 
   const schedule = useCallback(() => {
-    // Start as many queued/error items as allowed by MAX_CONCURRENCY
     if (runningRef.current >= MAX_CONCURRENCY) return;
     const available = MAX_CONCURRENCY - runningRef.current;
 
@@ -289,7 +284,6 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
     nextBatch.forEach((it) => startOne(it));
   }, [startOne]);
 
-  // Auto-scheduler: whenever items or running changes and autoStart enabled, schedule more
   useEffect(() => {
     if (autoStart) schedule();
   }, [items, running, autoStart, schedule]);
@@ -301,7 +295,6 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
 
   const onPauseAll = useCallback(() => {
     setAutoStart(false);
-    // cancel all running
     itemsRef.current.forEach((it) => {
       if (
         (it.status === 'uploading' ||

@@ -121,7 +121,6 @@ export default function AudioManagerPage() {
       ?.map((e) => e?.node)
       .filter((n): n is TrackType => !!n) ?? [];
 
-  // Simulated fetch
   const refresh = async () => {
     await refetch(variables);
     setSnackbar({ open: true, message: t('refreshed'), severity: 'info' });

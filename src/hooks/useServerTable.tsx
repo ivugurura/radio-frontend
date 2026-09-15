@@ -44,7 +44,6 @@ export function useServerTable<
 
   const [selectedIds, setSelectedIds] = useState<Array<string | number>>([]);
 
-  // Debounce search
   const debounceTimer = useRef<number | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
@@ -85,13 +84,11 @@ export function useServerTable<
     }
   }, [fetcher, params]);
 
-  // Fetch on dependency change
   useEffect(() => {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageSize, debouncedSearch, sortBy, sortDir, filters]);
 
-  // Reset selection if data changes
   useEffect(() => {
     setSelectedIds([]);
   }, [rows]);

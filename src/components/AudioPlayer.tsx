@@ -43,7 +43,6 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const [duration, setDuration] = React.useState(0);
   const [seeking, setSeeking] = React.useState(false);
 
-  // Initialize/replace audio on source change
   React.useEffect(() => {
     if (!source?.processedRelPath) return;
     const trackSrc = getTrackUrl(studioId, source.id);

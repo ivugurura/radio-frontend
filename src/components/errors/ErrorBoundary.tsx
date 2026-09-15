@@ -54,7 +54,7 @@ export class ErrorBoundary extends React.PureComponent<
   }
 
   onReloadClick() {
-    window.location.reload(); // hard page reload
+    window.location.reload();
   }
 
   render() {
