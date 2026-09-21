@@ -88,8 +88,10 @@ if (!i18n.isInitialized) {
         escapeValue: false,
       },
       detection: {
-        // Remembered across reload / refresh / reopening the browser.
-        order: ['localStorage', 'navigator', 'htmlTag'],
+        // Only trust an explicit prior choice; otherwise fall back to
+        // DEFAULT_LANGUAGE instead of the browser/OS language.
+        // order: ['localStorage', 'navigator', 'htmlTag']
+        order: ['localStorage'],
         lookupLocalStorage: LANGUAGE_STORAGE_KEY,
         caches: ['localStorage'],
       },
