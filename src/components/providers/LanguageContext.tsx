@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 import {
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
-  STUDIO_BY_LANGUAGE,
+  // STUDIO_BY_LANGUAGE,
   type AppLanguage,
 } from '../../i18n/config';
 
@@ -19,7 +19,8 @@ export interface LanguageContextState {
 
 export const initialLanguageState: LanguageContextState = {
   language: DEFAULT_LANGUAGE,
-  studioId: STUDIO_BY_LANGUAGE[DEFAULT_LANGUAGE],
+  // studioId: STUDIO_BY_LANGUAGE[DEFAULT_LANGUAGE],
+  studioId: 'reformation-rw',
   languages: SUPPORTED_LANGUAGES,
   setLanguage: () => {},
 };

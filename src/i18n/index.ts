@@ -90,8 +90,7 @@ if (!i18n.isInitialized) {
       detection: {
         // Only trust an explicit prior choice; otherwise fall back to
         // DEFAULT_LANGUAGE instead of the browser/OS language.
-        // order: ['localStorage', 'navigator', 'htmlTag']
-        order: ['localStorage'],
+        order: ['localStorage', 'navigator', 'htmlTag'],
         lookupLocalStorage: LANGUAGE_STORAGE_KEY,
         caches: ['localStorage'],
       },

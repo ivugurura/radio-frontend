@@ -6,7 +6,7 @@ import {
   Select,
   type SelectChangeEvent,
 } from '@mui/material';
-import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded';
+import { TranslateRounded as TranslateRoundedIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 
 import { useLanguage } from './providers/LanguageContext';
@@ -43,7 +43,9 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   return (
     <FormControl size={size} sx={{ minWidth: variant === 'short' ? 88 : 140 }}>
-      {withLabel && <InputLabel id="language-selector-label">{label}</InputLabel>}
+      {withLabel && (
+        <InputLabel id="language-selector-label">{label}</InputLabel>
+      )}
       <Select
         labelId="language-selector-label"
         label={withLabel ? label : undefined}

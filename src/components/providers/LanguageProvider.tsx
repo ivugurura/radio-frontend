@@ -5,7 +5,7 @@ import i18n from '../../i18n';
 import {
   LANGUAGE_STORAGE_KEY,
   SUPPORTED_LANGUAGES,
-  STUDIO_BY_LANGUAGE,
+  // STUDIO_BY_LANGUAGE,
   normalizeLanguage,
   type AppLanguage,
 } from '../../i18n/config';
@@ -26,7 +26,7 @@ export const LanguageProvider = ({
   // (falling back to the browser locale) by the time we render.
   const { i18n: i18nInstance } = useTranslation();
 
-  const [language, setLanguageState] = useState<AppLanguage>(() =>
+  const [languageState, setLanguageState] = useState<AppLanguage>(() =>
     normalizeLanguage(i18nInstance.language),
   );
 
@@ -44,8 +44,7 @@ export const LanguageProvider = ({
 
   // Keep local state in sync if the language changes elsewhere (e.g. dev tools).
   useEffect(() => {
-    const handler = (lng: string) =>
-      setLanguageState(normalizeLanguage(lng));
+    const handler = (lng: string) => setLanguageState(normalizeLanguage(lng));
     i18n.on('languageChanged', handler);
     applyDocumentLanguage(normalizeLanguage(i18n.language));
     return () => {
@@ -55,12 +54,14 @@ export const LanguageProvider = ({
 
   const value = useMemo<LanguageContextState>(
     () => ({
-      language,
-      studioId: STUDIO_BY_LANGUAGE[language],
+      language: languageState,
+      // The studio ID is derived from the language, so it updates automatically when the language changes.
+      // studioId: STUDIO_BY_LANGUAGE[language],
+      studioId: 'reformation-rw',
       languages: SUPPORTED_LANGUAGES,
       setLanguage,
     }),
-    [language, setLanguage],
+    [languageState, setLanguage],
   );
 
   return (
