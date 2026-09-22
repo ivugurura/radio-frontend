@@ -243,6 +243,10 @@ export function useRadioStream({
 }: UseRadioStreamParams): UseRadioStreamResult {
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const abortRef = React.useRef<AbortController | null>(null);
+  // Tracks user intent (as opposed to `status`, which reflects the live
+  // connection) so a network drop/reconnect can resume playback without the
+  // user having pressed play again.
+  const shouldBePlayingRef = React.useRef(false);
   const [status, setStatus] = React.useState<RadioStreamStatus>('idle');
   const [errorMessage, setErrorMessage] = React.useState('');
   const [volume, setVolumeState] = React.useState(0.85);
@@ -314,6 +318,7 @@ export function useRadioStream({
   const play = React.useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    shouldBePlayingRef.current = true;
     setErrorMessage('');
     setStatus('buffering');
     // Always (re)connect fresh rather than resuming a stale buffer — this is
@@ -351,6 +356,7 @@ export function useRadioStream({
   const stop = React.useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    shouldBePlayingRef.current = false;
     teardownStream();
     audio.pause();
     audio.removeAttribute('src');
@@ -369,6 +375,35 @@ export function useRadioStream({
   React.useEffect(() => {
     if (autoPlay) play();
   }, [autoPlay, streamUrl, play]);
+
+  // A live MSE fetch doesn't recover on its own from a network change (Wi-Fi
+  // <-> cellular handoff, brief drop/reconnect, etc.) — it just stalls or
+  // errors out. If the user still wants playback, re-buffer and resume as
+  // soon as the network is back, instead of leaving it stuck.
+  React.useEffect(() => {
+    const handleOffline = () => {
+      if (shouldBePlayingRef.current) setStatus('buffering');
+    };
+    const handleNetworkRestored = () => {
+      if (shouldBePlayingRef.current) play();
+    };
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleNetworkRestored);
+
+    // Network Information API: fires on network type changes (e.g. wifi ->
+    // cellular) that may not trigger 'offline'/'online' but still break the
+    // in-flight stream connection. Not supported everywhere, so best-effort.
+    const connection = (navigator as Navigator & { connection?: EventTarget })
+      .connection;
+    connection?.addEventListener('change', handleNetworkRestored);
+
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleNetworkRestored);
+      connection?.removeEventListener('change', handleNetworkRestored);
+    };
+  }, [play]);
 
   const setVolume = React.useCallback((value: number) => {
     setMuted(false);
