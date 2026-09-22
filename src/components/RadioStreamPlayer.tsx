@@ -13,7 +13,6 @@ import { keyframes } from '@emotion/react';
 import {
   PlayArrowRounded as PlayArrowRoundedIcon,
   PauseRounded as PauseRoundedIcon,
-  StopRounded as StopRoundedIcon,
   VolumeUpRounded as VolumeUpRoundedIcon,
   VolumeDownRounded as VolumeDownRoundedIcon,
   VolumeOffRounded as VolumeOffRoundedIcon,
@@ -60,6 +59,29 @@ type Props = {
   showVolumeControl?: boolean;
 };
 
+function getPlaybackIcon(isPlaying: boolean, isBuffering: boolean) {
+  if (isBuffering) return <CircularProgress size={24} />;
+  if (isPlaying) return <PauseRoundedIcon sx={{ fontSize: 24 }} />;
+  return <PlayArrowRoundedIcon sx={{ fontSize: 24 }} />;
+}
+
+function getVolumeIcon(volume: number, muted: boolean) {
+  const effectiveVolume = muted ? 0 : volume;
+  let icon: React.ElementType;
+  if (effectiveVolume === 0) {
+    icon = VolumeOffRoundedIcon;
+  } else if (effectiveVolume < 0.5) {
+    icon = VolumeDownRoundedIcon;
+  } else {
+    icon = VolumeUpRoundedIcon;
+  }
+  return {
+    icon,
+    effectiveVolume,
+    volumePercent: Math.round(effectiveVolume * 100),
+  };
+}
+
 export const RadioStreamPlayer: React.FC<Props> = ({
   variant,
   streamUrl,
@@ -86,17 +108,12 @@ export const RadioStreamPlayer: React.FC<Props> = ({
     setVolume,
     toggleMute,
   } = useRadioStream({ streamUrl, nowUrl, statusUrl, autoPlay });
-
-  const effectiveVolume = muted ? 0 : volume;
-  const VolumeIcon =
-    effectiveVolume === 0
-      ? VolumeOffRoundedIcon
-      : effectiveVolume < 0.5
-        ? VolumeDownRoundedIcon
-        : VolumeUpRoundedIcon;
-  const volumePercent = Math.round(effectiveVolume * 100);
+  const {
+    icon: VolumeIcon,
+    effectiveVolume,
+    volumePercent,
+  } = getVolumeIcon(volume, muted);
   const step = 0.1;
-
   if (variant === 'compact') {
     return (
       <Paper variant="outlined" sx={{ p: 1.5 }}>
@@ -106,7 +123,7 @@ export const RadioStreamPlayer: React.FC<Props> = ({
             onClick={togglePlayback}
             aria-label={isPlaying ? 'Pause radio' : 'Play radio'}
           >
-            {isPlaying ? <PauseRoundedIcon /> : <PlayArrowRoundedIcon />}
+            {getPlaybackIcon(isPlaying, isBuffering)}
           </IconButton>
 
           <Box flex={1} minWidth={0}>
@@ -204,11 +221,7 @@ export const RadioStreamPlayer: React.FC<Props> = ({
               backdropFilter: 'blur(6px)',
             }}
           >
-            {isPlaying ? (
-              <StopRoundedIcon sx={{ fontSize: 26 }} />
-            ) : (
-              <PlayArrowRoundedIcon sx={{ fontSize: 28, ml: 0.25 }} />
-            )}
+            {getPlaybackIcon(isPlaying, isBuffering)}
           </Box>
         </Stack>
       </IconButton>
@@ -325,15 +338,6 @@ export const RadioStreamPlayer: React.FC<Props> = ({
         </Stack>
       )}
 
-      {isBuffering && (
-        <Stack direction="row" spacing={1} alignItems="center">
-          <CircularProgress size={14} thickness={5} />
-          <Typography variant="caption" color="text.secondary">
-            Buffering live stream...
-          </Typography>
-        </Stack>
-      )}
-
       {currentTrack && (
         <Typography
           variant="h6"
@@ -344,13 +348,28 @@ export const RadioStreamPlayer: React.FC<Props> = ({
         </Typography>
       )}
       {nextTrack && (
-        <Typography
-          variant="body1"
-          sx={{ color: '#5f7598', fontWeight: 400 }}
-          textAlign="center"
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
         >
-          {nextTrack}
-        </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: '#5f7598', fontWeight: 400 }}
+            textAlign="center"
+          >
+            {nextTrack}
+          </Typography>
+          <Typography
+            variant="caption"
+            color="rgba(95, 117, 152, 0.6)"
+            sx={{ ml: 0.5 }}
+          >
+            (next)
+          </Typography>
+        </Box>
       )}
       {metadataError && (
         <Typography variant="caption" color="error.main">
