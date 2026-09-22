@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Button,
-  Container,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
-import { MicOffRounded as MicOffRoundedIcon } from '@mui/icons-material';
+import { Box, Container, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { STUDIO_URL } from '@libs/constants';
 import { useStudioId } from '@components/providers';
