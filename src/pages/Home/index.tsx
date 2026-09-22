@@ -1,5 +1,12 @@
 import React from 'react';
-import { Box, Button, Container, Paper, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { MicOffRounded as MicOffRoundedIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { STUDIO_URL } from '@libs/constants';
@@ -38,47 +45,8 @@ const HomePage: React.FC = () => {
             nowUrl={nowUrl}
             statusUrl={statusUrl}
             title={t('stationTitle')}
+            showVolumeControl
           />
-
-          <Paper
-            elevation={0}
-            sx={{
-              width: '100%',
-              p: 2,
-              borderRadius: 3,
-              border: '1px solid #d9e2ee',
-              background: '#fff',
-            }}
-          >
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <MicOffRoundedIcon sx={{ color: '#8191a4' }} />
-                <Box>
-                  <Typography variant="h6" sx={{ lineHeight: 1.2 }}>
-                    {t('voiceControl')}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    {t('voiceControlStatus.disabled')}
-                  </Typography>
-                </Box>
-              </Stack>
-              <Button
-                variant="contained"
-                disabled
-                sx={{
-                  minWidth: 92,
-                  backgroundColor: '#becbda',
-                  color: '#2e3f57',
-                }}
-              >
-                {t('enable')}
-              </Button>
-            </Stack>
-          </Paper>
         </Stack>
       </Container>
       <ListenerChat />

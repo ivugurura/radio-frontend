@@ -15,8 +15,11 @@ import {
   PauseRounded as PauseRoundedIcon,
   StopRounded as StopRoundedIcon,
   VolumeUpRounded as VolumeUpRoundedIcon,
+  VolumeDownRounded as VolumeDownRoundedIcon,
   VolumeOffRounded as VolumeOffRoundedIcon,
   RefreshRounded as RefreshRoundedIcon,
+  AddRounded as AddRoundedIcon,
+  RemoveRounded as RemoveRoundedIcon,
 } from '@mui/icons-material';
 import { useRadioStream } from '../hooks/useRadioStream';
 
@@ -84,6 +87,16 @@ export const RadioStreamPlayer: React.FC<Props> = ({
     toggleMute,
   } = useRadioStream({ streamUrl, nowUrl, statusUrl, autoPlay });
 
+  const effectiveVolume = muted ? 0 : volume;
+  const VolumeIcon =
+    effectiveVolume === 0
+      ? VolumeOffRoundedIcon
+      : effectiveVolume < 0.5
+        ? VolumeDownRoundedIcon
+        : VolumeUpRoundedIcon;
+  const volumePercent = Math.round(effectiveVolume * 100);
+  const step = 0.1;
+
   if (variant === 'compact') {
     return (
       <Paper variant="outlined" sx={{ p: 1.5 }}>
@@ -138,6 +151,9 @@ export const RadioStreamPlayer: React.FC<Props> = ({
 
   return (
     <Stack spacing={1.5} alignItems="center">
+      <Typography variant="h5" fontWeight={500} textAlign="center">
+        {title}
+      </Typography>
       <IconButton
         onClick={togglePlayback}
         aria-label={isPlaying ? 'Stop radio' : 'Start radio'}
@@ -197,10 +213,6 @@ export const RadioStreamPlayer: React.FC<Props> = ({
         </Stack>
       </IconButton>
 
-      <Typography variant="h5" fontWeight={500} textAlign="center">
-        {title}
-      </Typography>
-
       <Stack
         direction="row"
         spacing={0.75}
@@ -237,6 +249,82 @@ export const RadioStreamPlayer: React.FC<Props> = ({
         </Typography>
       </Stack>
 
+      {showVolumeControl && (
+        <Stack
+          direction="row"
+          spacing={0.5}
+          alignItems="center"
+          sx={{
+            width: '100%',
+            maxWidth: 260,
+            px: 1.5,
+            py: 0.75,
+            borderRadius: 999,
+            backgroundColor: 'rgba(108, 130, 163, 0.08)',
+          }}
+        >
+          <Tooltip title={muted ? 'Unmute' : 'Mute'}>
+            <IconButton
+              size="small"
+              onClick={toggleMute}
+              aria-label={muted ? 'Unmute' : 'Mute'}
+              sx={{ color: '#5f7598' }}
+            >
+              <VolumeIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Decrease volume">
+            <span>
+              <IconButton
+                size="small"
+                onClick={() => setVolume(effectiveVolume - step)}
+                disabled={effectiveVolume <= 0}
+                aria-label="Decrease volume"
+                sx={{ color: '#5f7598' }}
+              >
+                <RemoveRoundedIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Slider
+            size="small"
+            value={volumePercent}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(_, v) => {
+              const n = Array.isArray(v) ? v[0] : v;
+              setVolume(n / 100);
+            }}
+            aria-label="Volume"
+            sx={{ color: '#53a9e7' }}
+          />
+
+          <Tooltip title="Increase volume">
+            <span>
+              <IconButton
+                size="small"
+                onClick={() => setVolume(effectiveVolume + step)}
+                disabled={effectiveVolume >= 1}
+                aria-label="Increase volume"
+                sx={{ color: '#5f7598' }}
+              >
+                <AddRoundedIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Typography
+            variant="caption"
+            sx={{ color: '#8191a4', width: 30, textAlign: 'right' }}
+          >
+            {volumePercent}%
+          </Typography>
+        </Stack>
+      )}
+
       {isBuffering && (
         <Stack direction="row" spacing={1} alignItems="center">
           <CircularProgress size={14} thickness={5} />
@@ -261,7 +349,7 @@ export const RadioStreamPlayer: React.FC<Props> = ({
           sx={{ color: '#5f7598', fontWeight: 400 }}
           textAlign="center"
         >
-          Next: {nextTrack}
+          {nextTrack}
         </Typography>
       )}
       {metadataError && (
