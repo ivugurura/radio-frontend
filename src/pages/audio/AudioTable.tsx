@@ -542,7 +542,7 @@ export const AudioTable: React.FC<AudioTableProps> = ({
         rowsPerPage={rowsPerPage}
         onPageChange={(_, p) => onPageChange(p)}
         onRowsPerPageChange={(e) =>
-          onRowsPerPageChange(parseInt(e.target.value, 10))
+          onRowsPerPageChange(Number.parseInt(e.target.value, 10))
         }
         rowsPerPageOptions={[10, 25, 50]}
         labelRowsPerPage={t('rowsPerPage')}

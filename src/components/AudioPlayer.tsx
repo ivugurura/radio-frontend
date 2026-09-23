@@ -155,7 +155,9 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           setFailed(true);
           onPlayingChange(false);
         }}
-      />
+      >
+        <track kind="captions" />
+      </audio>
 
       <Box
         sx={{
