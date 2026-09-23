@@ -1,30 +1,41 @@
 import * as React from 'react';
 import {
+  Alert,
   Box,
   Button,
-  Chip,
+  CircularProgress,
+  Collapse,
   Container,
-  Divider,
+  IconButton,
   InputAdornment,
+  LinearProgress,
+  Paper,
   Snackbar,
   Stack,
   TextField,
-  Toolbar,
+  Tooltip,
   Typography,
-  Alert,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
+import { alpha } from '@mui/material/styles';
+import { NetworkStatus } from '@apollo/client';
+import {
+  CloudUploadOutlined as CloudUploadOutlinedIcon,
+  DeleteOutlineRounded as DeleteOutlineRoundedIcon,
+  RefreshRounded as RefreshRoundedIcon,
+  SearchRounded as SearchRoundedIcon,
+  CloseRounded as CloseRoundedIcon,
+} from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { AudioTable } from './AudioTable';
-import { useTracksQuery } from '@graphql/hooks';
+import { IN_PROGRESS_STATES, isPlayable } from '@libs/tracks';
+import { useDeleteTrackMutation, useTracksQuery } from '@graphql/hooks';
 import { useStudioId } from '@components/providers';
+import { AudioPlayer } from '@components/AudioPlayer';
 import type { TracksQueryVariables, TrackType } from '@graphql/graphql';
 import ConfirmDialog from './ConfirmDialog';
-import type { Audio } from './types';
 import { UploadForm } from './UploadForm';
+
+const POLL_INTERVAL_MS = 3000;
 
 function useDebounced<T>(value: T, delay = 400): T {
   const [v, setV] = React.useState(value);
@@ -37,210 +48,419 @@ function useDebounced<T>(value: T, delay = 400): T {
   return v;
 }
 
+/**
+ * The tracks connection uses graphene's offset cursors ("arrayconnection:<n>"),
+ * so the cursor for any page can be derived instead of walking pages one by one.
+ */
+const cursorForPage = (page: number, pageSize: number) =>
+  page <= 0 ? null : btoa(`arrayconnection:${page * pageSize - 1}`);
+
+type SnackbarState = {
+  open: boolean;
+  message: string;
+  severity: 'success' | 'info' | 'warning' | 'error';
+};
+
 export default function AudioManagerPage() {
   const { t } = useTranslation('audio');
   const studioId = useStudioId();
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [after, setAfter] = React.useState<string | null>(null);
-  const [audios, setAudios] = React.useState<Audio[]>([]);
+  const [page, setPage] = React.useState(0);
   const [selected, setSelected] = React.useState<string[]>([]);
   const [search, setSearch] = React.useState('');
   const [createOpen, setCreateOpen] = React.useState(false);
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = React.useState(false);
-  const [snackbar, setSnackbar] = React.useState<{
-    open: boolean;
-    message: string;
-    severity?: 'success' | 'info' | 'warning' | 'error';
-  }>({
+  const [pendingDelete, setPendingDelete] = React.useState<TrackType[]>([]);
+  const [deleting, setDeleting] = React.useState(false);
+  const [nowPlaying, setNowPlaying] = React.useState<TrackType | null>(null);
+  const [playing, setPlaying] = React.useState(false);
+  const [snackbar, setSnackbar] = React.useState<SnackbarState>({
     open: false,
     message: '',
     severity: 'success',
   });
 
-  const searchDebounced = useDebounced(search, 400);
+  const notify = (message: string, severity: SnackbarState['severity']) =>
+    setSnackbar({ open: true, message, severity });
+
+  const searchDebounced = useDebounced(search.trim(), 350);
 
   const variables = React.useMemo<TracksQueryVariables>(
     () => ({
       studioSlug: studioId,
       search: searchDebounced || null,
       first: rowsPerPage,
-      after,
+      after: cursorForPage(page, rowsPerPage),
     }),
-    [studioId, searchDebounced, rowsPerPage, after],
+    [studioId, searchDebounced, rowsPerPage, page],
   );
 
-  const { data, loading, refetch, fetchMore } = useTracksQuery({
+  const {
+    data,
+    previousData,
+    loading,
+    networkStatus,
+    error,
+    refetch,
+    startPolling,
+    stopPolling,
+  } = useTracksQuery({
     variables,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: 'cache-and-network',
   });
 
-  const endCursor = data?.tracks?.pageInfo?.endCursor ?? null;
-  const hasNextPage = data?.tracks?.pageInfo?.hasNextPage ?? false;
-  const totalCount = data?.tracks?.totalCount ?? 0;
-  const rows =
-    data?.tracks?.edges
-      ?.map((e) => e?.node)
-      .filter((n): n is TrackType => !!n) ?? [];
+  const [deleteTrack] = useDeleteTrackMutation();
 
-  const refresh = async () => {
-    await refetch(variables);
-    setSnackbar({ open: true, message: t('refreshed'), severity: 'info' });
-  };
-
-  const handleChangePage = React.useCallback(
-    async (newPage: number) => {
-      if (newPage === 0) {
-        setAfter(null);
-        await refetch({ ...variables, after: null });
-        return;
-      }
-
-      if (hasNextPage && endCursor) {
-        setAfter(endCursor);
-        await fetchMore({ variables: { ...variables, after: endCursor } });
-      }
-    },
-    [endCursor, hasNextPage, variables, fetchMore, refetch],
+  // Keep showing the previous page while the next one loads, instead of flashing skeletons.
+  const tracks = (data ?? previousData)?.tracks;
+  const totalCount = tracks?.totalCount ?? 0;
+  const rows = React.useMemo(
+    () =>
+      tracks?.edges?.map((e) => e?.node).filter((n): n is TrackType => !!n) ??
+      [],
+    [tracks],
   );
 
-  const handleRowsPerPageChange = React.useCallback(
-    async (nextRows: number) => {
-      setRowsPerPage(nextRows);
-      setAfter(null);
-      await refetch({
-        ...variables,
-        first: nextRows,
-        after: null,
-      });
-    },
-    [variables, refetch],
-  );
+  const inProgressCount = rows.filter((r) =>
+    IN_PROGRESS_STATES.includes(r.state),
+  ).length;
 
-  const handleBulkDelete = () => {
-    if (selected.length === 0) return;
-    setConfirmDeleteOpen(true);
+  // Uploads are processed asynchronously by a worker; poll until every visible
+  // track has left the uploading/processing states.
+  React.useEffect(() => {
+    if (inProgressCount === 0) return;
+    startPolling(POLL_INTERVAL_MS);
+    return () => stopPolling();
+  }, [inProgressCount, startPolling, stopPolling]);
+
+  // If the current page no longer exists (deletions, shrinking results), step back.
+  const lastPage = Math.max(0, Math.ceil(totalCount / rowsPerPage) - 1);
+  if (data && page > lastPage) {
+    setPage(lastPage);
+  }
+
+  const backgroundFetching =
+    loading && networkStatus !== NetworkStatus.poll && rows.length > 0;
+  const searching =
+    search.trim() !== searchDebounced || (loading && !!searchDebounced);
+
+  const refreshTracks = React.useCallback(() => {
+    void refetch();
+  }, [refetch]);
+
+  const handleRefresh = async () => {
+    await refetch();
+    notify(t('refreshed'), 'info');
   };
 
-  const confirmDelete = () => {
-    setAudios((prev) => prev.filter((a) => !selected.includes(a.id)));
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(0);
     setSelected([]);
-    setConfirmDeleteOpen(false);
-    setSnackbar({
-      open: true,
-      message: t('audioDeleted'),
-      severity: 'success',
-    });
+  };
+
+  const handlePageChange = (next: number) => {
+    setPage(next);
+    setSelected([]);
+  };
+
+  const handleRowsPerPageChange = (next: number) => {
+    setRowsPerPage(next);
+    setPage(0);
+    setSelected([]);
+  };
+
+  // --- Playback -------------------------------------------------------------
+
+  const playable = rows.filter(isPlayable);
+  const playIndex = nowPlaying
+    ? playable.findIndex((r) => r.id === nowPlaying.id)
+    : -1;
+  const nextTrack = playIndex >= 0 ? playable[playIndex + 1] : undefined;
+  const previousTrack = playIndex > 0 ? playable[playIndex - 1] : undefined;
+
+  const handlePlay = (track: TrackType) => {
+    if (nowPlaying?.id === track.id) {
+      setPlaying((p) => !p);
+      return;
+    }
+    setNowPlaying(track);
+    setPlaying(true);
+  };
+
+  const playTrack = (track?: TrackType) => {
+    if (!track) return;
+    setNowPlaying(track);
+    setPlaying(true);
+  };
+
+  const handleEnded = () => {
+    if (nextTrack) playTrack(nextTrack);
+    else setPlaying(false);
+  };
+
+  const closePlayer = () => {
+    setPlaying(false);
+    setNowPlaying(null);
+  };
+
+  // --- Deletion -------------------------------------------------------------
+
+  const selectedTracks = rows.filter((r) => selected.includes(r.id));
+
+  const confirmDelete = async () => {
+    const targets = pendingDelete;
+    if (deleting || targets.length === 0) return;
+    setDeleting(true);
+    const results = await Promise.allSettled(
+      targets.map((tr) => deleteTrack({ variables: { trackId: tr.id } })),
+    );
+    setDeleting(false);
+    setPendingDelete([]);
+
+    const failed = results.filter(
+      (r) => r.status === 'rejected' || !r.value.data?.deleteTrack?.ok,
+    ).length;
+    const deletedIds = new Set(targets.map((tr) => tr.id));
+
+    setSelected((prev) => prev.filter((id) => !deletedIds.has(id)));
+    if (nowPlaying && deletedIds.has(nowPlaying.id)) closePlayer();
+    await refetch();
+
+    if (failed > 0) notify(t('deleteFailed', { count: failed }), 'error');
+    else notify(t('audioDeleted', { count: targets.length }), 'success');
   };
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
+      {/* Header */}
       <Stack
-        direction="row"
-        alignItems="center"
+        direction={{ xs: 'column', sm: 'row' }}
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
         justifyContent="space-between"
-        mb={2}
+        spacing={2}
+        mb={3}
       >
-        <Stack direction="row" alignItems="baseline" spacing={1}>
+        <Box>
           <Typography variant="h5" fontWeight={700}>
             {t('title')}
           </Typography>
-          <Chip
-            label={t('totalCount', { count: totalCount || audios.length })}
-            size="small"
-          />
-        </Stack>
+          <Typography variant="body2" color="text.secondary">
+            {t('subtitle', { count: totalCount })}
+          </Typography>
+        </Box>
         <Stack direction="row" spacing={1}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={() => void refresh()}
-            disabled={loading}
-          >
-            {t('refresh')}
-          </Button>
+          <Tooltip title={t('refresh')}>
+            <span>
+              <IconButton
+                onClick={() => void handleRefresh()}
+                disabled={loading && networkStatus !== NetworkStatus.poll}
+                sx={{
+                  border: 1,
+                  borderColor: 'divider',
+                  bgcolor: 'background.paper',
+                }}
+              >
+                <RefreshRoundedIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
           <Button
             variant="contained"
-            startIcon={<AddIcon />}
+            startIcon={<CloudUploadOutlinedIcon />}
             onClick={() => setCreateOpen(true)}
+            sx={{ borderRadius: 2, px: 2.5 }}
           >
             {t('newAudio')}
           </Button>
         </Stack>
       </Stack>
 
-      <Toolbar disableGutters sx={{ mb: 1 }}>
-        <TextField
-          size="small"
-          placeholder={t('search')}
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setAfter(null);
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ width: 380, maxWidth: '100%' }}
-        />
-        <Box sx={{ flex: 1 }} />
-        <Button
-          color="error"
-          startIcon={<DeleteOutlineIcon />}
-          disabled={selected.length === 0}
-          onClick={handleBulkDelete}
+      <Collapse in={inProgressCount > 0} unmountOnExit>
+        <Alert
+          severity="info"
+          icon={<CircularProgress size={18} thickness={5} />}
+          sx={{ mb: 2, borderRadius: 2 }}
         >
-          {t('deleteSelected', { count: selected.length })}
-        </Button>
-      </Toolbar>
+          {t('processingHint', { count: inProgressCount })}
+        </Alert>
+      </Collapse>
 
-      <Divider sx={{ mb: 2 }} />
+      {error && (
+        <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+          {error.message}
+        </Alert>
+      )}
 
-      <AudioTable
-        rows={rows}
-        loading={loading}
-        totalCount={totalCount}
-        hasNextPage={hasNextPage}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={(nextRows) => {
-          void handleRowsPerPageChange(nextRows);
+      <Paper
+        variant="outlined"
+        sx={{ borderRadius: 3, overflow: 'hidden', position: 'relative' }}
+      >
+        {/* Toolbar: search, or bulk actions while rows are selected */}
+        <Box
+          sx={(theme) => ({
+            px: 2,
+            py: 1.5,
+            minHeight: 64,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            flexWrap: 'wrap',
+            borderBottom: 1,
+            borderColor: 'divider',
+            transition: 'background-color 150ms',
+            ...(selected.length > 0 && {
+              bgcolor: alpha(theme.palette.primary.main, 0.08),
+            }),
+          })}
+        >
+          {selected.length > 0 ? (
+            <>
+              <Typography variant="subtitle2" color="primary" sx={{ flex: 1 }}>
+                {t('selected', { count: selected.length })}
+              </Typography>
+              <Button size="small" onClick={() => setSelected([])}>
+                {t('clearSelection')}
+              </Button>
+              <Button
+                size="small"
+                variant="contained"
+                color="error"
+                disableElevation
+                startIcon={<DeleteOutlineRoundedIcon />}
+                onClick={() => setPendingDelete(selectedTracks)}
+              >
+                {t('delete')}
+              </Button>
+            </>
+          ) : (
+            <>
+              <TextField
+                size="small"
+                placeholder={t('search')}
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') handleSearchChange('');
+                }}
+                sx={{
+                  flex: 1,
+                  maxWidth: { sm: 420 },
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    bgcolor: 'grey.50',
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        {searching ? (
+                          <CircularProgress size={18} thickness={5} />
+                        ) : (
+                          <SearchRoundedIcon fontSize="small" color="action" />
+                        )}
+                      </InputAdornment>
+                    ),
+                    endAdornment: search ? (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          edge="end"
+                          aria-label={t('clearSearch')}
+                          onClick={() => handleSearchChange('')}
+                        >
+                          <CloseRoundedIcon fontSize="small" />
+                        </IconButton>
+                      </InputAdornment>
+                    ) : null,
+                  },
+                }}
+              />
+              {searchDebounced && !searching && (
+                <Typography variant="body2" color="text.secondary">
+                  {t('resultsFor', {
+                    count: totalCount,
+                    query: searchDebounced,
+                  })}
+                </Typography>
+              )}
+            </>
+          )}
+        </Box>
+
+        <Box sx={{ height: 2 }}>
+          {backgroundFetching && <LinearProgress sx={{ height: 2 }} />}
+        </Box>
+
+        <AudioTable
+          rows={rows}
+          loading={loading}
+          search={searchDebounced}
+          selected={selected}
+          onSelectedChange={setSelected}
+          currentId={nowPlaying?.id ?? null}
+          playing={playing}
+          onPlay={handlePlay}
+          onDelete={setPendingDelete}
+          onUploadClick={() => setCreateOpen(true)}
+          page={Math.min(page, lastPage)}
+          rowsPerPage={rowsPerPage}
+          totalCount={totalCount}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleRowsPerPageChange}
+        />
+      </Paper>
+
+      {nowPlaying && (
+        <AudioPlayer
+          track={nowPlaying}
+          playing={playing}
+          onPlayingChange={setPlaying}
+          onEnded={handleEnded}
+          onNext={() => playTrack(nextTrack)}
+          onPrevious={() => playTrack(previousTrack)}
+          hasNext={!!nextTrack}
+          hasPrevious={!!previousTrack}
+          onClose={closePlayer}
+        />
+      )}
+
+      <UploadForm
+        open={createOpen}
+        onClose={() => {
+          setCreateOpen(false);
+          refreshTracks();
         }}
-        onPageChange={(newPage) => {
-          void handleChangePage(newPage);
-        }}
-        onRefresh={() => {
-          void refresh();
-        }}
+        onTracksChanged={refreshTracks}
       />
 
-      <UploadForm open={createOpen} onClose={() => setCreateOpen(false)} />
-
       <ConfirmDialog
-        open={confirmDeleteOpen}
-        onClose={() => setConfirmDeleteOpen(false)}
-        onConfirm={confirmDelete}
-        title={t('confirmDeleteTitle')}
+        open={pendingDelete.length > 0}
+        onClose={() => !deleting && setPendingDelete([])}
+        onConfirm={() => void confirmDelete()}
+        title={t('confirmDeleteTitle', { count: pendingDelete.length })}
         message={
           <Alert severity="warning" icon={false} sx={{ mb: 0 }}>
-            {t('confirmDeleteBody', { count: selected.length })}
+            {pendingDelete.length === 1
+              ? t('confirmDeleteOne', { title: pendingDelete[0].title })
+              : t('confirmDeleteBody', { count: pendingDelete.length })}
           </Alert>
         }
-        confirmText={t('confirmDeleteAction')}
+        confirmText={deleting ? t('deleting') : t('confirmDeleteAction')}
+        cancelText={t('cancel')}
         confirmColor="error"
       />
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={2200}
+        autoHideDuration={2500}
         onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert
-          severity={snackbar.severity || 'success'}
+          severity={snackbar.severity}
+          variant="filled"
           onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
           sx={{ width: '100%' }}
         >

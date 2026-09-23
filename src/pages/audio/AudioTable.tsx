@@ -1,7 +1,12 @@
+import React from 'react';
 import {
   Box,
+  Button,
+  Checkbox,
+  Chip,
+  CircularProgress,
   IconButton,
-  Paper,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -10,155 +15,507 @@ import {
   TablePagination,
   TableRow,
   Tooltip,
+  Typography,
 } from '@mui/material';
-import { Delete as DeleteIcon } from '@mui/icons-material';
-
-import React, { useCallback } from 'react';
-import { useDeleteTrackMutation } from '@graphql/hooks';
-import type { TrackType } from '@graphql/graphql';
-import { AudioPlayer } from '@components/AudioPlayer';
+import { alpha } from '@mui/material/styles';
+import { keyframes } from '@mui/system';
+import {
+  PlayArrowRounded as PlayArrowRoundedIcon,
+  PauseRounded as PauseRoundedIcon,
+  MusicNoteRounded as MusicNoteRoundedIcon,
+  ErrorOutlineRounded as ErrorOutlineRoundedIcon,
+  DeleteOutlineRounded as DeleteOutlineRoundedIcon,
+  LibraryMusicOutlined as LibraryMusicOutlinedIcon,
+  SearchOffRounded as SearchOffRoundedIcon,
+  CloudUploadOutlined as CloudUploadOutlinedIcon,
+} from '@mui/icons-material';
+import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
+import type { MediasTrackStateChoices, TrackType } from '@graphql/graphql';
+import { IN_PROGRESS_STATES, formatTime, isPlayable } from '@libs/tracks';
 
 export type AudioTableProps = {
   rows: TrackType[];
   loading: boolean;
-  totalCount: number;
-  hasNextPage: boolean;
+  search: string;
+  selected: string[];
+  onSelectedChange: (ids: string[]) => void;
+  currentId: string | null;
+  playing: boolean;
+  onPlay: (track: TrackType) => void;
+  onDelete: (tracks: TrackType[]) => void;
+  onUploadClick: () => void;
+  page: number;
   rowsPerPage: number;
+  totalCount: number;
+  onPageChange: (page: number) => void;
   onRowsPerPageChange: (rows: number) => void;
-  onPageChange: (newPage: number) => void;
-  onRefresh: () => void;
 };
 
-function secondsToClock(n?: number | null) {
-  if (!n || n <= 0) return '—';
-  const m = Math.floor(n / 60);
-  const s = Math.round(n % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
+const bounce = keyframes`
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+`;
+
+const PlayingBars: React.FC = () => (
+  <Box
+    aria-hidden
+    sx={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: 14 }}
+  >
+    {[0, 0.2, 0.4].map((delay) => (
+      <Box
+        key={delay}
+        sx={{
+          width: 3,
+          height: '100%',
+          borderRadius: 1,
+          bgcolor: 'currentColor',
+          transformOrigin: 'bottom',
+          animation: `${bounce} 0.9s ease-in-out ${delay}s infinite`,
+        }}
+      />
+    ))}
+  </Box>
+);
+
+const STATE_COLOR: Record<
+  MediasTrackStateChoices,
+  'success' | 'info' | 'error' | 'default'
+> = {
+  READY: 'success',
+  UPLOADING: 'info',
+  PENDING: 'info',
+  PROCESSING: 'info',
+  FAILED: 'error',
+  ARCHIVED: 'default',
+};
+
+const StateChip: React.FC<{ state: MediasTrackStateChoices }> = ({ state }) => {
+  const { t } = useTranslation('audio');
+  const busy = IN_PROGRESS_STATES.includes(state);
+  return (
+    <Chip
+      size="small"
+      variant={state === 'READY' ? 'outlined' : 'filled'}
+      color={STATE_COLOR[state] ?? 'default'}
+      label={t(`states.${state}`, { defaultValue: state })}
+      icon={
+        busy ? (
+          <CircularProgress size={10} thickness={6} color="inherit" />
+        ) : undefined
+      }
+      sx={{
+        fontWeight: 500,
+        ...(busy && {
+          bgcolor: (th) => alpha(th.palette.info.main, 0.12),
+          color: 'info.dark',
+        }),
+        ...(state === 'FAILED' && {
+          bgcolor: (th) => alpha(th.palette.error.main, 0.12),
+          color: 'error.dark',
+        }),
+        '& .MuiChip-icon': { ml: 1 },
+      }}
+    />
+  );
+};
+
+/** Artwork tile in the title cell: play/pause affordance, playing bars or state icon. */
+const TrackTile: React.FC<{
+  track: TrackType;
+  isCurrent: boolean;
+  playing: boolean;
+}> = ({ track, isCurrent, playing }) => {
+  const playable = isPlayable(track);
+  const failed = track.state === 'FAILED';
+  const idle = isCurrent ? (
+    playing ? (
+      <PlayingBars />
+    ) : (
+      <PauseRoundedIcon fontSize="small" />
+    )
+  ) : failed ? (
+    <ErrorOutlineRoundedIcon fontSize="small" />
+  ) : IN_PROGRESS_STATES.includes(track.state) ? (
+    <CircularProgress size={16} thickness={5} color="inherit" />
+  ) : (
+    <MusicNoteRoundedIcon fontSize="small" />
+  );
+
+  return (
+    <Box
+      className="track-tile"
+      sx={(theme) => ({
+        width: 40,
+        height: 40,
+        flexShrink: 0,
+        borderRadius: 1.5,
+        display: 'grid',
+        placeItems: 'center',
+        transition: 'all 150ms',
+        color: isCurrent
+          ? theme.palette.primary.contrastText
+          : failed
+            ? theme.palette.error.main
+            : theme.palette.primary.main,
+        bgcolor: isCurrent
+          ? theme.palette.primary.main
+          : failed
+            ? alpha(theme.palette.error.main, 0.1)
+            : alpha(theme.palette.primary.main, 0.08),
+        '& .hover-icon': { display: 'none' },
+        ...(playable && {
+          'tr:hover &': {
+            bgcolor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+          },
+          'tr:hover & .idle-icon': { display: 'none' },
+          'tr:hover & .hover-icon': { display: 'grid' },
+        }),
+      })}
+    >
+      <Box className="idle-icon" sx={{ display: 'grid' }}>
+        {idle}
+      </Box>
+      <Box className="hover-icon" sx={{ placeItems: 'center' }}>
+        {isCurrent && playing ? (
+          <PauseRoundedIcon fontSize="small" />
+        ) : (
+          <PlayArrowRoundedIcon fontSize="small" />
+        )}
+      </Box>
+    </Box>
+  );
+};
+
+const hideBelow = (bp: 'sm' | 'md' | 'lg') => ({
+  display: { xs: 'none', [bp]: 'table-cell' },
+});
+
+const EmptyState: React.FC<{ search: string; onUploadClick: () => void }> = ({
+  search,
+  onUploadClick,
+}) => {
+  const { t } = useTranslation('audio');
+  const Icon = search ? SearchOffRoundedIcon : LibraryMusicOutlinedIcon;
+  return (
+    <Box sx={{ py: 8, px: 2, textAlign: 'center' }}>
+      <Box
+        sx={(theme) => ({
+          width: 64,
+          height: 64,
+          mx: 'auto',
+          mb: 2,
+          borderRadius: '50%',
+          display: 'grid',
+          placeItems: 'center',
+          color: 'primary.main',
+          bgcolor: alpha(theme.palette.primary.main, 0.08),
+        })}
+      >
+        <Icon fontSize="large" />
+      </Box>
+      <Typography variant="subtitle1" fontWeight={600}>
+        {search ? t('noResultsTitle') : t('emptyTitle')}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+        {search ? t('noResultsBody', { query: search }) : t('emptyBody')}
+      </Typography>
+      {!search && (
+        <Button
+          variant="contained"
+          startIcon={<CloudUploadOutlinedIcon />}
+          onClick={onUploadClick}
+          sx={{ mt: 2.5 }}
+        >
+          {t('newAudio')}
+        </Button>
+      )}
+    </Box>
+  );
+};
 
 export const AudioTable: React.FC<AudioTableProps> = ({
   rows,
   loading,
-  totalCount,
-  hasNextPage,
+  search,
+  selected,
+  onSelectedChange,
+  currentId,
+  playing,
+  onPlay,
+  onDelete,
+  onUploadClick,
+  page,
   rowsPerPage,
-  onRowsPerPageChange,
+  totalCount,
   onPageChange,
-  onRefresh,
+  onRowsPerPageChange,
 }) => {
-  const [current, setCurrent] = React.useState<TrackType | null>(null);
+  const { t } = useTranslation('audio');
+  const pageIds = rows.map((r) => r.id);
+  const selectedOnPage = pageIds.filter((id) => selected.includes(id));
+  const allSelected = rows.length > 0 && selectedOnPage.length === rows.length;
 
-  const [deleteTrack, { loading: deleting }] = useDeleteTrackMutation({
-    onError: () => {},
-  });
+  const toggleAll = () =>
+    onSelectedChange(
+      allSelected
+        ? selected.filter((id) => !pageIds.includes(id))
+        : Array.from(new Set([...selected, ...pageIds])),
+    );
 
-  const handleChangePage = useCallback(
-    (_: unknown, newPage: number) => {
-      onPageChange(newPage);
-    },
-    [onPageChange],
-  );
+  const toggleOne = (id: string) =>
+    onSelectedChange(
+      selected.includes(id)
+        ? selected.filter((x) => x !== id)
+        : [...selected, id],
+    );
 
-  const handleChangeRowsPerPage = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onRowsPerPageChange(parseInt(e.target.value, 10));
-    },
-    [onRowsPerPageChange],
-  );
+  const showSkeleton = loading && rows.length === 0;
 
-  const onDelete = useCallback(
-    async (id: string) => {
-      const confirm = window.confirm(
-        'Delete this track and remove files from disk?',
-      );
-      if (!confirm) return;
-      await deleteTrack({ variables: { trackId: id } });
-      onRefresh();
-    },
-    [deleteTrack, onRefresh],
-  );
-
-  const handleEndPlay = () => {
-    if (!rows || rows.length === 0) return;
-    if (!current) {
-      setCurrent(rows[0] as TrackType);
-      return;
-    }
-    const currentIndex = rows.findIndex((r) => r.id === current.id);
-    if (currentIndex === -1 || currentIndex === rows.length - 1) {
-      setCurrent(null);
-      return;
-    }
-    setCurrent(rows[currentIndex + 1] as TrackType);
-  };
+  if (!showSkeleton && rows.length === 0) {
+    return <EmptyState search={search} onUploadClick={onUploadClick} />;
+  }
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <AudioPlayer source={current} autoPlay onEnded={handleEndPlay} />
-
+    <>
       <TableContainer>
-        <Table size="small">
+        <Table
+          size="medium"
+          sx={{
+            '& th': {
+              color: 'text.secondary',
+              fontSize: 12,
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: 0.6,
+              bgcolor: 'grey.50',
+              whiteSpace: 'nowrap',
+              py: 1.25,
+            },
+            '& td': { py: 1, borderColor: 'divider' },
+            '& tr:last-of-type td': { borderBottom: 0 },
+          }}
+        >
           <TableHead>
             <TableRow>
-              <TableCell>Title</TableCell>
-              <TableCell>Artist</TableCell>
-              <TableCell>Album</TableCell>
-              <TableCell>Genre</TableCell>
-              <TableCell align="right">Year</TableCell>
-              <TableCell align="right">Dur</TableCell>
-              <TableCell align="right">Kbps</TableCell>
-              <TableCell>State</TableCell>
-              <TableCell align="center">Actions</TableCell>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  size="small"
+                  checked={allSelected}
+                  indeterminate={selectedOnPage.length > 0 && !allSelected}
+                  onChange={toggleAll}
+                  disabled={rows.length === 0}
+                  slotProps={{ input: { 'aria-label': t('selectAll') } }}
+                />
+              </TableCell>
+              <TableCell>{t('columns.title')}</TableCell>
+              <TableCell sx={hideBelow('md')}>{t('columns.album')}</TableCell>
+              <TableCell sx={hideBelow('lg')}>{t('columns.genre')}</TableCell>
+              <TableCell sx={hideBelow('lg')}>{t('columns.added')}</TableCell>
+              <TableCell align="right" sx={hideBelow('sm')}>
+                {t('columns.duration')}
+              </TableCell>
+              <TableCell align="right" sx={hideBelow('lg')}>
+                {t('columns.quality')}
+              </TableCell>
+              <TableCell sx={hideBelow('sm')}>{t('columns.status')}</TableCell>
+              <TableCell align="right" />
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows?.map((r) => (
-              <TableRow
-                key={r.id}
-                hover
-                sx={{
-                  bgcolor: current?.id === r.id ? 'lightgray' : 'transparent',
-                }}
-              >
-                <TableCell onClick={() => setCurrent(r as TrackType)}>
-                  {r.title || '—'}
-                </TableCell>
-                <TableCell>{r.artist || '—'}</TableCell>
-                <TableCell>{r.album || '—'}</TableCell>
-                <TableCell>{r.genre || '—'}</TableCell>
-                <TableCell align="right">{r.year ?? '—'}</TableCell>
-                <TableCell align="right">
-                  {secondsToClock(r.durationSeconds)}
-                </TableCell>
-                <TableCell align="right">{r.bitrateKbps ?? '—'}</TableCell>
-                <TableCell>{r.state}</TableCell>
-                <TableCell align="center">
-                  <Tooltip title="Delete">
-                    <span>
-                      <IconButton
-                        size="small"
-                        onClick={() => onDelete(r.id)}
-                        disabled={deleting || r.state === 'PROCESSING'}
+            {showSkeleton
+              ? Array.from({ length: Math.min(rowsPerPage, 8) }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell padding="checkbox">
+                      <Skeleton
+                        variant="rounded"
+                        width={18}
+                        height={18}
+                        sx={{ mx: 'auto' }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}
                       >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-
-            {rows?.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={10}>
-                  <Box
-                    sx={{ py: 4, textAlign: 'center', color: 'text.secondary' }}
-                  >
-                    {loading ? 'Loading…' : 'No tracks'}
-                  </Box>
-                </TableCell>
-              </TableRow>
-            )}
+                        <Skeleton variant="rounded" width={40} height={40} />
+                        <Box sx={{ flex: 1 }}>
+                          <Skeleton width="60%" />
+                          <Skeleton width="35%" />
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell sx={hideBelow('md')}>
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell sx={hideBelow('lg')}>
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell sx={hideBelow('lg')}>
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell sx={hideBelow('sm')}>
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell sx={hideBelow('lg')}>
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell sx={hideBelow('sm')}>
+                      <Skeleton width={64} />
+                    </TableCell>
+                    <TableCell />
+                  </TableRow>
+                ))
+              : rows.map((r) => {
+                  const isCurrent = r.id === currentId;
+                  const isSelected = selected.includes(r.id);
+                  const playable = isPlayable(r);
+                  return (
+                    <TableRow
+                      key={r.id}
+                      hover
+                      selected={isSelected}
+                      onClick={() => playable && onPlay(r)}
+                      sx={(theme) => ({
+                        cursor: playable ? 'pointer' : 'default',
+                        ...(isCurrent && {
+                          bgcolor: alpha(theme.palette.primary.main, 0.06),
+                          boxShadow: `inset 3px 0 0 ${theme.palette.primary.main}`,
+                        }),
+                      })}
+                    >
+                      <TableCell
+                        padding="checkbox"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          size="small"
+                          checked={isSelected}
+                          onChange={() => toggleOne(r.id)}
+                          slotProps={{ input: { 'aria-label': r.title } }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ maxWidth: 0, width: '40%' }}>
+                        <Tooltip
+                          title={playable ? '' : t('notPlayable')}
+                          placement="top-start"
+                        >
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1.5,
+                              minWidth: 0,
+                            }}
+                          >
+                            <TrackTile
+                              track={r}
+                              isCurrent={isCurrent}
+                              playing={playing}
+                            />
+                            <Box sx={{ minWidth: 0 }}>
+                              <Typography
+                                variant="body2"
+                                fontWeight={600}
+                                noWrap
+                                title={r.title}
+                                color={isCurrent ? 'primary' : 'text.primary'}
+                              >
+                                {r.title || '—'}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                noWrap
+                                component="div"
+                              >
+                                {r.artist || t('unknownArtist')}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell sx={{ ...hideBelow('md'), maxWidth: 180 }}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          noWrap
+                          title={r.album}
+                        >
+                          {r.album || '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={hideBelow('lg')}>
+                        {r.genre ? (
+                          <Chip
+                            size="small"
+                            label={r.genre}
+                            sx={{ bgcolor: 'grey.100', maxWidth: 140 }}
+                          />
+                        ) : (
+                          <Typography variant="body2" color="text.disabled">
+                            —
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell
+                        sx={{ ...hideBelow('lg'), whiteSpace: 'nowrap' }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          {r.createdAt
+                            ? dayjs(r.createdAt).format('MMM D, YYYY')
+                            : '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{
+                          ...hideBelow('sm'),
+                          fontVariantNumeric: 'tabular-nums',
+                          color: 'text.secondary',
+                        }}
+                      >
+                        {Number(r.durationSeconds) > 0
+                          ? formatTime(Number(r.durationSeconds))
+                          : '—'}
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{
+                          ...hideBelow('lg'),
+                          whiteSpace: 'nowrap',
+                          color: 'text.secondary',
+                        }}
+                      >
+                        {r.bitrateKbps ? `${r.bitrateKbps} kbps` : '—'}
+                      </TableCell>
+                      <TableCell sx={hideBelow('sm')}>
+                        <StateChip state={r.state} />
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Tooltip title={t('delete')}>
+                          <span>
+                            <IconButton
+                              size="small"
+                              onClick={() => onDelete([r])}
+                              disabled={r.state === 'PROCESSING'}
+                              sx={{
+                                color: 'text.secondary',
+                                '&:hover': { color: 'error.main' },
+                              }}
+                            >
+                              <DeleteOutlineRoundedIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -166,19 +523,21 @@ export const AudioTable: React.FC<AudioTableProps> = ({
       <TablePagination
         component="div"
         count={totalCount}
-        page={
-          0 /* Using relay forward pagination; we reset page to 0 when after changes */
-        }
+        page={totalCount === 0 ? 0 : page}
         rowsPerPage={rowsPerPage}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        labelDisplayedRows={() =>
-          hasNextPage
-            ? `Showing ${rows?.length} of ${totalCount}+`
-            : `Showing ${rows?.length} of ${totalCount}`
+        onPageChange={(_, p) => onPageChange(p)}
+        onRowsPerPageChange={(e) =>
+          onRowsPerPageChange(parseInt(e.target.value, 10))
         }
-        rowsPerPageOptions={[5, 10, 25, 50]}
+        rowsPerPageOptions={[10, 25, 50]}
+        labelRowsPerPage={t('rowsPerPage')}
+        labelDisplayedRows={({ from, to, count }) =>
+          t('displayedRows', { from, to, count })
+        }
+        showFirstButton
+        showLastButton
+        sx={{ borderTop: 1, borderColor: 'divider' }}
       />
-    </Paper>
+    </>
   );
 };

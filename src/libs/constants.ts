@@ -70,6 +70,5 @@ export const notifier = {
     }),
 };
 
-export const getTrackUrl = (studioSlug: string, trackId: string) => {
-  return `${BASE_API_URL}/studios/${studioSlug}/tracks/${trackId}`;
-};
+export const getTrackUrl = (studioSlug: string, trackId: string) =>
+  `${BASE_API_URL}/api/studios/${studioSlug}/tracks/${trackId}`;
