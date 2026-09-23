@@ -4,6 +4,7 @@ import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import { scaleSequential } from 'd3-scale';
 import { interpolateBlues } from 'd3-scale-chromatic';
 import type { CountryCount } from '@graphql/graphql';
+import { NAME_TO_ALPHA2, NUMERIC_TO_ALPHA2 } from './countryCodes';
 
 type Props = {
   data: CountryCount[];
@@ -37,14 +38,17 @@ export const WorldMap: React.FC<Props> = ({ data, height = 440 }) => {
           <Geographies geography={GEO_URL}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                const props = geo.properties as Record<string, string>;
-                const code = (props.ISO_A2 || props.iso_a2 || '').toUpperCase();
+                const name = (geo.properties as { name?: string }).name ?? '';
+                const code =
+                  NUMERIC_TO_ALPHA2[String(geo.id)] ||
+                  NAME_TO_ALPHA2[name] ||
+                  '';
                 const cnt = byCode.get(code) || 0;
                 return (
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    fill={cnt > 0 ? (color(cnt) as string) : '#6584c2ff'}
+                    fill={cnt > 0 ? (color(cnt) as string) : '#e0e0e0'}
                     stroke="#fff"
                     strokeWidth={0.5}
                   />
