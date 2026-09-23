@@ -31,6 +31,7 @@ import { useStudioId } from './providers/LanguageContext';
 import Login from '../pages/Login';
 import RadioStreamPlayer from './RadioStreamPlayer';
 import LanguageSelector from './LanguageSelector';
+import SkipTrackButton from './SkipTrackButton';
 
 const drawerWidth = 260;
 
@@ -42,7 +43,7 @@ const Layout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const studioId = useStudioId();
 
-  const listenUrl = `${STUDIO_URL}/${studioId}/listen`;
+  const studioBaseUrl = `${STUDIO_URL}/${studioId}`;
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -134,13 +135,6 @@ const Layout: React.FC = () => {
             </ListItemButton>
           </ListItem>
         ))}
-        <ListItem>
-          <RadioStreamPlayer
-            variant="compact"
-            streamUrl={listenUrl}
-            title={t('player.compactTitle')}
-          />
-        </ListItem>
       </List>
     </Box>
   );
@@ -174,6 +168,20 @@ const Layout: React.FC = () => {
             {menuItems.find((item) => item.path === location.pathname)?.text ||
               t('nav.dashboard')}
           </Typography>
+          <Box sx={{ mx: { xs: 1, sm: 2 }, minWidth: 0 }}>
+            <RadioStreamPlayer
+              variant="compact"
+              streamUrl={`${studioBaseUrl}/listen`}
+              nowUrl={`${studioBaseUrl}/now`}
+              statusUrl={`${studioBaseUrl}/status`}
+              title={t('player.compactTitle')}
+              renderActions={(nowPlaying) =>
+                isAuthenticated && (
+                  <SkipTrackButton studioId={studioId} {...nowPlaying} />
+                )
+              }
+            />
+          </Box>
           <LanguageSelector variant="short" />
         </Toolbar>
       </AppBar>
