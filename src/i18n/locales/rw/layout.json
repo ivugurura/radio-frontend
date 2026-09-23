@@ -9,5 +9,16 @@
   },
   "player": {
     "compactTitle": "R-RW"
+  },
+  "skip": {
+    "tooltip": "Simbuka indirimbo iri gucurangwa",
+    "disabledLive": "Gusimbuka bishoboka gusa iyo AutoDJ ari yo iri gucuranga",
+    "disabledNoTrack": "Nta ndirimbo ya AutoDJ iri gucurangwa",
+    "confirmTitle": "Usimbuke iyi ndirimbo?",
+    "confirmMessage": "\"{{track}}\" izahagarara ku bumva bose maze AutoDJ ijye ku ikurikiyeho.",
+    "confirm": "Simbuka",
+    "cancel": "Reka",
+    "success": "\"{{track}}\" yasimbutswe",
+    "error": "Ntibyashobotse gusimbuka indirimbo"
   }
 }

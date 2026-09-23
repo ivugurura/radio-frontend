@@ -9,5 +9,16 @@
   },
   "player": {
     "compactTitle": "R-RW"
+  },
+  "skip": {
+    "tooltip": "Skip current track",
+    "disabledLive": "Skipping is only available while AutoDJ is on air",
+    "disabledNoTrack": "No AutoDJ track playing",
+    "confirmTitle": "Skip this track?",
+    "confirmMessage": "\"{{track}}\" will stop for all listeners and AutoDJ will move to the next track.",
+    "confirm": "Skip",
+    "cancel": "Cancel",
+    "success": "Skipped \"{{track}}\"",
+    "error": "Could not skip the track"
   }
 }
