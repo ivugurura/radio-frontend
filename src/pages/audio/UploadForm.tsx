@@ -79,12 +79,12 @@ async function computeSHA256(file: File): Promise<string | null> {
     .join('');
 }
 
-interface UploadFormProps {
+type UploadFormProps = Readonly<{
   open: boolean;
   onClose: () => void;
   /** Called when a track row is created or queued for processing, so lists can refetch. */
   onTracksChanged?: () => void;
-}
+}>;
 
 type UploadStatus =
   | 'queued'
@@ -112,6 +112,13 @@ type UploadItem = {
 
   // runtime
   abort?: AbortController;
+};
+
+const PROGRESS_COLOR: Partial<
+  Record<UploadStatus, 'error' | 'success' | 'primary'>
+> = {
+  error: 'error',
+  done: 'success',
 };
 
 export const UploadForm = ({
@@ -472,13 +479,7 @@ export const UploadForm = ({
                   <LinearProgress
                     variant="determinate"
                     value={it.progress}
-                    color={
-                      it.status === 'error'
-                        ? 'error'
-                        : it.status === 'done'
-                          ? 'success'
-                          : 'primary'
-                    }
+                    color={PROGRESS_COLOR[it.status] ?? 'primary'}
                   />
                 </Box>
               </ListItem>

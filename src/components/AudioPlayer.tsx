@@ -27,7 +27,7 @@ import { useStudioId } from '@components/providers';
 import { getTrackUrl } from '@libs/constants';
 import { formatTime, isPlayable } from '@libs/tracks';
 
-type AudioPlayerProps = {
+type AudioPlayerProps = Readonly<{
   track: TrackType;
   /** Controlled play state; the player reports changes through onPlayingChange. */
   playing: boolean;
@@ -38,9 +38,15 @@ type AudioPlayerProps = {
   hasNext?: boolean;
   hasPrevious?: boolean;
   onClose?: () => void;
-};
+}>;
 
 const VOLUME_KEY = 'radio.player.volume';
+
+const getVolumeIcon = (volume: number) => {
+  if (volume === 0) return VolumeOffRoundedIcon;
+  if (volume < 0.5) return VolumeDownRoundedIcon;
+  return VolumeUpRoundedIcon;
+};
 
 const readStoredVolume = () => {
   try {
@@ -112,12 +118,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const shownTime = seekValue ?? current;
   const total = duration || fallbackDuration;
   const effectiveVolume = muted ? 0 : volume;
-  const VolumeIcon =
-    effectiveVolume === 0
-      ? VolumeOffRoundedIcon
-      : effectiveVolume < 0.5
-        ? VolumeDownRoundedIcon
-        : VolumeUpRoundedIcon;
+  const VolumeIcon = getVolumeIcon(effectiveVolume);
 
   return (
     <Paper

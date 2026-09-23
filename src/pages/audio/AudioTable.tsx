@@ -17,7 +17,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
+import { alpha, type Theme } from '@mui/material/styles';
 import { keyframes } from '@mui/system';
 import {
   PlayArrowRounded as PlayArrowRoundedIcon,
@@ -34,7 +34,7 @@ import { useTranslation } from 'react-i18next';
 import type { MediasTrackStateChoices, TrackType } from '@graphql/graphql';
 import { IN_PROGRESS_STATES, formatTime, isPlayable } from '@libs/tracks';
 
-export type AudioTableProps = {
+export type AudioTableProps = Readonly<{
   rows: TrackType[];
   loading: boolean;
   search: string;
@@ -50,7 +50,7 @@ export type AudioTableProps = {
   totalCount: number;
   onPageChange: (page: number) => void;
   onRowsPerPageChange: (rows: number) => void;
-};
+}>;
 
 const bounce = keyframes`
   0%, 100% { transform: scaleY(0.3); }
@@ -90,7 +90,9 @@ const STATE_COLOR: Record<
   ARCHIVED: 'default',
 };
 
-const StateChip: React.FC<{ state: MediasTrackStateChoices }> = ({ state }) => {
+const StateChip: React.FC<Readonly<{ state: MediasTrackStateChoices }>> = ({
+  state,
+}) => {
   const { t } = useTranslation('audio');
   const busy = IN_PROGRESS_STATES.includes(state);
   return (
@@ -120,27 +122,48 @@ const StateChip: React.FC<{ state: MediasTrackStateChoices }> = ({ state }) => {
   );
 };
 
-/** Artwork tile in the title cell: play/pause affordance, playing bars or state icon. */
-const TrackTile: React.FC<{
+type TrackTileProps = Readonly<{
   track: TrackType;
   isCurrent: boolean;
   playing: boolean;
-}> = ({ track, isCurrent, playing }) => {
+}>;
+
+const getIdleIcon = ({ track, isCurrent, playing }: TrackTileProps) => {
+  if (isCurrent && playing) return <PlayingBars />;
+  if (isCurrent) return <PauseRoundedIcon fontSize="small" />;
+  if (track.state === 'FAILED') {
+    return <ErrorOutlineRoundedIcon fontSize="small" />;
+  }
+  if (IN_PROGRESS_STATES.includes(track.state)) {
+    return <CircularProgress size={16} thickness={5} color="inherit" />;
+  }
+  return <MusicNoteRoundedIcon fontSize="small" />;
+};
+
+const getTileColors = (theme: Theme, isCurrent: boolean, failed: boolean) => {
+  if (isCurrent) {
+    return {
+      color: theme.palette.primary.contrastText,
+      bgcolor: theme.palette.primary.main,
+    };
+  }
+  if (failed) {
+    return {
+      color: theme.palette.error.main,
+      bgcolor: alpha(theme.palette.error.main, 0.1),
+    };
+  }
+  return {
+    color: theme.palette.primary.main,
+    bgcolor: alpha(theme.palette.primary.main, 0.08),
+  };
+};
+
+/** Artwork tile in the title cell: play/pause affordance, playing bars or state icon. */
+const TrackTile: React.FC<TrackTileProps> = (props) => {
+  const { track, isCurrent, playing } = props;
   const playable = isPlayable(track);
   const failed = track.state === 'FAILED';
-  const idle = isCurrent ? (
-    playing ? (
-      <PlayingBars />
-    ) : (
-      <PauseRoundedIcon fontSize="small" />
-    )
-  ) : failed ? (
-    <ErrorOutlineRoundedIcon fontSize="small" />
-  ) : IN_PROGRESS_STATES.includes(track.state) ? (
-    <CircularProgress size={16} thickness={5} color="inherit" />
-  ) : (
-    <MusicNoteRoundedIcon fontSize="small" />
-  );
 
   return (
     <Box
@@ -153,16 +176,7 @@ const TrackTile: React.FC<{
         display: 'grid',
         placeItems: 'center',
         transition: 'all 150ms',
-        color: isCurrent
-          ? theme.palette.primary.contrastText
-          : failed
-            ? theme.palette.error.main
-            : theme.palette.primary.main,
-        bgcolor: isCurrent
-          ? theme.palette.primary.main
-          : failed
-            ? alpha(theme.palette.error.main, 0.1)
-            : alpha(theme.palette.primary.main, 0.08),
+        ...getTileColors(theme, isCurrent, failed),
         '& .hover-icon': { display: 'none' },
         ...(playable && {
           'tr:hover &': {
@@ -175,7 +189,7 @@ const TrackTile: React.FC<{
       })}
     >
       <Box className="idle-icon" sx={{ display: 'grid' }}>
-        {idle}
+        {getIdleIcon(props)}
       </Box>
       <Box className="hover-icon" sx={{ placeItems: 'center' }}>
         {isCurrent && playing ? (
@@ -188,14 +202,15 @@ const TrackTile: React.FC<{
   );
 };
 
+const SKELETON_KEYS = Array.from({ length: 8 }, (_, n) => `skeleton-${n}`);
+
 const hideBelow = (bp: 'sm' | 'md' | 'lg') => ({
   display: { xs: 'none', [bp]: 'table-cell' },
 });
 
-const EmptyState: React.FC<{ search: string; onUploadClick: () => void }> = ({
-  search,
-  onUploadClick,
-}) => {
+const EmptyState: React.FC<
+  Readonly<{ search: string; onUploadClick: () => void }>
+> = ({ search, onUploadClick }) => {
   const { t } = useTranslation('audio');
   const Icon = search ? SearchOffRoundedIcon : LibraryMusicOutlinedIcon;
   return (
@@ -325,8 +340,8 @@ export const AudioTable: React.FC<AudioTableProps> = ({
           </TableHead>
           <TableBody>
             {showSkeleton
-              ? Array.from({ length: Math.min(rowsPerPage, 8) }).map((_, i) => (
-                  <TableRow key={i}>
+              ? SKELETON_KEYS.slice(0, rowsPerPage).map((key) => (
+                  <TableRow key={key}>
                     <TableCell padding="checkbox">
                       <Skeleton
                         variant="rounded"
