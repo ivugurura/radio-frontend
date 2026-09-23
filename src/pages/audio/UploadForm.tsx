@@ -82,6 +82,8 @@ async function computeSHA256(file: File): Promise<string | null> {
 interface UploadFormProps {
   open: boolean;
   onClose: () => void;
+  /** Called when a track row is created or queued for processing, so lists can refetch. */
+  onTracksChanged?: () => void;
 }
 
 type UploadStatus =
@@ -112,7 +114,11 @@ type UploadItem = {
   abort?: AbortController;
 };
 
-export const UploadForm = ({ open, onClose }: UploadFormProps) => {
+export const UploadForm = ({
+  open,
+  onClose,
+  onTracksChanged,
+}: UploadFormProps) => {
   const studioId = useStudioId();
   const [items, setItems] = useState<UploadItem[]>([]);
   const [running, setRunning] = useState(0);
@@ -194,6 +200,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
           status: 'uploading',
           message: 'Uploading...',
         });
+        onTracksChanged?.();
 
         const total = file.size;
         let start = 0;
@@ -251,6 +258,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
           message: 'Queued for processing',
           progress: 100,
         });
+        onTracksChanged?.();
       } catch (err: unknown) {
         if (err instanceof Error && err.name === 'AbortError') {
           updateItem(id, { status: 'canceled', message: 'Upload canceled' });
@@ -270,7 +278,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
         setRunning(runningRef.current);
       }
     },
-    [requestUpload, finalizeUpload, studioId, updateItem],
+    [requestUpload, finalizeUpload, studioId, updateItem, onTracksChanged],
   );
 
   const schedule = useCallback(() => {
@@ -344,7 +352,7 @@ export const UploadForm = ({ open, onClose }: UploadFormProps) => {
 
           <Stack direction="row" spacing={2}>
             <Button variant="contained" component="label">
-              Select Files
+              Select Files{' '}
               <input
                 hidden
                 type="file"
