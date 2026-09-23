@@ -47,16 +47,24 @@ const toStatus = (status: string | null, errMsg?: string) => {
   return status ? statusMap[status] || status : 'Idle';
 };
 
+export type NowPlayingInfo = {
+  isLive: boolean;
+  currentTrack: string;
+  refreshMetadata: () => void;
+};
+
 type Props = {
-  /** 'hero' = big button + now-playing (public listener page). 'compact' = toolbar (admin sidebar). */
+  /** 'hero' = big button + now-playing (public listener page). 'compact' = inline bar (admin app bar). */
   variant: 'hero' | 'compact';
   streamUrl: string;
-  /** Now-playing/live status polling — hero only; omit for a minimal compact player. */
+  /** Now-playing/live status polling; omit for a minimal compact player. */
   nowUrl?: string;
   statusUrl?: string;
   title?: string;
   autoPlay?: boolean;
   showVolumeControl?: boolean;
+  /** Compact only: extra controls rendered after the player's own (e.g. admin skip). */
+  renderActions?: (info: NowPlayingInfo) => React.ReactNode;
 };
 
 function getPlaybackIcon(isPlaying: boolean, isBuffering: boolean) {
@@ -90,6 +98,7 @@ export const RadioStreamPlayer: React.FC<Props> = ({
   title = 'Radio Stream',
   autoPlay = false,
   showVolumeControl = false,
+  renderActions,
 }) => {
   const {
     status,
@@ -107,6 +116,7 @@ export const RadioStreamPlayer: React.FC<Props> = ({
     reconnect,
     setVolume,
     toggleMute,
+    refreshMetadata,
   } = useRadioStream({ streamUrl, nowUrl, statusUrl, autoPlay });
   const {
     icon: VolumeIcon,
@@ -115,10 +125,18 @@ export const RadioStreamPlayer: React.FC<Props> = ({
   } = getVolumeIcon(volume, muted);
   const step = 0.1;
   if (variant === 'compact') {
+    const showSourceBadge = Boolean(statusUrl);
+    const subtitle = isLive
+      ? 'Live'
+      : currentTrack || toStatus(status, errorMessage);
     return (
-      <Paper variant="outlined" sx={{ p: 1.5 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5}>
+      <Paper
+        variant="outlined"
+        sx={{ px: 0.5, py: 0.25, borderRadius: 999, minWidth: 0 }}
+      >
+        <Stack direction="row" alignItems="center" spacing={0.5} minWidth={0}>
           <IconButton
+            size="small"
             color={isPlaying ? 'primary' : 'default'}
             onClick={togglePlayback}
             aria-label={isPlaying ? 'Pause radio' : 'Play radio'}
@@ -126,28 +144,60 @@ export const RadioStreamPlayer: React.FC<Props> = ({
             {getPlaybackIcon(isPlaying, isBuffering)}
           </IconButton>
 
-          <Box flex={1} minWidth={0}>
-            <Typography variant="body2" noWrap title={title}>
-              {title}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {toStatus(status, errorMessage)}
+          <Box
+            minWidth={0}
+            sx={{ display: { xs: 'none', sm: 'block' }, maxWidth: 220 }}
+          >
+            <Stack direction="row" alignItems="center" spacing={0.75}>
+              <Typography variant="body2" noWrap fontWeight={600}>
+                {title}
+              </Typography>
+              {showSourceBadge && (
+                <Box
+                  component="span"
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    flexShrink: 0,
+                    borderRadius: '50%',
+                    backgroundColor: isLive ? '#e63946' : '#8191a4',
+                    animation: isLive
+                      ? `${pulse} 1.4s ease-in-out infinite`
+                      : 'none',
+                  }}
+                  title={isLive ? 'Live' : 'AutoDJ'}
+                />
+              )}
+            </Stack>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              noWrap
+              component="div"
+              title={subtitle}
+            >
+              {subtitle}
             </Typography>
           </Box>
 
           <Tooltip title={muted ? 'Unmute' : 'Mute'}>
-            <IconButton onClick={toggleMute} aria-label="Toggle mute">
-              {muted ? <VolumeOffRoundedIcon /> : <VolumeUpRoundedIcon />}
+            <IconButton size="small" onClick={toggleMute} aria-label="Toggle mute">
+              {muted ? (
+                <VolumeOffRoundedIcon fontSize="small" />
+              ) : (
+                <VolumeUpRoundedIcon fontSize="small" />
+              )}
             </IconButton>
           </Tooltip>
 
           {showVolumeControl && (
             <Slider
+              size="small"
               value={muted ? 0 : Math.round(volume * 100)}
               min={0}
               max={100}
               step={1}
-              sx={{ width: 'auto' }}
+              sx={{ width: 80 }}
               onChange={(_, v) => {
                 const n = Array.isArray(v) ? v[0] : v;
                 setVolume(n / 100);
@@ -157,10 +207,20 @@ export const RadioStreamPlayer: React.FC<Props> = ({
           )}
 
           <Tooltip title="Reconnect">
-            <IconButton onClick={reconnect} aria-label="Reconnect stream">
-              <RefreshRoundedIcon />
+            <IconButton
+              size="small"
+              onClick={reconnect}
+              aria-label="Reconnect stream"
+            >
+              <RefreshRoundedIcon fontSize="small" />
             </IconButton>
           </Tooltip>
+
+          {renderActions?.({
+            isLive,
+            currentTrack,
+            refreshMetadata,
+          })}
         </Stack>
       </Paper>
     );

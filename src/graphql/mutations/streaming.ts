@@ -20,3 +20,11 @@ export const REGENERATE_STREAMING_CREDENTIAL = graphql(`
     }
   }
 `);
+
+export const SKIP_TRACK = graphql(`
+  mutation SkipTrack($studioId: String!) {
+    skipTrack(studioId: $studioId) {
+      ok
+    }
+  }
+`);

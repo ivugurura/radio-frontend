@@ -46,6 +46,8 @@ type UseRadioStreamResult = {
   reconnect: () => void;
   setVolume: (value: number) => void;
   toggleMute: () => void;
+  /** Re-polls now-playing/status right away, e.g. after a skip. */
+  refreshMetadata: () => void;
 };
 
 const cleanTrackName = (value?: string) =>
@@ -126,7 +128,10 @@ function removeRangeAsync(
   });
 }
 
-async function trimBuffered(sourceBuffer: SourceBuffer, audio: HTMLAudioElement) {
+async function trimBuffered(
+  sourceBuffer: SourceBuffer,
+  audio: HTMLAudioElement,
+) {
   if (sourceBuffer.updating) return;
   const buffered = sourceBuffer.buffered;
   if (buffered.length === 0) return;
@@ -230,7 +235,9 @@ function startMseStream(
       { once: true },
     );
 
-    mediaSource.addEventListener('error', () => fail(new Error('MediaSource error')));
+    mediaSource.addEventListener('error', () =>
+      fail(new Error('MediaSource error')),
+    );
   });
 }
 
@@ -249,7 +256,7 @@ export function useRadioStream({
   const shouldBePlayingRef = React.useRef(false);
   const [status, setStatus] = React.useState<RadioStreamStatus>('idle');
   const [errorMessage, setErrorMessage] = React.useState('');
-  const [volume, setVolumeState] = React.useState(0.85);
+  const [volumeState, setVolumeState] = React.useState(0.85);
   const [muted, setMuted] = React.useState(false);
 
   const [isLive, setIsLive] = React.useState(false);
@@ -257,6 +264,7 @@ export function useRadioStream({
   const [nextTrack, setNextTrack] = React.useState('');
   const [elapsedSec, setElapsedSec] = React.useState(0);
   const [metadataError, setMetadataError] = React.useState('');
+  const [metadataNonce, setMetadataNonce] = React.useState(0);
 
   const isPlaying = status === 'playing';
   const isBuffering = status === 'buffering';
@@ -271,11 +279,12 @@ export function useRadioStream({
     audioRef.current = audio;
     audio.preload = 'none';
     audio.crossOrigin = 'anonymous';
-    audio.volume = volume;
+    audio.volume = volumeState;
     audio.muted = muted;
 
     const onPlaying = () => setStatus('playing');
-    const onPause = () => setStatus((prev) => (prev === 'error' ? prev : 'paused'));
+    const onPause = () =>
+      setStatus((prev) => (prev === 'error' ? prev : 'paused'));
     const onError = () => {
       setErrorMessage('Failed to play stream');
       setStatus('error');
@@ -308,8 +317,8 @@ export function useRadioStream({
   }, [streamUrl, teardownStream]);
 
   React.useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume;
-  }, [volume]);
+    if (audioRef.current) audioRef.current.volume = volumeState;
+  }, [volumeState]);
 
   React.useEffect(() => {
     if (audioRef.current) audioRef.current.muted = muted;
@@ -455,7 +464,12 @@ export function useRadioStream({
       isMounted = false;
       window.clearInterval(timer);
     };
-  }, [nowUrl, statusUrl, pollIntervalMs]);
+  }, [nowUrl, statusUrl, pollIntervalMs, metadataNonce]);
+
+  const refreshMetadata = React.useCallback(
+    () => setMetadataNonce((n) => n + 1),
+    [],
+  );
 
   React.useEffect(() => {
     if (!currentTrack) {
@@ -472,7 +486,7 @@ export function useRadioStream({
     isPlaying,
     isBuffering,
     errorMessage,
-    volume,
+    volume: volumeState,
     muted,
     isLive,
     currentTrack,
@@ -483,5 +497,6 @@ export function useRadioStream({
     reconnect: play,
     setVolume,
     toggleMute,
+    refreshMetadata,
   };
 }
