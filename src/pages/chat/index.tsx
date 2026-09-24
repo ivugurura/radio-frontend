@@ -2,9 +2,10 @@ import React from 'react';
 import { Alert, Container, Grid, Paper, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useStudioId } from '@components/providers';
-import { mergeChatMessages, chatMessageFromQueryRow } from '@libs/chat';
+import { mergeChatMessages } from '@libs/chat';
 import type { ChatMessagePayload } from '@libs/chat';
-import { useChatMessagesQuery, useChatMutesQuery } from '@graphql/hooks';
+import { useChatMutesQuery } from '@graphql/hooks';
+import { useChatHistory } from '../../hooks/useChatHistory';
 import { useChatSocket } from '../../hooks/useChatSocket';
 import ChatComposer from './ChatComposer';
 import ChatMessageList from './ChatMessageList';
@@ -25,10 +26,13 @@ const ChatPage: React.FC = () => {
     null,
   );
 
-  const { data: historyData, error: historyError } = useChatMessagesQuery({
-    variables: { studioSlug },
-    fetchPolicy: 'network-only',
-  });
+  const {
+    messages: historyMessages,
+    error: historyError,
+    hasMore,
+    loadingOlder,
+    loadOlder,
+  } = useChatHistory(studioSlug);
 
   const { data: mutesData, error: mutesError } = useChatMutesQuery({
     variables: { studioSlug },
@@ -55,12 +59,8 @@ const ChatPage: React.FC = () => {
 
   const messages = React.useMemo(
     () =>
-      mergeChatMessages(
-        (historyData?.chatMessages ?? []).map(chatMessageFromQueryRow),
-        liveMessages,
-        hiddenOverrides,
-      ),
-    [historyData, liveMessages, hiddenOverrides],
+      mergeChatMessages(historyMessages, liveMessages, hiddenOverrides),
+    [historyMessages, liveMessages, hiddenOverrides],
   );
 
   // ChatMute has no display name; recover one from that listener's messages.
@@ -122,6 +122,9 @@ const ChatPage: React.FC = () => {
               onReply={setReplyTarget}
               onToggleHide={handleToggleHide}
               onMute={setMuteTarget}
+              hasMore={hasMore}
+              loadingOlder={loadingOlder}
+              onLoadOlder={loadOlder}
             />
             <ChatComposer
               replyTarget={replyTarget}
