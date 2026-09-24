@@ -4,6 +4,8 @@
   "historyLoadFailed": "Failed to load chat history: {{message}}",
   "mutesLoadFailed": "Failed to load muted listeners: {{message}}",
   "noMessages": "No messages yet.",
+  "today": "Today",
+  "yesterday": "Yesterday",
   "noMessagesListener": "No messages yet. Say hi to the studio 👋",
   "roleListener": "Listener",
   "roleAdmin": "Admin",

@@ -1,8 +1,9 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Chip, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { ChatMessagePayload } from '@libs/chat';
 import ChatMessageItem from './ChatMessageItem';
+import { groupMessagesByDay, useDayLabel } from './utils';
 
 type Props = {
   messages: ChatMessagePayload[];
@@ -18,7 +19,9 @@ export const ChatMessageList: React.FC<Props> = ({
   onMute,
 }) => {
   const { t } = useTranslation('chat');
+  const getDayLabel = useDayLabel();
   const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
+  const dayGroups = React.useMemo(() => groupMessagesByDay(messages), [messages]);
 
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -46,14 +49,26 @@ export const ChatMessageList: React.FC<Props> = ({
           {t('noMessages')}
         </Typography>
       ) : (
-        messages.map((message) => (
-          <ChatMessageItem
-            key={message.id}
-            message={message}
-            onReply={onReply}
-            onToggleHide={onToggleHide}
-            onMute={onMute}
-          />
+        dayGroups.map((group) => (
+          <React.Fragment key={group.dayKey}>
+            <Divider sx={{ my: 0.5 }}>
+              <Chip
+                label={getDayLabel(group.date)}
+                size="small"
+                variant="outlined"
+                sx={{ fontSize: '0.7rem', color: 'text.secondary' }}
+              />
+            </Divider>
+            {group.messages.map((message) => (
+              <ChatMessageItem
+                key={message.id}
+                message={message}
+                onReply={onReply}
+                onToggleHide={onToggleHide}
+                onMute={onMute}
+              />
+            ))}
+          </React.Fragment>
         ))
       )}
       <div ref={messagesEndRef} />

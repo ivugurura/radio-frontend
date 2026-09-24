@@ -73,7 +73,7 @@ export const ChatMessageItem: React.FC<Props> = ({
               sx={{ height: 18, fontSize: '0.65rem' }}
             />
             <Typography variant="caption" color="text.secondary">
-              {dayjs(message.createdAt).format('MMM D, HH:mm')}
+              {dayjs(message.createdAt).format('HH:mm')}
             </Typography>
             {isHidden && (
               <Chip

@@ -4,6 +4,8 @@
   "historyLoadFailed": "Kuzana amateka y'ikiganiro byanze: {{message}}",
   "mutesLoadFailed": "Kuzana abumva baciwe byanze: {{message}}",
   "noMessages": "Nta butumwa burahaba.",
+  "today": "Uyu munsi",
+  "yesterday": "Ejo hashize",
   "noMessagesListener": "Nta butumwa burahaba. Ramutsa sitidiyo 👋",
   "roleListener": "Uwumva",
   "roleAdmin": "Umuyobozi",
