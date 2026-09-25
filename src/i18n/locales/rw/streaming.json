@@ -1,12 +1,12 @@
 {
-  "title": "Porogaramu zo gutambutsa",
-  "refresh": "Vugurura",
-  "intro": "Huza porogaramu itambutsa nka BUTT ukoresheje amagenamiterere akurikira. Andika aderesi ya seriveri na porudi ku gikubo cya BUTT cya \"Main\", uhuze n'amagenamiterere y'imiterere ku gikubo cyayo cya \"Stream\".",
-  "loadFailed": "Ntibyashobotse kuzana amagenamiterere yo gutambutsa.",
-  "regenerateSuccess": "Ijambobanga ryongeye gukorwa. Vugurura BUTT mbere yo kongera guhuza.",
-  "regenerateError": "Ntibyashobotse kongera gukora ijambobanga",
-  "regeneratePassword": "Ongera ukore ijambobanga",
-  "confirmTitle": "Ongera ukore ijambobanga ryo gutambutsa?",
-  "confirmBody": "Ijambobanga rihari rihita ritagira icyo rimaze. Porogaramu itambutsa yose ihujwe n'iryambere izacibwa.",
-  "confirmAction": "Ongera ukore"
+  "title": "Streaming Apps",
+  "refresh": "Refresh",
+  "intro": "Connect a live encoder such as BUTT using the settings below. Enter the server address and port on BUTT's \"Main\" tab, and match the format settings on its \"Stream\" tab.",
+  "loadFailed": "Could not load streaming configuration.",
+  "regenerateSuccess": "Password regenerated. Update BUTT before reconnecting.",
+  "regenerateError": "Could not regenerate the password",
+  "regeneratePassword": "Regenerate password",
+  "confirmTitle": "Regenerate streaming password?",
+  "confirmBody": "The current password will stop working immediately. Any live encoder connected with the old password will be disconnected.",
+  "confirmAction": "Regenerate"
 }

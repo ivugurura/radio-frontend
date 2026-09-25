@@ -1,14 +1,14 @@
 {
-  "title": "Imibare y'abumva",
+  "title": "Imibare y'aba Listeners",
   "range": "Igihe",
   "rangeOptions": {
     "last24h": "Amasaha 24 ashize",
     "last7d": "Iminsi 7 ishize"
   },
-  "refresh": "Vugurura",
-  "refreshing": "Biravugururwa...",
-  "loadFailed": "Ikibazo mu kuzana imibare: {{message}}",
+  "refresh": "Refreshinga",
+  "refreshing": "Iri ku refleshinga...",
+  "loadFailed": "Ntibyakunze kuzana imibare ya stats: {{message}}",
   "noStats": "Nta mibare iboneka.",
-  "byCountry": "Abumva ku gihugu",
+  "byCountry": "Listeners kuri buri gihugu",
   "noMapData": "Nta makuru y'ikarita yo kwerekana."
 }

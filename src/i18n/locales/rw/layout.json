@@ -1,23 +1,23 @@
 {
-  "brand": "RRV Radio",
+  "brand": "Radio RRV",
   "nav": {
-    "dashboard": "Imbonerahamwe",
-    "audioManager": "Gucunga Amajwi",
-    "listenerStatistics": "Imibare y'abumva",
-    "liveChat": "Ikiganiro",
-    "streamingApps": "Porogaramu zo gutambutsa"
+    "dashboard": "Dashboard",
+    "audioManager": "Indirimbo",
+    "listenerStatistics": "Imibare y aba Listeners",
+    "liveChat": "Isangizabitekerezo",
+    "streamingApps": "Apps za streaming"
   },
   "player": {
     "compactTitle": "R-RW"
   },
   "skip": {
-    "tooltip": "Simbuka indirimbo iri gucurangwa",
-    "disabledLive": "Gusimbuka bishoboka gusa iyo AutoDJ ari yo iri gucuranga",
-    "disabledNoTrack": "Nta ndirimbo ya AutoDJ iri gucurangwa",
-    "confirmTitle": "Usimbuke iyi ndirimbo?",
-    "confirmMessage": "\"{{track}}\" izahagarara ku bumva bose maze AutoDJ ijye ku ikurikiyeho.",
+    "tooltip": "Simbuka indirimbo irimo",
+    "disabledLive": "Gusimbuka bishoboka gusa tutari Live",
+    "disabledNoTrack": "Nta ndirimbo irimo gucurangwa",
+    "confirmTitle": "Murashaka gusimbuke iyi ndirimbo?",
+    "confirmMessage": "\"{{track}}\" irahagarara ku bumva bose maze hajyeho ikurikira.",
     "confirm": "Simbuka",
-    "cancel": "Reka",
+    "cancel": "Bireke",
     "success": "\"{{track}}\" yasimbutswe",
     "error": "Ntibyashobotse gusimbuka indirimbo"
   }

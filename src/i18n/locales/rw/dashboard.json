@@ -1,6 +1,6 @@
 {
-  "title": "Imbonerahamwe",
-  "loadFailed": "Kuzana imbonerahamwe byanze: {{message}}",
+  "title": "Dashboard",
+  "loadFailed": "Kuzana Dashboard byanze: {{message}}",
   "summaryTitle": "Incamake y'abumva",
   "currentlyTitle": "Ubu"
 }
