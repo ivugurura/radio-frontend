@@ -1,14 +1,19 @@
 {
-  "title": "Listener Statistics",
-  "range": "Range",
-  "rangeOptions": {
-    "last24h": "Last 24 hours",
-    "last7d": "Last 7 days"
-  },
+  "atTheMoment": "At the moment",
+  "worldwide": "Your listeners worldwide",
+  "connectedListener_one": "connected listener",
+  "connectedListener_other": "connected listeners",
+  "country": "Country",
+  "listenersColumn": "Listeners",
+  "unknownCountry": "Unknown",
+  "noListenersNow": "No one is listening right now.",
+  "loadFailed": "Error loading stats: {{message}}",
   "refresh": "Refresh",
   "refreshing": "Refreshing...",
-  "loadFailed": "Error loading stats: {{message}}",
-  "noStats": "No statistics available.",
-  "byCountry": "Listeners by Country",
-  "noMapData": "No map data to display."
+  "lastUpdated": "Updated at {{time}}",
+  "listenerCount_one": "{{count}} listener",
+  "listenerCount_other": "{{count}} listeners",
+  "fullscreen": "Full screen",
+  "exitFullscreen": "Exit full screen",
+  "recenter": "Zoom to listeners"
 }

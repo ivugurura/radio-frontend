@@ -1,4 +1,4 @@
-// world-atlas (countries-110m.json) identifies countries by ISO 3166-1 numeric
+// world-atlas (countries-50m.json) identifies countries by ISO 3166-1 numeric
 // code in `geo.id` and only exposes `properties.name`, so we map numeric -> alpha-2
 // to match the backend's CountryCount.code.
 export const NUMERIC_TO_ALPHA2: Record<string, string> = {
@@ -31,6 +31,18 @@ export const NUMERIC_TO_ALPHA2: Record<string, string> = {
   '780': 'TT', '784': 'AE', '788': 'TN', '792': 'TR', '795': 'TM', '800': 'UG',
   '804': 'UA', '807': 'MK', '818': 'EG', '826': 'GB', '834': 'TZ', '840': 'US',
   '854': 'BF', '858': 'UY', '860': 'UZ', '862': 'VE', '887': 'YE', '894': 'ZM',
+  // Smaller states and territories only present in the 50m atlas.
+  '016': 'AS', '020': 'AD', '028': 'AG', '048': 'BH', '052': 'BB', '060': 'BM',
+  '086': 'IO', '092': 'VG', '132': 'CV', '136': 'KY', '174': 'KM', '184': 'CK',
+  '212': 'DM', '234': 'FO', '239': 'GS', '248': 'AX', '258': 'PF', '296': 'KI',
+  '308': 'GD', '316': 'GU', '334': 'HM', '336': 'VA', '344': 'HK', '438': 'LI',
+  '446': 'MO', '462': 'MV', '470': 'MT', '480': 'MU', '492': 'MC', '500': 'MS',
+  '520': 'NR', '531': 'CW', '533': 'AW', '534': 'SX', '570': 'NU', '574': 'NF',
+  '580': 'MP', '583': 'FM', '584': 'MH', '585': 'PW', '612': 'PN', '652': 'BL',
+  '654': 'SH', '659': 'KN', '660': 'AI', '662': 'LC', '663': 'MF', '666': 'PM',
+  '670': 'VC', '674': 'SM', '678': 'ST', '690': 'SC', '702': 'SG', '776': 'TO',
+  '796': 'TC', '831': 'GG', '832': 'JE', '833': 'IM', '850': 'VI', '876': 'WF',
+  '882': 'WS',
 };
 
 // Features in the atlas that have no numeric id.

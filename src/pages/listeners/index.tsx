@@ -5,120 +5,114 @@ import {
   Alert,
   Box,
   Button,
-  Container,
-  Divider,
-  FormControl,
   Grid,
-  InputLabel,
-  MenuItem,
-  Select,
   Skeleton,
   Stack,
   Typography,
 } from '@mui/material';
-import type { CountryCount, TimeRange } from '@graphql/graphql';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+import dayjs from 'dayjs';
+import type { CountryCount } from '@graphql/graphql';
 import { useListenerOverviewQuery } from '@graphql/hooks';
-import { StatsHeader } from './StatsHeader';
+import { ActiveListenersCard } from './ActiveListenersCard';
+import { CountryList } from './CountryList';
 import { WorldMap } from './WorldMap';
+
+// Live figures: refresh often enough to feel "at the moment".
+const POLL_INTERVAL_MS = 30_000;
+const MAP_HEIGHT = 'max(480px, calc(100vh - 220px))';
 
 export const ListenerStatsPage: React.FC = () => {
   const { t } = useTranslation('listeners');
   const studioId = useStudioId();
-  const [range, setRange] = React.useState<TimeRange>('LAST_24_HOURS');
 
   const { data, loading, error, refetch } = useListenerOverviewQuery({
-    variables: { studioId, range },
+    variables: { studioId },
     fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL_MS,
   });
 
   const ov = data?.listenerOverview || null;
+  const countries = (ov?.countries ?? []) as CountryCount[];
+  const initialLoading = loading && !ov;
+
+  // Stamp each successful response (polls included) so staff can tell how
+  // fresh the numbers are.
+  const [updatedAt, setUpdatedAt] = React.useState<Date | null>(null);
+  React.useEffect(() => {
+    if (ov) setUpdatedAt(new Date());
+  }, [ov]);
+
+  const renderLeft = () => {
+    if (initialLoading) {
+      return (
+        <Stack spacing={2}>
+          <Skeleton variant="rounded" height={130} />
+          <Skeleton variant="rounded" height={160} />
+        </Stack>
+      );
+    }
+    return (
+      <Stack spacing={2}>
+        <ActiveListenersCard count={ov?.activeNow ?? 0} />
+        <CountryList data={countries} />
+      </Stack>
+    );
+  };
+
+  const renderMap = () => {
+    if (initialLoading) {
+      return <Skeleton variant="rounded" height={MAP_HEIGHT} />;
+    }
+    return <WorldMap data={countries} height={MAP_HEIGHT} />;
+  };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 3 }}>
+    <Box sx={{ p: 1 }}>
       <Stack
         direction="row"
         alignItems="center"
-        justifyContent="space-between"
+        justifyContent="flex-end"
         spacing={2}
-        mb={2}
+        mb={1}
       >
-        <Typography variant="h5" fontWeight={700}>
-          {t('title')}
-        </Typography>
-        <Stack direction="row" spacing={2}>
-          <FormControl size="small">
-            <InputLabel id="range-label">{t('range')}</InputLabel>
-            <Select
-              labelId="range-label"
-              label={t('range')}
-              value={range}
-              onChange={(e) => setRange(e.target.value as TimeRange)}
-            >
-              <MenuItem value="LAST_24_HOURS">
-                {t('rangeOptions.last24h')}
-              </MenuItem>
-              <MenuItem value="LAST_7_DAYS">
-                {t('rangeOptions.last7d')}
-              </MenuItem>
-            </Select>
-          </FormControl>
-          <Button
-            variant="outlined"
-            onClick={() => refetch()}
-            disabled={loading}
-          >
-            {loading ? t('refreshing') : t('refresh')}
-          </Button>
-        </Stack>
+        {updatedAt && (
+          <Typography variant="body2" color="text.secondary">
+            {t('lastUpdated', { time: dayjs(updatedAt).format('HH:mm:ss') })}
+          </Typography>
+        )}
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<RefreshRoundedIcon />}
+          onClick={() => refetch()}
+          disabled={loading}
+        >
+          {loading ? t('refreshing') : t('refresh')}
+        </Button>
       </Stack>
 
       {error && (
-        <Alert severity="error">
+        <Alert severity="error" sx={{ mb: 2 }}>
           {t('loadFailed', { message: error.message })}
         </Alert>
       )}
 
-      <Box mb={2}>
-        {loading && !ov ? (
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Skeleton variant="rounded" height={90} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Skeleton variant="rounded" height={90} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Skeleton variant="rounded" height={90} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Skeleton variant="rounded" height={90} />
-            </Grid>
-          </Grid>
-        ) : ov ? (
-          <StatsHeader
-            activeNow={ov.activeNow!}
-            peakLastHour={ov.peakLastHour!}
-            peakLast24h={ov.peakLast24h!}
-            listenerMinutes24h={ov.listenerMinutesLast24h!}
-          />
-        ) : (
-          <Alert severity="info">{t('noStats')}</Alert>
-        )}
-      </Box>
-
-      <Divider sx={{ my: 2 }} />
-
-      <Typography variant="h6" mb={1}>
-        {t('byCountry')}
-      </Typography>
-      {loading && !ov ? (
-        <Skeleton variant="rounded" height={440} />
-      ) : ov ? (
-        <WorldMap data={ov.countries! as CountryCount[]} height={720} />
-      ) : (
-        <Alert severity="info">{t('noMapData')}</Alert>
-      )}
-    </Container>
+      <Grid container spacing={1}>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Typography variant="h5" mb={3}>
+            {t('atTheMoment')}
+          </Typography>
+          {renderLeft()}
+        </Grid>
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Typography variant="h5" mb={3}>
+            {t('worldwide')}
+          </Typography>
+          {renderMap()}
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 
