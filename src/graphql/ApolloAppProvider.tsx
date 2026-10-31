@@ -1,7 +1,7 @@
 import { type PropsWithChildren, useMemo } from 'react';
 import { ApolloProvider } from '@apollo/client/react';
-import { createApolloClient, defaultRefreshAccessToken } from './client';
-import { lStorage, notifier } from '@libs/constants';
+import { createApolloClient, defaultRefreshAccessToken, signOut } from './client';
+import { notifier } from '@libs/constants';
 
 declare const process: { env: { NODE_ENV: string } };
 
@@ -15,9 +15,7 @@ type ApolloAppProviderProps = PropsWithChildren<{
 
 export function ApolloAppProvider({
   refreshAccessToken = defaultRefreshAccessToken,
-  onSignOut = () => {
-    lStorage.removeAll();
-  },
+  onSignOut = signOut,
   includeCookies = false,
   children,
 }: ApolloAppProviderProps) {

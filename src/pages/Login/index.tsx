@@ -43,13 +43,13 @@ const Login = ({ shouldRedirect = false }) => {
 
   useEffect(() => {
     if (data?.loginUser) {
-      const { token, restToken, user } = data.loginUser;
+      const { token, refreshToken, user } = data.loginUser;
       const messageToShow = shouldRedirect
         ? t('welcomeBackRedirect', { name: user?.firstName })
         : t('welcomeBack', { name: user?.firstName });
 
       notifier.success(messageToShow);
-      lStorage.save(token!, restToken ?? undefined);
+      lStorage.save(token!, refreshToken ?? undefined);
       setAuthUser(user as UserType);
       if (!shouldRedirect) {
         window.location.reload();

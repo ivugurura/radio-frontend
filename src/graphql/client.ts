@@ -1,6 +1,7 @@
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 import { lStorage, APP_SCHEMA, BASE_API_URL } from '@libs/constants';
 import type { GraphQLError } from 'graphql';
+import { jwtDecode } from 'jwt-decode';
 import i18n from '../i18n';
 import { DEFAULT_LANGUAGE, normalizeLanguage } from '../i18n/config';
 
@@ -32,6 +33,9 @@ type CreateApolloClientOptions = {
     shouldRetryStatus?: (status: number) => boolean; // default: 5xx or 429
   };
 };
+
+const REFRESH_LOCK = 'refresh-access-token';
+const REFRESH_TIMEOUT_MS = 15000;
 
 // In-flight refresh coordination (prevents stampeding herds)
 let isRefreshing = false;
@@ -159,13 +163,6 @@ export function createApolloClient(
             const body = await clone.json().catch(() => null);
             const errors: GraphQLError[] | undefined = body?.errors;
             if (errors?.length) {
-              if (onGraphQLError) {
-                const opName = body?.extensions?.operationName as
-                  | string
-                  | undefined;
-                for (const e of errors) onGraphQLError(e, opName);
-              }
-
               const unauth = errors.some(
                 (e) =>
                   (e.extensions as { code?: string })?.code ===
@@ -181,6 +178,13 @@ export function createApolloClient(
                 } else {
                   return res;
                 }
+              }
+
+              if (onGraphQLError) {
+                const opName = body?.extensions?.operationName as
+                  | string
+                  | undefined;
+                for (const e of errors) onGraphQLError(e, opName);
               }
             }
           }
@@ -232,6 +236,7 @@ export function createApolloClient(
       try {
         const newToken = await doRefresh();
         notifyRefreshWaiters(newToken ?? null);
+        if (!newToken && !lStorage.getRefreshToken()) onSignOutCb?.();
         return newToken ?? null;
       } catch {
         notifyRefreshWaiters(null);
@@ -245,7 +250,8 @@ export function createApolloClient(
     const token = await new Promise<string | null>((resolve) => {
       refreshWaiters.push(resolve);
     });
-    if (!token) onSignOutCb?.();
+    // A refresh that failed on the network keeps its tokens, so the session stays alive.
+    if (!token && !lStorage.getRefreshToken()) onSignOutCb?.();
     return token;
   }
 
@@ -263,10 +269,47 @@ export function createApolloClient(
   });
 }
 
-// Example placeholder refresh function (adjust to your backend contract)
+/** Ends the session; reloading lets AuthProvider start over without the tokens. */
+export function signOut() {
+  lStorage.removeAll();
+  window.location.reload();
+}
+
+// Each refresh token works once, so tabs must take turns or all but one would be rejected.
 export async function defaultRefreshAccessToken(): Promise<string | null> {
+  const staleToken = lStorage.get();
+  if (!navigator.locks) return requestAccessToken(staleToken);
+  return navigator.locks.request(REFRESH_LOCK, () =>
+    requestAccessToken(staleToken),
+  );
+}
+
+/** For callers outside Apollo (websockets) that can't retry after a rejected token. */
+export async function ensureFreshAccessToken(): Promise<void> {
+  const token = lStorage.get();
+  if (token && !isTokenExpired(token)) return;
+  await defaultRefreshAccessToken();
+}
+
+function isTokenExpired(token: string): boolean {
+  try {
+    const { exp } = jwtDecode<{ exp?: number }>(token);
+    return !exp || exp <= Date.now() / 1000;
+  } catch {
+    return true;
+  }
+}
+
+async function requestAccessToken(staleToken: string): Promise<string | null> {
+  // Another tab refreshed while this one waited for the lock.
+  const currentToken = lStorage.get();
+  if (currentToken && currentToken !== staleToken) return currentToken;
+
   const refreshToken = lStorage.getRefreshToken();
-  if (!refreshToken) return null;
+  if (!refreshToken) {
+    lStorage.removeAll();
+    return null;
+  }
 
   try {
     const response = await fetch(getRefreshEndpoint(), {
@@ -277,6 +320,7 @@ export async function defaultRefreshAccessToken(): Promise<string | null> {
       },
       body: JSON.stringify({ refresh_token: refreshToken }),
       credentials: 'same-origin',
+      signal: AbortSignal.timeout(REFRESH_TIMEOUT_MS),
     });
 
     if (!response.ok) {

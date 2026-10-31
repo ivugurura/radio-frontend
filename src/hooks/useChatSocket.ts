@@ -1,7 +1,11 @@
 import React from 'react';
 import { BASE_API_URL } from '@libs/constants';
 import { lStorage } from '@libs/constants';
-import { currentLanguageTag } from '@graphql/client';
+import {
+  currentLanguageTag,
+  ensureFreshAccessToken,
+  signOut,
+} from '@graphql/client';
 import type {
   ChatClientEvent,
   ChatMessagePayload,
@@ -114,8 +118,19 @@ export function useChatSocket(
     setMutedListenerIds(new Set());
     setSelfMuted(false);
 
-    const connect = () => {
+    let cancelled = false;
+
+    const connect = async () => {
       setStatus('connecting');
+      if (isAdmin) {
+        // An expired token is treated as anonymous and closed, so reconnects would never recover.
+        await ensureFreshAccessToken();
+        if (cancelled) return;
+        if (!lStorage.get()) {
+          signOut();
+          return;
+        }
+      }
       const url = buildWsUrl({
         studioSlug,
         isAdmin,
@@ -230,9 +245,10 @@ export function useChatSocket(
       };
     };
 
-    connect();
+    void connect();
 
     return () => {
+      cancelled = true;
       closedByEffectRef.current = true;
       if (reconnectTimeoutRef.current !== null) {
         window.clearTimeout(reconnectTimeoutRef.current);

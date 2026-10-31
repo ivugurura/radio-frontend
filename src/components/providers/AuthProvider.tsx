@@ -14,9 +14,10 @@ import type { UserType } from '@graphql/graphql';
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<AuthContextState>(initialState);
 
-  const clearLocalStorage = () => {
-    lStorage.removeAll();
-    setState((prev) => ({ ...prev, isLoading: false }));
+  // Tokens stay stored: a rejected refresh already cleared them, and a network
+  // failure shouldn't end the session.
+  const showSignedOut = () => {
+    setState((prev) => ({ ...prev, message: 'invalid token', isLoading: false }));
   };
 
   const validateAuth = async () => {
@@ -38,8 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!exp || exp <= currentTime) {
         const refreshedToken = await defaultRefreshAccessToken();
         if (!refreshedToken) {
-          setState((prev) => ({ ...prev, message: 'invalid token' }));
-          clearLocalStorage();
+          showSignedOut();
           return;
         }
       }
@@ -62,13 +62,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           user: data as UserType,
         }));
       } else {
-        setState((prev) => ({ ...prev, message: 'invalid token' }));
-        clearLocalStorage();
+        showSignedOut();
       }
     } catch (error: unknown) {
       console.error('Error validating authentication:', error);
-      setState((prev) => ({ ...prev, message: 'invalid token' }));
-      clearLocalStorage();
+      lStorage.removeAll();
+      showSignedOut();
     }
   };
 
