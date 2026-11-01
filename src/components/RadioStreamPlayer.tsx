@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   CircularProgress,
@@ -100,6 +101,7 @@ export const RadioStreamPlayer: React.FC<Props> = ({
   showVolumeControl = false,
   renderActions,
 }) => {
+  const { t } = useTranslation('audio');
   const {
     status,
     isPlaying,
@@ -425,9 +427,9 @@ export const RadioStreamPlayer: React.FC<Props> = ({
           <Typography
             variant="caption"
             color="rgba(95, 117, 152, 0.6)"
-            sx={{ ml: 0.5 }}
+            sx={{ ml: 0.5, textTransform: 'lowercase' }}
           >
-            (next)
+            ({t('next')})
           </Typography>
         </Box>
       )}
