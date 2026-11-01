@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 import { Paper, Box, Typography } from '@mui/material';
+import { keyframes } from '@emotion/react';
+import { useTranslation } from 'react-i18next';
 import {
   AreaChart,
   Area,
@@ -16,28 +18,84 @@ interface Props {
   data: ListeningTrend | null;
   height?: number;
   loading?: boolean;
+  liveListeners?: number;
 }
 
+const pulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+`;
+
 const formatTime = (iso: string) => dayjs(iso).format('HH:mm');
+
+const LiveListenersBadge: React.FC<{ count: number }> = ({ count }) => {
+  const { t } = useTranslation('listeners');
+  const hasListeners = count > 0;
+  const color = hasListeners ? '#e63946' : '#6c82a3';
+
+  return (
+    <Box
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 0.75,
+        px: 1.25,
+        py: 0.25,
+        borderRadius: 999,
+        whiteSpace: 'nowrap',
+        backgroundColor: hasListeners
+          ? 'rgba(230, 57, 70, 0.1)'
+          : 'rgba(108, 130, 163, 0.12)',
+      }}
+    >
+      <Box
+        sx={{
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
+          backgroundColor: color,
+          animation: hasListeners
+            ? `${pulse} 1.4s ease-in-out infinite`
+            : 'none',
+        }}
+      />
+      <Typography
+        variant="caption"
+        sx={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums', color }}
+      >
+        {count}
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        {t('connectedListener', { count })}
+      </Typography>
+    </Box>
+  );
+};
 
 export const TrendChart: React.FC<Props> = ({
   data,
   height = 240,
   loading,
+  liveListeners,
 }) => {
   const chartData: ListeningTrendPoint[] = useMemo(
     () => data?.points ?? [],
-    [data]
+    [data],
   );
 
   const peak = data?.peak;
 
   return (
     <Paper variant="outlined" sx={{ p: 2, height }}>
-      <Box display="flex" justifyContent="space-between" mb={1}>
-        <Typography variant="subtitle2">
-          You are listening in real time
-        </Typography>
+      <Box display="flex" justifyContent="space-between" gap={1} mb={1}>
+        <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
+          <Typography variant="subtitle2">
+            You are listening in real time
+          </Typography>
+          {liveListeners !== undefined && (
+            <LiveListenersBadge count={liveListeners} />
+          )}
+        </Box>
         {peak && (
           <Typography variant="caption" color="text.secondary">
             Peak at {formatTime(peak.ts)} – {peak.active} listening(s)

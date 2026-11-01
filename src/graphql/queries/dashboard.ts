@@ -38,5 +38,8 @@ export const DASHBOARD_OVERVIEW = graphql(`
         isCurrent
       }
     }
+    listenerOverview(studioId: $studioId) {
+      activeNow
+    }
   }
 `);

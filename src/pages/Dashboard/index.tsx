@@ -52,6 +52,7 @@ export const DashboardPage: React.FC = () => {
             <TrendChart
               data={trend as ListeningTrend}
               loading={loading && !trend}
+              liveListeners={data?.listenerOverview?.activeNow}
             />
           )}
         </Grid>
