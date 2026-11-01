@@ -89,9 +89,6 @@ export const TrendChart: React.FC<Props> = ({
     <Paper variant="outlined" sx={{ p: 2, height }}>
       <Box display="flex" justifyContent="space-between" gap={1} mb={1}>
         <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
-          <Typography variant="subtitle2">
-            You are listening in real time
-          </Typography>
           {liveListeners !== undefined && (
             <LiveListenersBadge count={liveListeners} />
           )}
