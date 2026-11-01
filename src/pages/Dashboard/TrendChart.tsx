@@ -31,7 +31,7 @@ const formatTime = (iso: string) => dayjs(iso).format('HH:mm');
 const LiveListenersBadge: React.FC<{ count: number }> = ({ count }) => {
   const { t } = useTranslation('listeners');
   const hasListeners = count > 0;
-  const color = hasListeners ? '#e63946' : '#6c82a3';
+  const color = hasListeners ? '#269060' : '#6c82a3';
 
   return (
     <Box
@@ -78,12 +78,15 @@ export const TrendChart: React.FC<Props> = ({
   loading,
   liveListeners,
 }) => {
+  const { t } = useTranslation('dashboard');
   const chartData: ListeningTrendPoint[] = useMemo(
     () => data?.points ?? [],
     [data],
   );
 
   const peak = data?.peak;
+  // Today's peak can be older than the charted window.
+  const isPeakCharted = chartData.some((point) => point.ts === peak?.ts);
 
   return (
     <Paper variant="outlined" sx={{ p: 2, height }}>
@@ -95,7 +98,10 @@ export const TrendChart: React.FC<Props> = ({
         </Box>
         {peak && (
           <Typography variant="caption" color="text.secondary">
-            Peak at {formatTime(peak.ts)} – {peak.active} listening(s)
+            {t('peakToday', {
+              count: peak.active,
+              time: formatTime(peak.ts),
+            })}
           </Typography>
         )}
       </Box>
@@ -140,7 +146,7 @@ export const TrendChart: React.FC<Props> = ({
               strokeWidth={2}
               isAnimationActive={false}
             />
-            {peak && (
+            {peak && isPeakCharted && (
               <ReferenceDot
                 x={peak.ts}
                 y={peak.active}

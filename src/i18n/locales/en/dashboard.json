@@ -2,5 +2,7 @@
   "title": "Dashboard",
   "loadFailed": "Failed to load dashboard: {{message}}",
   "summaryTitle": "Summary of your listening",
-  "currentlyTitle": "Currently"
+  "currentlyTitle": "Currently",
+  "peakToday_one": "Today's peak: {{count}} listener at {{time}}",
+  "peakToday_other": "Today's peak: {{count}} listeners at {{time}}"
 }

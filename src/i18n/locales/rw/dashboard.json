@@ -2,5 +2,7 @@
   "title": "Dashboard",
   "loadFailed": "Kuzana Dashboard byanze: {{message}}",
   "summaryTitle": "Incamake y'abumva",
-  "currentlyTitle": "Ubu"
+  "currentlyTitle": "Ubu",
+  "peakToday_one": "Abakurikiye benshi uyu munsi: {{count}} saa {{time}}",
+  "peakToday_other": "Abakurikiye benshi uyu munsi: {{count}} saa {{time}}"
 }
