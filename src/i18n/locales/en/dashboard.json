@@ -2,7 +2,39 @@
   "title": "Dashboard",
   "loadFailed": "Failed to load dashboard: {{message}}",
   "summaryTitle": "Summary of your listening",
-  "currentlyTitle": "Currently",
+  "currentlyTitle": "Now playing",
   "peakToday_one": "Today's peak: {{count}} listener at {{time}}",
-  "peakToday_other": "Today's peak: {{count}} listeners at {{time}}"
+  "peakToday_other": "Today's peak: {{count}} listeners at {{time}}",
+  "summary": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "prev30Days": "Previous 30 days",
+    "lastMonth": "Last month",
+    "vsPrev30": "vs previous 30 days"
+  },
+  "trend": {
+    "title": "Active listeners",
+    "subtitle": "Last 90 minutes",
+    "empty": "No listening data yet",
+    "tooltipListeners_one": "{{count}} listener",
+    "tooltipListeners_other": "{{count}} listeners"
+  },
+  "capacity": {
+    "title": "Usage",
+    "listeningTime": "Listening time",
+    "diskSpace": "Disk space",
+    "hoursValue": "{{used}} / {{quota}} hours",
+    "gbValue": "{{used}} / {{quota}} GB",
+    "percentUsed": "{{pct}}%",
+    "buyStorage": "Buy more storage"
+  },
+  "queue": {
+    "onAir": "On air",
+    "recentlyPlayed": "Recently played",
+    "nothingPlaying": "Nothing is playing right now",
+    "noHistory": "No tracks played yet",
+    "unknownArtist": "Unknown artist"
+  }
 }

@@ -2,7 +2,39 @@
   "title": "Dashboard",
   "loadFailed": "Kuzana Dashboard byanze: {{message}}",
   "summaryTitle": "Incamake y'abumva",
-  "currentlyTitle": "Ubu",
+  "currentlyTitle": "Ibiri gucurangwa",
   "peakToday_one": "Abakurikiye benshi uyu munsi: {{count}} saa {{time}}",
-  "peakToday_other": "Abakurikiye benshi uyu munsi: {{count}} saa {{time}}"
+  "peakToday_other": "Abakurikiye benshi uyu munsi: {{count}} saa {{time}}",
+  "summary": {
+    "today": "Uyu munsi",
+    "yesterday": "Ejo hashize",
+    "last7Days": "Iminsi 7 ishize",
+    "last30Days": "Iminsi 30 ishize",
+    "prev30Days": "Iminsi 30 yabanje",
+    "lastMonth": "Ukwezi gushize",
+    "vsPrev30": "ugereranyije n'iminsi 30 yabanje"
+  },
+  "trend": {
+    "title": "Abakurikiye ubu",
+    "subtitle": "Iminota 90 ishize",
+    "empty": "Nta makuru y'abumva arahari",
+    "tooltipListeners_one": "{{count}} ukurikiye",
+    "tooltipListeners_other": "{{count}} bakurikiye"
+  },
+  "capacity": {
+    "title": "Ikoreshwa",
+    "listeningTime": "Igihe cyo kumva",
+    "diskSpace": "Ububiko",
+    "hoursValue": "{{used}} / {{quota}} amasaha",
+    "gbValue": "{{used}} / {{quota}} GB",
+    "percentUsed": "{{pct}}%",
+    "buyStorage": "Gura ububiko bwisumbuye"
+  },
+  "queue": {
+    "onAir": "Kiri ku murongo",
+    "recentlyPlayed": "Ibyacuranzwe vuba",
+    "nothingPlaying": "Nta kiri gucurangwa ubu",
+    "noHistory": "Nta ndirimbo iracurangwa",
+    "unknownArtist": "Umuhanzi utazwi"
+  }
 }

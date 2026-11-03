@@ -1,84 +1,56 @@
 import React, { useMemo } from 'react';
-import { Paper, Box, Typography } from '@mui/material';
-import { keyframes } from '@emotion/react';
+import { Box, Paper, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import {
   AreaChart,
   Area,
+  CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
   ReferenceDot,
 } from 'recharts';
+import type { TooltipContentProps } from 'recharts';
+import type {
+  NameType,
+  ValueType,
+} from 'recharts/types/component/DefaultTooltipContent';
 import dayjs from 'dayjs';
 import type { ListeningTrend, ListeningTrendPoint } from '@graphql/graphql';
+import { DashboardCard } from './DashboardCard';
 
 interface Props {
   data: ListeningTrend | null;
-  height?: number;
-  loading?: boolean;
-  liveListeners?: number;
 }
-
-const pulse = keyframes`
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-`;
 
 const formatTime = (iso: string) => dayjs(iso).format('HH:mm');
 
-const LiveListenersBadge: React.FC<{ count: number }> = ({ count }) => {
-  const { t } = useTranslation('listeners');
-  const hasListeners = count > 0;
-  const color = hasListeners ? '#269060' : '#6c82a3';
+const TrendTooltip: React.FC<TooltipContentProps<ValueType, NameType>> = ({
+  active,
+  payload,
+  label,
+}) => {
+  const { t } = useTranslation('dashboard');
+  if (!active || !payload?.length) return null;
+  const count = Number(payload[0].value ?? 0);
 
   return (
-    <Box
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 0.75,
-        px: 1.25,
-        py: 0.25,
-        borderRadius: 999,
-        whiteSpace: 'nowrap',
-        backgroundColor: hasListeners
-          ? 'rgba(230, 57, 70, 0.1)'
-          : 'rgba(108, 130, 163, 0.12)',
-      }}
-    >
-      <Box
-        sx={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          backgroundColor: color,
-          animation: hasListeners
-            ? `${pulse} 1.4s ease-in-out infinite`
-            : 'none',
-        }}
-      />
-      <Typography
-        variant="caption"
-        sx={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums', color }}
-      >
-        {count}
+    <Paper elevation={3} sx={{ px: 1.5, py: 1, borderRadius: 2 }}>
+      <Typography variant="body2" color="text.secondary">
+        {dayjs(label as string).format('HH:mm:ss')}
       </Typography>
-      <Typography variant="caption" color="text.secondary">
-        {t('connectedListener', { count })}
+      <Typography variant="body1" fontWeight={700}>
+        {t('trend.tooltipListeners', { count })}
       </Typography>
-    </Box>
+    </Paper>
   );
 };
 
-export const TrendChart: React.FC<Props> = ({
-  data,
-  height = 240,
-  loading,
-  liveListeners,
-}) => {
+export const TrendChart: React.FC<Props> = ({ data }) => {
   const { t } = useTranslation('dashboard');
+  const theme = useTheme();
   const chartData: ListeningTrendPoint[] = useMemo(
     () => data?.points ?? [],
     [data],
@@ -87,78 +59,101 @@ export const TrendChart: React.FC<Props> = ({
   const peak = data?.peak;
   // Today's peak can be older than the charted window.
   const isPeakCharted = chartData.some((point) => point.ts === peak?.ts);
+  const stroke = theme.palette.primary.main;
+  const axisTick = { fill: theme.palette.text.secondary, fontSize: 12 };
 
   return (
-    <Paper variant="outlined" sx={{ p: 2, height }}>
-      <Box display="flex" justifyContent="space-between" gap={1} mb={1}>
-        <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
-          {liveListeners !== undefined && (
-            <LiveListenersBadge count={liveListeners} />
-          )}
-        </Box>
-        {peak && (
-          <Typography variant="caption" color="text.secondary">
+    <DashboardCard
+      title={t('trend.title')}
+      subtitle={t('trend.subtitle')}
+      action={
+        peak && (
+          <Typography variant="body2" color="text.secondary">
             {t('peakToday', {
               count: peak.active,
               time: formatTime(peak.ts),
             })}
           </Typography>
+        )
+      }
+    >
+      <Box sx={{ height: { xs: 220, sm: 260, lg: 280 }, mx: -1 }}>
+        {chartData.length === 0 ? (
+          <Box
+            height="100%"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Typography variant="body2" color="text.secondary">
+              {t('trend.empty')}
+            </Typography>
+          </Box>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={chartData}
+              margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+            >
+              <defs>
+                <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={stroke} stopOpacity={0.28} />
+                  <stop offset="100%" stopColor={stroke} stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                vertical={false}
+                stroke={theme.palette.divider}
+                strokeDasharray="3 3"
+              />
+              <XAxis
+                dataKey="ts"
+                tickFormatter={formatTime}
+                minTickGap={48}
+                tick={axisTick}
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+              <YAxis
+                allowDecimals={false}
+                width={36}
+                tick={axisTick}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                content={(props) => <TrendTooltip {...props} />}
+                cursor={{ stroke: theme.palette.text.secondary, strokeWidth: 1 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="active"
+                stroke={stroke}
+                fill="url(#colorActive)"
+                strokeWidth={2}
+                activeDot={{
+                  r: 5,
+                  fill: stroke,
+                  stroke: theme.palette.background.paper,
+                  strokeWidth: 2,
+                }}
+                isAnimationActive={false}
+              />
+              {peak && isPeakCharted && (
+                <ReferenceDot
+                  x={peak.ts}
+                  y={peak.active}
+                  r={5}
+                  fill={theme.palette.warning.main}
+                  stroke={theme.palette.background.paper}
+                  strokeWidth={2}
+                />
+              )}
+            </AreaChart>
+          </ResponsiveContainer>
         )}
       </Box>
-      {loading ? (
-        <Box
-          sx={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            Loading trend…
-          </Typography>
-        </Box>
-      ) : (
-        <ResponsiveContainer width="100%" height="85%">
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.7} />
-                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.05} />
-              </linearGradient>
-            </defs>
-            <XAxis
-              dataKey="ts"
-              tickFormatter={(v) => dayjs(v).format('HH:mm')}
-              minTickGap={40}
-            />
-            <YAxis />
-            <Tooltip
-              labelFormatter={(v) => dayjs(v).format('HH:mm:ss')}
-              formatter={(val) => [`${val} listeners`, 'Active']}
-            />
-            <Area
-              type="monotone"
-              dataKey="active"
-              stroke="#06b6d4"
-              fill="url(#colorActive)"
-              strokeWidth={2}
-              isAnimationActive={false}
-            />
-            {peak && isPeakCharted && (
-              <ReferenceDot
-                x={peak.ts}
-                y={peak.active}
-                r={4}
-                fill="#ef4444"
-                stroke="#fff"
-                strokeWidth={1}
-              />
-            )}
-          </AreaChart>
-        </ResponsiveContainer>
-      )}
-    </Paper>
+    </DashboardCard>
   );
 };
