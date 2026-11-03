@@ -49,6 +49,9 @@ const Layout: React.FC = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  // On phones the drawer overlays the page, so close it once a page is picked.
+  const closeMobileDrawer = () => setMobileOpen(false);
+
   const menuItems = [
     { text: t('nav.dashboard'), icon: <Dashboard />, path: '/admin' },
     {
@@ -96,6 +99,7 @@ const Layout: React.FC = () => {
             <ListItemButton
               component={Link}
               to={item.path}
+              onClick={closeMobileDrawer}
               selected={location.pathname === item.path}
               sx={{
                 mx: 1,
@@ -148,13 +152,13 @@ const Layout: React.FC = () => {
           ml: { md: `${drawerWidth}px` },
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ px: { xs: 1, sm: 2 }, gap: { xs: 0.5, sm: 0 } }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: 'none' } }}
+            sx={{ mr: { xs: 0.5, sm: 2 }, display: { md: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
@@ -163,12 +167,16 @@ const Layout: React.FC = () => {
             noWrap
             component="div"
             color="text.primary"
-            sx={{ flexGrow: 1 }}
+            sx={{
+              flexGrow: 1,
+              minWidth: 0,
+              fontSize: { xs: '1rem', sm: '1.25rem' },
+            }}
           >
             {menuItems.find((item) => item.path === location.pathname)?.text ||
               t('nav.dashboard')}
           </Typography>
-          <Box sx={{ mx: { xs: 1, sm: 2 }, minWidth: 0 }}>
+          <Box sx={{ mx: { xs: 0, sm: 2 }, minWidth: 0, flexShrink: 0 }}>
             <RadioStreamPlayer
               variant="compact"
               streamUrl={`${studioBaseUrl}/listen`}
@@ -224,13 +232,17 @@ const Layout: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          // Let wide children (tables, charts) scroll inside themselves
+          // instead of pushing the page sideways on phones.
+          minWidth: 0,
+          p: { xs: 1.5, sm: 2 },
           width: { md: `calc(100% - ${drawerWidth}px)` },
-          mt: '64px',
-          minHeight: 'calc(100vh - 64px)',
+          minHeight: '100dvh',
           backgroundColor: theme.palette.background.default,
         }}
       >
+        {/* Spacer matching the app bar height, which MUI shrinks on phones. */}
+        <Toolbar />
         {!isAuthenticated && !isLoading && <Login shouldRedirect={false} />}
         {isLoading && <CircularProgress />}
         {isAuthenticated && <Outlet />}

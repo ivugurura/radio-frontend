@@ -42,7 +42,10 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const label = t('language');
 
   return (
-    <FormControl size={size} sx={{ minWidth: variant === 'short' ? 88 : 140 }}>
+    <FormControl
+      size={size}
+      sx={{ minWidth: variant === 'short' ? { xs: 64, sm: 88 } : 140 }}
+    >
       {withLabel && (
         <InputLabel id="language-selector-label">{label}</InputLabel>
       )}
@@ -55,7 +58,15 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         startAdornment={
           <TranslateRoundedIcon
             fontSize="small"
-            sx={{ mr: 1, color: 'text.secondary' }}
+            sx={{
+              mr: 1,
+              color: 'text.secondary',
+              // The short variant sits in the phone app bar; the code alone is enough there.
+              display:
+                variant === 'short'
+                  ? { xs: 'none', sm: 'inline-block' }
+                  : undefined,
+            }}
           />
         }
       >

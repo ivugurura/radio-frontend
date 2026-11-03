@@ -93,6 +93,7 @@ const NowPlayingHero: React.FC<{ item: QueueItem }> = ({ item }) => {
   return (
     <Box
       sx={(theme) => ({
+        minWidth: 0,
         p: { xs: 1.5, sm: 2 },
         borderRadius: 3,
         background: `linear-gradient(135deg, ${alpha(
@@ -181,6 +182,7 @@ const EmptyState: React.FC<{ title: string; hint: string }> = ({
     spacing={2}
     alignItems="center"
     sx={(theme) => ({
+      minWidth: 0,
       p: { xs: 1.5, sm: 2 },
       borderRadius: 3,
       border: '1px dashed',
@@ -288,7 +290,14 @@ export const CurrentQueueSlider: React.FC<CurrentQueueSliderProps> = ({
       <Box
         display="grid"
         gap={{ xs: 2, md: 3 }}
-        sx={{ gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 5fr) minmax(0, 7fr)' } }}
+        sx={{
+          // minmax(0, …) lets the columns shrink below a long nowrap title,
+          // so it ellipsizes instead of widening the page on phones.
+          gridTemplateColumns: {
+            xs: 'minmax(0, 1fr)',
+            md: 'minmax(0, 5fr) minmax(0, 7fr)',
+          },
+        }}
       >
         {current ? (
           <NowPlayingHero item={current} />
