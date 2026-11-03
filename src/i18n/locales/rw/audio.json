@@ -64,5 +64,71 @@
   "unmute": "Fungura ijwi",
   "volume": "Ingano y'ijwi",
   "closePlayer": "Funga player",
-  "playbackError": "Ntibyashobotse gufungura iyi ndirimbo"
+  "playbackError": "Ntibyashobotse gufungura iyi ndirimbo",
+  "upload": {
+    "title": "Shyiraho indirimbo",
+    "subtitle": "Ongera indirimbo mu bubiko bw'iyi sitidiyo. Zihita zitunganyirizwa gucurangwa kuri radiyo.",
+    "dropTitle": "Kurura amajwi uyashyire hano, cyangwa ukande uhitemo",
+    "dropHint": "Ushobora guhitamo amajwi menshi icyarimwe (kugeza kuri {{batch}} ni byiza)",
+    "concurrencyHint_one": "Ijwi {{count}} rishyirwaho icyarimwe",
+    "concurrencyHint_other": "Amajwi {{count}} ashyirwaho icyarimwe",
+    "summary": {
+      "files_one": "Ijwi {{count}} • {{size}}",
+      "files_other": "Amajwi {{count}} • {{size}}",
+      "uploading": "{{count}} arimo koherezwa",
+      "done": "{{count}} yarangiye",
+      "errors_one": "{{count}} ryanze",
+      "errors_other": "{{count}} yanze"
+    },
+    "status": {
+      "queued": "Rirategereje",
+      "requesting": "Birategurwa",
+      "uploading": "Ririmo koherezwa",
+      "finalizing": "Birarangira",
+      "done": "Byarangiye",
+      "error": "Byanze",
+      "canceled": "Byahagaritswe"
+    },
+    "actions": {
+      "start": "Tangira",
+      "retry": "Ongera ugerageze",
+      "cancel": "Hagarika",
+      "remove": "Kuramo ku rutonde",
+      "close": "Funga",
+      "clearFinished": "Kuraho ibyarangiye",
+      "cancelRunning": "Hagarika ibiri gukorwa",
+      "startAll_one": "Ohereza ijwi {{count}}",
+      "startAll_other": "Ohereza amajwi {{count}}"
+    },
+    "warnings": {
+      "skipped_one": "Dosiye {{count}} yasimbutswe kuko atari ijwi.",
+      "skipped_other": "Dosiye {{count}} zasimbutswe kuko atari amajwi.",
+      "largeBatch": "Hari amajwi {{count}} ku rutonde. Kohereza {{batch}} cyangwa munsi yayo byoroshye gukurikirana no gusubukura iyo interineti icitse.",
+      "largeFiles_one": "Ijwi {{count}} rirengeje {{size}}. Rizoherezwa ariko bizatinda. Byaba byiza urisohoye nka MP3 cyangwa FLAC aho kuba WAV.",
+      "largeFiles_other": "Amajwi {{count}} arengeje {{size}}. Azoherezwa ariko bizatinda. Byaba byiza uyasohoye nka MP3 cyangwa FLAC aho kuba WAV."
+    },
+    "errors": {
+      "session": "Ntibyashobotse gutangira kohereza. Ongera ugerageze.",
+      "finalize": "Ijwi ryoherejwe ariko ntiryashoboye gushyirwa ku murongo wo gutunganywa."
+    },
+    "guidelines": {
+      "title": "Inama zo kohereza",
+      "formats": {
+        "title": "Ubwoko",
+        "body": "MP3, WAV, FLAC, M4A cyangwa OGG; byiza ni 192 kbps+ cyangwa lossless. Bihindurwa MP3 ya {{kbps}} kbps."
+      },
+      "batch": {
+        "title": "Umubare",
+        "body": "Kugeza ku majwi {{batch}}, buri rimwe munsi ya {{size}}; {{concurrency}} yoherezwa icyarimwe."
+      },
+      "tags": {
+        "title": "Amakuru",
+        "body": "Umutwe, umuhanzi na alubumu bisomwa mu makuru y'ijwi (tags); volume iringanizwa ubwayo."
+      },
+      "connection": {
+        "title": "Guma hano",
+        "body": "Ntufunge iri dirishya kugeza byose birangiye; ongera ugerageze ibyanze. Indirimbo ziba ziteguye nyuma y’iminota mike."
+      }
+    }
+  }
 }

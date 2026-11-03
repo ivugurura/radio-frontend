@@ -64,5 +64,71 @@
   "unmute": "Unmute",
   "volume": "Volume",
   "closePlayer": "Close player",
-  "playbackError": "Could not load this track"
+  "playbackError": "Could not load this track",
+  "upload": {
+    "title": "Upload audio",
+    "subtitle": "Add tracks to this studio's library. They are converted for broadcast automatically.",
+    "dropTitle": "Drag and drop audio files here, or click to browse",
+    "dropHint": "You can select several files at once (up to {{batch}} per batch works best)",
+    "concurrencyHint_one": "{{count}} file uploads at a time",
+    "concurrencyHint_other": "{{count}} files upload at a time",
+    "summary": {
+      "files_one": "{{count}} file • {{size}}",
+      "files_other": "{{count}} files • {{size}}",
+      "uploading": "{{count}} uploading",
+      "done": "{{count}} done",
+      "errors_one": "{{count}} failed",
+      "errors_other": "{{count}} failed"
+    },
+    "status": {
+      "queued": "Waiting",
+      "requesting": "Preparing",
+      "uploading": "Uploading",
+      "finalizing": "Finishing",
+      "done": "Done",
+      "error": "Failed",
+      "canceled": "Canceled"
+    },
+    "actions": {
+      "start": "Start",
+      "retry": "Retry",
+      "cancel": "Cancel",
+      "remove": "Remove from list",
+      "close": "Close",
+      "clearFinished": "Clear finished",
+      "cancelRunning": "Cancel running",
+      "startAll_one": "Upload {{count}} file",
+      "startAll_other": "Upload {{count}} files"
+    },
+    "warnings": {
+      "skipped_one": "{{count}} file was skipped because it is not an audio file.",
+      "skipped_other": "{{count}} files were skipped because they are not audio files.",
+      "largeBatch": "{{count}} files are in the list. Batches of {{batch}} or fewer are easier to follow and recover if the connection drops.",
+      "largeFiles_one": "{{count}} file is larger than {{size}}. It will work but take longer. Consider exporting it as MP3 or FLAC instead of WAV.",
+      "largeFiles_other": "{{count}} files are larger than {{size}}. They will work but take longer. Consider exporting them as MP3 or FLAC instead of WAV."
+    },
+    "errors": {
+      "session": "Could not start the upload. Please try again.",
+      "finalize": "The file was sent but could not be queued for processing."
+    },
+    "guidelines": {
+      "title": "Upload tips",
+      "formats": {
+        "title": "Formats",
+        "body": "MP3, WAV, FLAC, M4A or OGG; best at 192 kbps+ or lossless. Converted to {{kbps}} kbps MP3."
+      },
+      "batch": {
+        "title": "Batch",
+        "body": "Up to {{batch}} files, ideally under {{size}} each; {{concurrency}} upload at once."
+      },
+      "tags": {
+        "title": "Tags",
+        "body": "Title, artist and album are read from file tags; volume is levelled automatically."
+      },
+      "connection": {
+        "title": "Stay here",
+        "body": "Keep this window open until all are Done; Retry any that fail. Tracks are Ready a few minutes later."
+      }
+    }
+  }
 }

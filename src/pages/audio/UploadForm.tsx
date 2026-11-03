@@ -4,32 +4,46 @@ import React, {
   useState,
   useRef,
   useEffect,
-} from 'react';
+} from "react";
 import {
+  Alert,
   Box,
   Button,
-  LinearProgress,
-  Typography,
-  Paper,
+  Chip,
   Dialog,
-  Stack,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  LinearProgress,
   List,
   ListItem,
+  Stack,
   Tooltip,
-  IconButton,
-  ListItemText,
-} from '@mui/material';
+  Typography,
+} from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import {
   PlayArrow as PlayArrowIcon,
   Cancel as CancelIcon,
   Replay as ReplayIcon,
-} from '@mui/icons-material';
+  Close as CloseIcon,
+  DeleteOutline as DeleteOutlineIcon,
+  CloudUploadOutlined as CloudUploadIcon,
+  AudioFileOutlined as AudioFileIcon,
+  TipsAndUpdatesOutlined as TipsIcon,
+  GraphicEqOutlined as FormatIcon,
+  LayersOutlined as BatchIcon,
+  LabelOutlined as TagsIcon,
+  WifiOutlined as ConnectionIcon,
+} from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import {
   useFinalizeUploadMutation,
   useRequestUploadMutation,
-} from '@graphql/hooks';
-import { BASE_API_URL } from '@libs/constants';
-import { useStudioId } from '@components/providers';
+} from "@graphql/hooks";
+import { BASE_API_URL } from "@libs/constants";
+import { useStudioId } from "@components/providers";
 
 /**
  * UploadForm
@@ -47,19 +61,23 @@ import { useStudioId } from '@components/providers';
  * - Resumability:
  *   The server returns {"received": <bytes>} after each chunk. The client will use that
  *   value to continue uploading from where the server last recorded.
- *
- * Integration:
- * - Apollo client must be configured in your app.
- * - GraphQL mutations below match the Django schema used in the backend.
  */
 
 const DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1 MB
 const MAX_CONCURRENCY = 3; // adjust as needed
 const MAX_CHECKSUM_SIZE = 32 * 1024 * 1024; // 32 MB: compute SHA-256 client-side up to this size
 
+// Soft limits shown in the guidelines; exceeding them warns but never blocks.
+const RECOMMENDED_BATCH_SIZE = 20;
+const RECOMMENDED_MAX_FILE_SIZE = 250 * 1024 * 1024; // 250 MB
+
+// Mirrors the backend transcoder defaults (DEFAULT_TARGET_BR_KBPS / DEFAULT_TARGET_SR_HZ).
+const TARGET_BITRATE_KBPS = 128;
+const TARGET_SAMPLE_RATE_KHZ = 48;
+
 function formatBytes(n: number) {
   if (n < 1024) return `${n} B`;
-  const units = ['KB', 'MB', 'GB', 'TB'];
+  const units = ["KB", "MB", "GB", "TB"];
   let i = -1;
   do {
     n = n / 1024;
@@ -70,13 +88,19 @@ function formatBytes(n: number) {
 
 async function computeSHA256(file: File): Promise<string | null> {
   // Avoid large memory usage on big files; backend accepts checksum as optional
-  if (!('crypto' in window) || !('subtle' in window.crypto)) return null;
+  if (!("crypto" in window) || !("subtle" in window.crypto)) return null;
   if (file.size > MAX_CHECKSUM_SIZE) return null;
   const buf = await file.arrayBuffer();
-  const hash = await window.crypto.subtle.digest('SHA-256', buf);
+  const hash = await window.crypto.subtle.digest("SHA-256", buf);
   return Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function isAudioFile(file: File) {
+  if (file.type) return file.type.startsWith("audio/");
+  // Some browsers leave type empty for e.g. .flac; fall back to the extension.
+  return /\.(mp3|wav|flac|m4a|aac|ogg|oga|opus|wma|aiff?)$/i.test(file.name);
 }
 
 type UploadFormProps = Readonly<{
@@ -87,13 +111,13 @@ type UploadFormProps = Readonly<{
 }>;
 
 type UploadStatus =
-  | 'queued'
-  | 'requesting'
-  | 'uploading'
-  | 'finalizing'
-  | 'done'
-  | 'error'
-  | 'canceled';
+  | "queued"
+  | "requesting"
+  | "uploading"
+  | "finalizing"
+  | "done"
+  | "error"
+  | "canceled";
 
 type UploadItem = {
   id: string; // local UI id
@@ -102,6 +126,7 @@ type UploadItem = {
   bytesSent: number;
   totalBytes: number;
   status: UploadStatus;
+  /** Error detail from the server or network; status labels come from i18n. */
   message?: string;
 
   // server session
@@ -114,27 +139,56 @@ type UploadItem = {
   abort?: AbortController;
 };
 
+const ACTIVE_STATUSES: UploadStatus[] = [
+  "requesting",
+  "uploading",
+  "finalizing",
+];
+const STARTABLE_STATUSES: UploadStatus[] = ["queued", "error", "canceled"];
+
 const PROGRESS_COLOR: Partial<
-  Record<UploadStatus, 'error' | 'success' | 'primary'>
+  Record<UploadStatus, "error" | "success" | "primary">
 > = {
-  error: 'error',
-  done: 'success',
+  error: "error",
+  done: "success",
 };
+
+const STATUS_CHIP_COLOR: Record<
+  UploadStatus,
+  "default" | "primary" | "success" | "error" | "warning"
+> = {
+  queued: "default",
+  requesting: "primary",
+  uploading: "primary",
+  finalizing: "primary",
+  done: "success",
+  error: "error",
+  canceled: "warning",
+};
+
+const GUIDELINES = [
+  { key: "formats", icon: FormatIcon },
+  { key: "batch", icon: BatchIcon },
+  { key: "tags", icon: TagsIcon },
+  { key: "connection", icon: ConnectionIcon },
+] as const;
 
 export const UploadForm = ({
   open,
   onClose,
   onTracksChanged,
 }: UploadFormProps) => {
+  const { t } = useTranslation("audio");
   const studioId = useStudioId();
   const [items, setItems] = useState<UploadItem[]>([]);
   const [running, setRunning] = useState(0);
   const [autoStart, setAutoStart] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [skippedCount, setSkippedCount] = useState(0);
 
   const [requestUpload] = useRequestUploadMutation();
   const [finalizeUpload] = useFinalizeUploadMutation();
 
-  const queueRef = useRef<UploadItem[]>([]);
   const runningRef = useRef(0);
   const itemsRef = useRef(items);
   itemsRef.current = items;
@@ -147,31 +201,50 @@ export const UploadForm = ({
 
   const addFiles = useCallback((files: FileList | null) => {
     if (!files || files.length === 0) return;
-    const newItems: UploadItem[] = Array.from(files).map((file) => ({
+    const all = Array.from(files);
+    const audio = all.filter(isAudioFile);
+    setSkippedCount(all.length - audio.length);
+    const newItems: UploadItem[] = audio.map((file) => ({
       id: crypto.randomUUID(),
       file,
-      status: 'queued',
+      status: "queued",
       progress: 0,
       bytesSent: 0,
       totalBytes: file.size,
     }));
     setItems((prev) => [...newItems, ...prev]);
-    queueRef.current = [...newItems, ...queueRef.current];
-    // Optional auto-start
-    // setAutoStart(true);
   }, []);
 
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       addFiles(e.target.files);
-      e.currentTarget.value = ''; // reset so same file can be chosen again
+      e.currentTarget.value = ""; // reset so same file can be chosen again
+    },
+    [addFiles],
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragging(false);
+      addFiles(e.dataTransfer.files);
     },
     [addFiles],
   );
 
   const startOne = useCallback(
     async (item: UploadItem) => {
-      if (item.status !== 'queued' && item.status !== 'error') return;
+      if (!STARTABLE_STATUSES.includes(item.status)) return;
 
       runningRef.current += 1;
       setRunning(runningRef.current);
@@ -180,8 +253,8 @@ export const UploadForm = ({
       const file = item.file;
       const abort = new AbortController();
       updateItem(id, {
-        status: 'requesting',
-        message: 'Requesting session...',
+        status: "requesting",
+        message: undefined,
         abort,
         progress: 0,
         bytesSent: 0,
@@ -193,19 +266,18 @@ export const UploadForm = ({
             studioSlug: studioId,
             fileName: file.name,
             sizeBytes: file.size,
-            mimeType: file.type || 'application/octet-stream',
+            mimeType: file.type || "application/octet-stream",
           },
         });
         const payload = req.data?.requestUpload;
-        if (!payload) throw new Error('Failed to obtain upload session');
+        if (!payload) throw new Error(t("upload.errors.session"));
 
         updateItem(id, {
           uploadId: payload.uploadId,
           chunkUrl: payload.chunkUrl!,
           uploadToken: payload.uploadToken!,
           trackId: payload.trackId,
-          status: 'uploading',
-          message: 'Uploading...',
+          status: "uploading",
         });
         onTracksChanged?.();
 
@@ -221,17 +293,17 @@ export const UploadForm = ({
           const uploadUrl = BASE_API_URL + payload.chunkUrl;
 
           const resp = await fetch(uploadUrl, {
-            method: 'PUT',
+            method: "PUT",
             headers: {
-              'Content-Range': contentRange!,
-              'X-Upload-Token': payload.uploadToken!,
+              "Content-Range": contentRange!,
+              "X-Upload-Token": payload.uploadToken!,
             },
             body: blob,
             signal: abort.signal,
           });
 
           if (!resp.ok) {
-            const text = await resp.text().catch(() => '');
+            const text = await resp.text().catch(() => "");
             throw new Error(
               `Chunk failed: ${resp.status} ${resp.statusText} ${text}`,
             );
@@ -241,7 +313,7 @@ export const UploadForm = ({
             received?: number;
           };
           const received =
-            typeof json.received === 'number' ? json.received : end + 1;
+            typeof json.received === "number" ? json.received : end + 1;
           start = received;
 
           updateItem(id, {
@@ -250,33 +322,29 @@ export const UploadForm = ({
           });
         }
 
-        updateItem(id, { status: 'finalizing', message: 'Finalizing...' });
+        updateItem(id, { status: "finalizing" });
         const checksum = await computeSHA256(file).catch(() => null);
 
         const fin = await finalizeUpload({
           variables: { uploadId: payload.uploadId, checksumSha256: checksum },
         });
         if (!fin.data?.finalizeUpload?.ok) {
-          throw new Error('Finalize failed');
+          throw new Error(t("upload.errors.finalize"));
         }
 
-        updateItem(id, {
-          status: 'done',
-          message: 'Queued for processing',
-          progress: 100,
-        });
+        updateItem(id, { status: "done", progress: 100 });
         onTracksChanged?.();
       } catch (err: unknown) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          updateItem(id, { status: 'canceled', message: 'Upload canceled' });
+        if (err instanceof Error && err.name === "AbortError") {
+          updateItem(id, { status: "canceled" });
         } else if (err instanceof Error) {
           updateItem(id, {
-            status: 'error',
+            status: "error",
             message: err.message,
           });
         } else {
           updateItem(id, {
-            status: 'error',
+            status: "error",
             message: String(err),
           });
         }
@@ -285,7 +353,7 @@ export const UploadForm = ({
         setRunning(runningRef.current);
       }
     },
-    [requestUpload, finalizeUpload, studioId, updateItem, onTracksChanged],
+    [requestUpload, finalizeUpload, studioId, updateItem, onTracksChanged, t],
   );
 
   const schedule = useCallback(() => {
@@ -293,7 +361,7 @@ export const UploadForm = ({
     const available = MAX_CONCURRENCY - runningRef.current;
 
     const candidates = itemsRef.current.filter(
-      (it) => it.status === 'queued' || it.status === 'error',
+      (it) => it.status === "queued" || it.status === "error",
     );
     const nextBatch = candidates.slice(0, available);
     nextBatch.forEach((it) => startOne(it));
@@ -311,12 +379,7 @@ export const UploadForm = ({
   const onPauseAll = useCallback(() => {
     setAutoStart(false);
     itemsRef.current.forEach((it) => {
-      if (
-        (it.status === 'uploading' ||
-          it.status === 'finalizing' ||
-          it.status === 'requesting') &&
-        it.abort
-      ) {
+      if (ACTIVE_STATUSES.includes(it.status) && it.abort) {
         it.abort.abort();
       }
     });
@@ -338,28 +401,166 @@ export const UploadForm = ({
     }
   }, []);
 
+  const onRemoveOne = useCallback((id: string) => {
+    setItems((prev) => prev.filter((it) => it.id !== id));
+  }, []);
+
+  const onClearFinished = useCallback(() => {
+    setItems((prev) => prev.filter((it) => it.status !== "done"));
+  }, []);
+
   const summary = useMemo(() => {
     const total = items.length;
-    const done = items.filter((i) => i.status === 'done').length;
-    const errors = items.filter((i) => i.status === 'error').length;
-    const uploading = items.filter(
-      (i) =>
-        i.status === 'uploading' ||
-        i.status === 'finalizing' ||
-        i.status === 'requesting',
+    const done = items.filter((i) => i.status === "done").length;
+    const errors = items.filter((i) => i.status === "error").length;
+    const uploading = items.filter((i) =>
+      ACTIVE_STATUSES.includes(i.status),
     ).length;
-    return { total, done, errors, uploading, running };
+    const pending = items.filter((i) => i.status === "queued").length;
+    const totalBytes = items.reduce((acc, i) => acc + i.totalBytes, 0);
+    const sentBytes = items.reduce((acc, i) => acc + i.bytesSent, 0);
+    const oversized = items.filter(
+      (i) => i.status === "queued" && i.totalBytes > RECOMMENDED_MAX_FILE_SIZE,
+    ).length;
+    const overallProgress =
+      totalBytes > 0 ? Math.round((sentBytes / totalBytes) * 100) : 0;
+    return {
+      total,
+      done,
+      errors,
+      uploading,
+      pending,
+      running,
+      totalBytes,
+      oversized,
+      overallProgress,
+    };
   }, [items, running]);
 
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <Paper sx={{ p: 3, maxWidth: 980, mx: 'auto' }}>
-        <Stack spacing={2}>
-          <Typography variant="h6">Upload audio (multiple files)</Typography>
+  const handleDialogClose = useCallback(
+    (_e: unknown, reason?: "backdropClick" | "escapeKeyDown") => {
+      // Avoid losing the queue to a stray click while files are uploading.
+      if (reason === "backdropClick" && summary.uploading > 0) return;
+      onClose();
+    },
+    [onClose, summary.uploading],
+  );
 
-          <Stack direction="row" spacing={2}>
-            <Button variant="contained" component="label">
-              Select Files{' '}
+  const guidelineValues = {
+    kbps: TARGET_BITRATE_KBPS,
+    khz: TARGET_SAMPLE_RATE_KHZ,
+    batch: RECOMMENDED_BATCH_SIZE,
+    concurrency: MAX_CONCURRENCY,
+    size: formatBytes(RECOMMENDED_MAX_FILE_SIZE),
+  };
+
+  const renderRowActions = (it: UploadItem) => {
+    if (ACTIVE_STATUSES.includes(it.status)) {
+      return (
+        <Tooltip title={t("upload.actions.cancel")}>
+          <IconButton onClick={() => onCancelOne(it.id)} size="small">
+            <CancelIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      );
+    }
+    return (
+      <>
+        {STARTABLE_STATUSES.includes(it.status) && (
+          <Tooltip
+            title={
+              it.status === "queued"
+                ? t("upload.actions.start")
+                : t("upload.actions.retry")
+            }
+          >
+            <IconButton onClick={() => onStartOne(it.id)} size="small">
+              {it.status === "queued" ? (
+                <PlayArrowIcon fontSize="small" />
+              ) : (
+                <ReplayIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+        )}
+        <Tooltip title={t("upload.actions.remove")}>
+          <IconButton onClick={() => onRemoveOne(it.id)} size="small">
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </>
+    );
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={handleDialogClose}
+      maxWidth="lg"
+      fullWidth
+      slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+    >
+      <DialogTitle sx={{ pr: 6 }}>
+        <Typography variant="h6" component="span" sx={{ fontWeight: 700 }}>
+          {t("upload.title")}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {t("upload.subtitle")}
+        </Typography>
+        <IconButton
+          aria-label={t("upload.actions.close")}
+          onClick={onClose}
+          sx={{ position: "absolute", right: 12, top: 12 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent dividers>
+        <Box
+          sx={{
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "minmax(0, 2fr) minmax(0, 1fr)",
+            },
+          }}
+        >
+          {/* Left: drop zone + queue */}
+          <Stack spacing={2} sx={{ minWidth: 0 }}>
+            <Box
+              component="label"
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              sx={(theme) => ({
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+                py: 4,
+                px: 2,
+                textAlign: "center",
+                cursor: "pointer",
+                borderRadius: 2,
+                border: "2px dashed",
+                borderColor: dragging ? "primary.main" : "divider",
+                bgcolor: dragging
+                  ? alpha(theme.palette.primary.main, 0.08)
+                  : "action.hover",
+                transition: "border-color 120ms, background-color 120ms",
+                "&:hover": { borderColor: "primary.main" },
+              })}
+            >
+              <CloudUploadIcon color="primary" sx={{ fontSize: 44 }} />
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                {t("upload.dropTitle")}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {t("upload.dropHint", { batch: RECOMMENDED_BATCH_SIZE })}
+              </Typography>
               <input
                 hidden
                 type="file"
@@ -367,151 +568,244 @@ export const UploadForm = ({
                 multiple
                 onChange={handleFileInput}
               />
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={onStartAll}
-              disabled={
-                items.length === 0 ||
-                summary.uploading > 0 ||
-                summary.done === summary.total
-              }
-            >
-              Start All
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={onPauseAll}
-              disabled={summary.uploading === 0}
-            >
-              Cancel Running
-            </Button>
+            </Box>
+
+            {skippedCount > 0 && (
+              <Alert severity="warning" onClose={() => setSkippedCount(0)}>
+                {t("upload.warnings.skipped", { count: skippedCount })}
+              </Alert>
+            )}
+            {summary.total > RECOMMENDED_BATCH_SIZE && (
+              <Alert severity="info">
+                {t("upload.warnings.largeBatch", {
+                  count: summary.total,
+                  batch: RECOMMENDED_BATCH_SIZE,
+                })}
+              </Alert>
+            )}
+            {summary.oversized > 0 && (
+              <Alert severity="info">
+                {t("upload.warnings.largeFiles", {
+                  count: summary.oversized,
+                  size: formatBytes(RECOMMENDED_MAX_FILE_SIZE),
+                })}
+              </Alert>
+            )}
+
+            {items.length > 0 && (
+              <Box>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  flexWrap="wrap"
+                  useFlexGap
+                  spacing={1}
+                  sx={{ mb: 1 }}
+                >
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    <Chip
+                      size="small"
+                      label={t("upload.summary.files", {
+                        count: summary.total,
+                        size: formatBytes(summary.totalBytes),
+                      })}
+                    />
+                    {summary.uploading > 0 && (
+                      <Chip
+                        size="small"
+                        color="primary"
+                        label={t("upload.summary.uploading", {
+                          count: summary.uploading,
+                        })}
+                      />
+                    )}
+                    {summary.done > 0 && (
+                      <Chip
+                        size="small"
+                        color="success"
+                        label={t("upload.summary.done", {
+                          count: summary.done,
+                        })}
+                      />
+                    )}
+                    {summary.errors > 0 && (
+                      <Chip
+                        size="small"
+                        color="error"
+                        label={t("upload.summary.errors", {
+                          count: summary.errors,
+                        })}
+                      />
+                    )}
+                  </Stack>
+                  {summary.done > 0 && (
+                    <Button size="small" onClick={onClearFinished}>
+                      {t("upload.actions.clearFinished")}
+                    </Button>
+                  )}
+                </Stack>
+                <LinearProgress
+                  variant="determinate"
+                  value={summary.overallProgress}
+                  sx={{ height: 6, borderRadius: 3 }}
+                />
+              </Box>
+            )}
+
+            {items.length > 0 && (
+              <List
+                dense
+                disablePadding
+                sx={{
+                  maxHeight: 360,
+                  overflow: "auto",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                }}
+              >
+                {items.map((it, idx) => (
+                  <ListItem
+                    key={it.id}
+                    divider={idx < items.length - 1}
+                    sx={{ py: 1.25, alignItems: "flex-start", gap: 1.5 }}
+                  >
+                    <AudioFileIcon color="action" sx={{ mt: 0.25 }} />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={1}
+                        sx={{ mb: 0.5 }}
+                      >
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          title={it.file.name}
+                          sx={{ fontWeight: 600, flex: 1, minWidth: 0 }}
+                        >
+                          {it.file.name}
+                        </Typography>
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          color={STATUS_CHIP_COLOR[it.status]}
+                          label={t(`upload.status.${it.status}`)}
+                        />
+                      </Stack>
+                      <LinearProgress
+                        variant="determinate"
+                        value={it.progress}
+                        color={PROGRESS_COLOR[it.status] ?? "primary"}
+                        sx={{ borderRadius: 2 }}
+                      />
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        spacing={1}
+                        sx={{ mt: 0.5 }}
+                      >
+                        <Typography
+                          variant="caption"
+                          color={it.message ? "error" : "text.secondary"}
+                          noWrap
+                          title={it.message}
+                          sx={{ minWidth: 0 }}
+                        >
+                          {it.message ?? ""}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ whiteSpace: "nowrap" }}
+                        >
+                          {formatBytes(it.bytesSent)} /{" "}
+                          {formatBytes(it.totalBytes)} • {it.progress}%
+                        </Typography>
+                      </Stack>
+                    </Box>
+                    <Stack direction="row" spacing={0.5}>
+                      {renderRowActions(it)}
+                    </Stack>
+                  </ListItem>
+                ))}
+              </List>
+            )}
           </Stack>
 
-          <Typography variant="body2" color="text.secondary">
-            Concurrency: {MAX_CONCURRENCY} • Total: {summary.total} • Running:{' '}
-            {summary.running} • Done: {summary.done} • Errors: {summary.errors}
-          </Typography>
-
-          <List
-            dense
+          {/* Right: guidelines */}
+          <Box
             sx={{
-              maxHeight: 520,
-              overflow: 'auto',
-              border: '1px solid',
-              borderColor: 'divider',
-              borderRadius: 1,
+              p: 2,
+              borderRadius: 2,
+              bgcolor: "action.hover",
+              alignSelf: "start",
             }}
           >
-            {items.map((it) => (
-              <ListItem
-                key={it.id}
-                secondaryAction={
-                  <Stack direction="row" spacing={1}>
-                    {(it.status === 'queued' || it.status === 'error') && (
-                      <Tooltip
-                        title={it.status === 'queued' ? 'Start' : 'Retry'}
-                      >
-                        <IconButton
-                          onClick={() => onStartOne(it.id)}
-                          size="small"
-                        >
-                          {it.status === 'queued' ? (
-                            <PlayArrowIcon />
-                          ) : (
-                            <ReplayIcon />
-                          )}
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {(it.status === 'requesting' ||
-                      it.status === 'uploading' ||
-                      it.status === 'finalizing') && (
-                      <Tooltip title="Cancel">
-                        <IconButton
-                          onClick={() => onCancelOne(it.id)}
-                          size="small"
-                        >
-                          <CancelIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Stack>
-                }
-              >
-                <Box sx={{ width: '100%' }}>
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    spacing={2}
-                    sx={{ mb: 0.5 }}
-                  >
-                    <ListItemText
-                      primary={
-                        <Stack direction="row" spacing={1}>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {it.file.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            ({formatBytes(it.totalBytes)})
-                          </Typography>
-                        </Stack>
-                      }
-                      secondary={
-                        <Typography variant="caption" color="text.secondary">
-                          {it.status.toUpperCase()}
-                          {it.trackId ? ` • track ${it.trackId}` : ''}
-                          {it.message ? ` — ${it.message}` : ''}
-                        </Typography>
-                      }
-                      sx={{ mr: 2 }}
-                    />
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ minWidth: 120, textAlign: 'right' }}
-                    >
-                      {formatBytes(it.bytesSent)} / {formatBytes(it.totalBytes)}{' '}
-                      • {it.progress}%
-                    </Typography>
-                  </Stack>
-                  <LinearProgress
-                    variant="determinate"
-                    value={it.progress}
-                    color={PROGRESS_COLOR[it.status] ?? 'primary'}
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ mb: 1.25 }}
+            >
+              <TipsIcon color="primary" fontSize="small" />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                {t("upload.guidelines.title")}
+              </Typography>
+            </Stack>
+            <Stack spacing={1}>
+              {GUIDELINES.map(({ key, icon: Icon }) => (
+                <Stack key={key} direction="row" spacing={1}>
+                  <Icon
+                    fontSize="small"
+                    sx={{ color: "text.secondary", mt: 0.125 }}
                   />
-                </Box>
-              </ListItem>
-            ))}
-          </List>
-
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              Notes:
-            </Typography>
-            <ul>
-              <li>
-                Each file is uploaded using 1 MB chunks with Content-Range and
-                X-Upload-Token.
-              </li>
-              <li>
-                Up to {MAX_CONCURRENCY} uploads run in parallel; you can adjust
-                MAX_CONCURRENCY in the component.
-              </li>
-              <li>
-                SHA‑256 is computed client‑side only for files ≤{' '}
-                {formatBytes(MAX_CHECKSUM_SIZE)} to avoid excessive memory;
-                checksum is optional.
-              </li>
-              <li>
-                After finalize, the server enqueues processing (Celery + ffmpeg)
-                and publishes to your library directory.
-              </li>
-            </ul>
+                  <Typography variant="body2" color="text.secondary">
+                    <Box
+                      component="span"
+                      sx={{ fontWeight: 600, color: "text.primary" }}
+                    >
+                      {t(`upload.guidelines.${key}.title`)}:
+                    </Box>{" "}
+                    {t(`upload.guidelines.${key}.body`, guidelineValues)}
+                  </Typography>
+                </Stack>
+              ))}
+            </Stack>
           </Box>
-        </Stack>
-      </Paper>
+        </Box>
+      </DialogContent>
+
+      <DialogActions sx={{ px: 3, py: 2 }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mr: "auto" }}
+        >
+          {t("upload.concurrencyHint", { count: MAX_CONCURRENCY })}
+        </Typography>
+        <Button
+          variant="outlined"
+          color="inherit"
+          onClick={onPauseAll}
+          disabled={summary.uploading === 0}
+        >
+          {t("upload.actions.cancelRunning")}
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<CloudUploadIcon />}
+          onClick={onStartAll}
+          disabled={
+            summary.pending + summary.errors === 0 || summary.uploading > 0
+          }
+        >
+          {t("upload.actions.startAll", {
+            count: summary.pending + summary.errors,
+          })}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };
