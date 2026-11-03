@@ -20,5 +20,7 @@
     "cancel": "Bireke",
     "success": "\"{{track}}\" yasimbutswe",
     "error": "Ntibyashobotse gusimbuka indirimbo"
-  }
+  },
+  "logout": "Sohoka",
+  "signingOut": "Birimo gusohoka…"
 }

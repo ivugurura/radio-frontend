@@ -24,8 +24,10 @@ import {
   CommitOutlined,
   ForumOutlined,
   SettingsInputAntennaOutlined,
+  LogoutOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
+import { logout } from '@graphql/client';
 import { useAuth } from './providers/AuthContext';
 import { useStudioId } from './providers/LanguageContext';
 import Login from '../pages/login';
@@ -41,7 +43,8 @@ const Layout: React.FC = () => {
   const theme = useTheme();
   const location = useLocation();
   const { t } = useTranslation('layout');
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
   const studioId = useStudioId();
 
   const studioBaseUrl = `${STUDIO_URL}/${studioId}`;
@@ -77,8 +80,18 @@ const Layout: React.FC = () => {
     },
   ];
 
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await logout(); // reloads the page, so no need to reset the flag
+  };
+
+  const displayName = [user?.firstName, user?.lastName]
+    .filter(Boolean)
+    .join(' ');
+
   const drawer = (
-    <Box>
+    // Full-height column so the account section sits in the bottom-left corner.
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Box
         sx={{
           display: 'flex',
@@ -141,6 +154,57 @@ const Layout: React.FC = () => {
           </ListItem>
         ))}
       </List>
+      {isAuthenticated && (
+        <Box sx={{ mt: 'auto' }}>
+          <Divider />
+          <Box sx={{ px: 2, pt: 1.5, minWidth: 0 }}>
+            {displayName && (
+              <Typography variant="body2" fontWeight={600} noWrap>
+                {displayName}
+              </Typography>
+            )}
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              noWrap
+              component="div"
+              title={user?.email}
+            >
+              {user?.email}
+            </Typography>
+          </Box>
+          <List sx={{ pb: 1.5 }}>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={handleLogout}
+                disabled={loggingOut}
+                sx={{
+                  mx: 1,
+                  borderRadius: 2,
+                  color: theme.palette.error.main,
+                  '&:hover': {
+                    backgroundColor: theme.palette.error.light + '15',
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                  {loggingOut ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <LogoutOutlined />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={loggingOut ? t('signingOut') : t('logout')}
+                  slotProps={{
+                    primary: { fontSize: '0.9rem', fontWeight: 500 },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Box>
+      )}
     </Box>
   );
 

@@ -74,21 +74,21 @@ function sanitizeUrlPart(value: string): string {
   return value.replace(/\/+$/, '');
 }
 
-function getRefreshEndpoint(): string {
+function getAuthEndpoint(action: 'refresh' | 'logout'): string {
   if (BASE_API_URL) {
     const baseApi = sanitizeUrlPart(BASE_API_URL);
     if (baseApi.endsWith('/api')) {
-      return `${baseApi}/auth/refresh`;
+      return `${baseApi}/auth/${action}`;
     }
-    return `${baseApi}/api/auth/refresh`;
+    return `${baseApi}/api/auth/${action}`;
   }
 
   if (APP_SCHEMA) {
     const origin = new URL(APP_SCHEMA, window.location.origin).origin;
-    return `${sanitizeUrlPart(origin)}/api/auth/refresh`;
+    return `${sanitizeUrlPart(origin)}/api/auth/${action}`;
   }
 
-  return '/api/auth/refresh';
+  return `/api/auth/${action}`;
 }
 
 export function createApolloClient(
@@ -275,6 +275,39 @@ export function signOut() {
   window.location.reload();
 }
 
+/**
+ * Revokes the refresh token on the server, then ends the session locally.
+ * Holds the refresh lock so another tab can't rotate the token mid-logout and
+ * leave a fresh, unrevoked one behind. Signs out locally even if the server
+ * can't be reached; the token then simply expires (7 days).
+ */
+export async function logout(): Promise<void> {
+  const revoke = async () => {
+    const refreshToken = lStorage.getRefreshToken();
+    if (!refreshToken) return;
+    await fetch(getAuthEndpoint('logout'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': currentLanguageTag(),
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: 'same-origin',
+      signal: AbortSignal.timeout(REFRESH_TIMEOUT_MS),
+    }).catch(() => undefined);
+  };
+
+  try {
+    if (navigator.locks) {
+      await navigator.locks.request(REFRESH_LOCK, revoke);
+    } else {
+      await revoke();
+    }
+  } finally {
+    signOut();
+  }
+}
+
 // Each refresh token works once, so tabs must take turns or all but one would be rejected.
 export async function defaultRefreshAccessToken(): Promise<string | null> {
   const staleToken = lStorage.get();
@@ -312,7 +345,7 @@ async function requestAccessToken(staleToken: string): Promise<string | null> {
   }
 
   try {
-    const response = await fetch(getRefreshEndpoint(), {
+    const response = await fetch(getAuthEndpoint('refresh'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

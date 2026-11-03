@@ -20,5 +20,7 @@
     "cancel": "Cancel",
     "success": "Skipped \"{{track}}\"",
     "error": "Could not skip the track"
-  }
+  },
+  "logout": "Sign out",
+  "signingOut": "Signing out…"
 }
