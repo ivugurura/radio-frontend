@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { STUDIO_URL } from '@libs/constants';
 import {
@@ -32,6 +32,7 @@ import Login from '../pages/login';
 import RadioStreamPlayer from './RadioStreamPlayer';
 import LanguageSelector from './LanguageSelector';
 import SkipTrackButton from './SkipTrackButton';
+import PageLoader from './PageLoader';
 
 const drawerWidth = 260;
 
@@ -245,7 +246,11 @@ const Layout: React.FC = () => {
         <Toolbar />
         {!isAuthenticated && !isLoading && <Login shouldRedirect={false} />}
         {isLoading && <CircularProgress />}
-        {isAuthenticated && <Outlet />}
+        {isAuthenticated && (
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
+        )}
       </Box>
     </Box>
   );

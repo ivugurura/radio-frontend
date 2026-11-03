@@ -7,11 +7,15 @@ export const isErrorLike = (value: unknown) =>
   value !== null &&
   ('stack' in value || 'message' in value) &&
   !('__typename' in value);
-const isWebpackChunkError = (value: unknown) =>
+// A lazily loaded page whose chunk vanished, usually because a deploy replaced
+// the hashed files while this tab was open. Vite's dynamic import() rejects
+// with browser-specific messages (Chrome, Firefox, Safari respectively).
+const CHUNK_ERROR_RE =
+  /loading css chunk|failed to fetch dynamically imported module|error loading dynamically imported module|importing a module script failed/i;
+const isChunkLoadError = (value: unknown) =>
   isErrorLike(value) &&
   value instanceof Error &&
-  (value.name === 'ChunkLoadError' ||
-    /loading css chunk/gi.test(value.message));
+  (value.name === 'ChunkLoadError' || CHUNK_ERROR_RE.test(value.message));
 const asError = (value: unknown) => {
   if (value instanceof Error) {
     return value;
@@ -61,7 +65,7 @@ export class ErrorBoundary extends React.PureComponent<
     const { error } = this.state;
     const { render, extraContext, children } = this.props;
     if (error !== undefined) {
-      if (isWebpackChunkError(error)) {
+      if (isChunkLoadError(error)) {
         return (
           <Box sx={{ textAlign: 'center', padding: 2 }}>
             <Typography>A new version of The SITE is available.</Typography>
