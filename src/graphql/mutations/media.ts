@@ -1,4 +1,4 @@
-import { graphql } from '../generated';
+import { graphql } from "../generated";
 
 export const REQUEST_UPLOAD = graphql(`
   mutation RequestUpload(
@@ -35,6 +35,14 @@ export const FINALIZE_UPLOAD = graphql(`
 export const DELETE_TRACK = graphql(`
   mutation DeleteTrack($trackId: UUID!) {
     deleteTrack(trackId: $trackId) {
+      ok
+    }
+  }
+`);
+
+export const CANCEL_UPLOAD = graphql(`
+  mutation CancelUpload($uploadId: UUID!) {
+    cancelUpload(uploadId: $uploadId) {
       ok
     }
   }

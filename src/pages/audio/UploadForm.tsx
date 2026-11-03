@@ -39,6 +39,7 @@ import {
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import {
+  useCancelUploadMutation,
   useFinalizeUploadMutation,
   useRequestUploadMutation,
 } from "@graphql/hooks";
@@ -188,6 +189,7 @@ export const UploadForm = ({
 
   const [requestUpload] = useRequestUploadMutation();
   const [finalizeUpload] = useFinalizeUploadMutation();
+  const [cancelUpload] = useCancelUploadMutation();
 
   const runningRef = useRef(0);
   const itemsRef = useRef(items);
@@ -260,6 +262,7 @@ export const UploadForm = ({
         bytesSent: 0,
       });
 
+      let uploadId: string | undefined;
       try {
         const req = await requestUpload({
           variables: {
@@ -271,6 +274,7 @@ export const UploadForm = ({
         });
         const payload = req.data?.requestUpload;
         if (!payload) throw new Error(t("upload.errors.session"));
+        uploadId = payload.uploadId;
 
         updateItem(id, {
           uploadId: payload.uploadId,
@@ -348,12 +352,28 @@ export const UploadForm = ({
             message: String(err),
           });
         }
+        // A retry always opens a new session, so discard this one rather than
+        // leave an UPLOADING track behind. Best effort: the hourly cleanup
+        // catches anything this misses.
+        if (uploadId) {
+          cancelUpload({ variables: { uploadId } })
+            .then(() => onTracksChanged?.())
+            .catch(() => undefined);
+        }
       } finally {
         runningRef.current -= 1;
         setRunning(runningRef.current);
       }
     },
-    [requestUpload, finalizeUpload, studioId, updateItem, onTracksChanged, t],
+    [
+      requestUpload,
+      finalizeUpload,
+      cancelUpload,
+      studioId,
+      updateItem,
+      onTracksChanged,
+      t,
+    ],
   );
 
   const schedule = useCallback(() => {
@@ -436,6 +456,17 @@ export const UploadForm = ({
       overallProgress,
     };
   }, [items, running]);
+
+  // Refreshing or closing the tab aborts uploads and loses the queue, so ask first.
+  useEffect(() => {
+    if (summary.uploading === 0) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = ""; // still required by some browsers to show the prompt
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [summary.uploading]);
 
   const handleDialogClose = useCallback(
     (_e: unknown, reason?: "backdropClick" | "escapeKeyDown") => {
