@@ -119,7 +119,13 @@ export const RadioStreamPlayer: React.FC<Props> = ({
     setVolume,
     toggleMute,
     refreshMetadata,
-  } = useRadioStream({ streamUrl, nowUrl, statusUrl, autoPlay });
+  } = useRadioStream({
+    streamUrl,
+    nowUrl,
+    statusUrl,
+    stationName: title,
+    autoPlay,
+  });
   const {
     icon: VolumeIcon,
     effectiveVolume,
