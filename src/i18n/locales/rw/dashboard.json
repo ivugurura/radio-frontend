@@ -28,13 +28,27 @@
     "hoursValue": "{{used}} / {{quota}} amasaha",
     "gbValue": "{{used}} / {{quota}} GB",
     "percentUsed": "{{pct}}%",
-    "buyStorage": "Gura ububiko bwisumbuye"
+    "subtitle": "Iminsi 30 ishize",
+    "hoursLeft_one": "Hasigaye amasaha {{value}} · bihagije ku ~{{count}} wumva amasaha 24/24",
+    "hoursLeft_other": "Hasigaye amasaha {{value}} · bihagije ku ~{{count}} bumva amasaha 24/24",
+    "gbFree": "Hasigaye {{value}} GB",
+    "server": {
+      "title": "Seriveri",
+      "cpu": "CPU",
+      "cpuValue_one": "Core {{count}}",
+      "cpuValue_other": "Cores {{count}}",
+      "memory": "RAM",
+      "disk": "Disiki",
+      "bandwidth": "Bandwidth",
+      "bandwidthValue": "{{value}} TB / ukwezi"
+    }
   },
   "queue": {
     "onAir": "Kiri ku murongo",
     "recentlyPlayed": "Ibyacuranzwe vuba",
     "nothingPlaying": "Nta kiri gucurangwa ubu",
     "noHistory": "Nta ndirimbo iracurangwa",
-    "unknownArtist": "Umuhanzi utazwi"
+    "unknownArtist": "Umuhanzi utazwi",
+    "nothingPlayingHint": "Indirimbo za AutoDJ cyangwa iz'ikiganiro kiri imbonankubone zizagaragara hano."
   }
 }

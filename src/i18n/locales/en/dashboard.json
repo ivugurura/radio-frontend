@@ -28,13 +28,27 @@
     "hoursValue": "{{used}} / {{quota}} hours",
     "gbValue": "{{used}} / {{quota}} GB",
     "percentUsed": "{{pct}}%",
-    "buyStorage": "Buy more storage"
+    "subtitle": "Rolling 30 days",
+    "hoursLeft_one": "{{value}} hours left · room for ~{{count}} listener around the clock",
+    "hoursLeft_other": "{{value}} hours left · room for ~{{count}} listeners around the clock",
+    "gbFree": "{{value}} GB free",
+    "server": {
+      "title": "Server",
+      "cpu": "CPU",
+      "cpuValue_one": "{{count}} core",
+      "cpuValue_other": "{{count}} cores",
+      "memory": "Memory",
+      "disk": "Disk",
+      "bandwidth": "Bandwidth",
+      "bandwidthValue": "{{value}} TB / month"
+    }
   },
   "queue": {
     "onAir": "On air",
     "recentlyPlayed": "Recently played",
     "nothingPlaying": "Nothing is playing right now",
     "noHistory": "No tracks played yet",
-    "unknownArtist": "Unknown artist"
+    "unknownArtist": "Unknown artist",
+    "nothingPlayingHint": "Tracks from AutoDJ or a live show will appear here."
   }
 }

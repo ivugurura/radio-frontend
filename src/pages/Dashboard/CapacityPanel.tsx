@@ -1,10 +1,20 @@
 import React from 'react';
-import { Box, Typography, LinearProgress, Link, Stack } from '@mui/material';
+import {
+  Box,
+  Divider,
+  Grid,
+  LinearProgress,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
   HeadphonesOutlined,
   StorageOutlined,
-  AddCircleOutline,
+  MemoryOutlined,
+  DeveloperBoardOutlined,
+  SaveOutlined,
+  SwapVertOutlined,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import type { StudioCapacity } from '@graphql/graphql';
@@ -15,6 +25,16 @@ interface CapacityPanelProps {
 }
 
 type MeterColor = 'primary' | 'warning' | 'error';
+
+// VPS the studios run on; quotas are derived from it in the API.
+const SERVER_SPECS = {
+  cpuCores: 2,
+  memoryGb: 8,
+  diskGb: 100,
+  bandwidthTb: 8,
+};
+
+const HOURS_IN_30_DAYS = 30 * 24;
 
 const pct = (val: number, max: number) => {
   if (!max) return 0;
@@ -27,12 +47,16 @@ const meterColor = (percent: number, base: MeterColor): MeterColor => {
   return base;
 };
 
+const formatNumber = (value: number, digits = 0) =>
+  value.toLocaleString(undefined, { maximumFractionDigits: digits });
+
 const UsageMeter: React.FC<{
   icon: React.ElementType;
   label: string;
   value: string;
   percent: number;
-}> = ({ icon: Icon, label, value, percent }) => {
+  caption: string;
+}> = ({ icon: Icon, label, value, percent, caption }) => {
   const { t } = useTranslation('dashboard');
   const color = meterColor(percent, 'primary');
 
@@ -86,60 +110,128 @@ const UsageMeter: React.FC<{
           '& .MuiLinearProgress-bar': { borderRadius: 4 },
         })}
       />
+      <Typography variant="body2" color="text.secondary" mt={0.75}>
+        {caption}
+      </Typography>
     </Box>
   );
 };
 
+const SpecItem: React.FC<{
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}> = ({ icon: Icon, label, value }) => (
+  <Stack
+    direction="row"
+    spacing={1}
+    alignItems="center"
+    sx={(theme) => ({
+      p: 1,
+      borderRadius: 2,
+      minWidth: 0,
+      backgroundColor: alpha(theme.palette.text.primary, 0.03),
+    })}
+  >
+    <Icon sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
+    <Box minWidth={0}>
+      <Typography variant="body2" color="text.secondary" noWrap>
+        {label}
+      </Typography>
+      <Typography variant="body1" fontWeight={600} noWrap>
+        {value}
+      </Typography>
+    </Box>
+  </Stack>
+);
+
 export const CapacityPanel: React.FC<CapacityPanelProps> = ({ capacity }) => {
   const { t } = useTranslation('dashboard');
-  const listeningHours = capacity
-    ? (capacity.listeningSeconds / 3600).toFixed(2)
-    : '0.00';
-  const listeningQuotaHours = capacity
-    ? (capacity.listeningSecondsQuota / 3600).toFixed(0)
-    : '0';
-  const diskUsed = capacity ? capacity.diskUsedGb.toFixed(2) : '0';
-  const diskQuota = capacity ? capacity.diskQuotaGb.toFixed(0) : '0';
+  const usedHours = capacity ? capacity.listeningSeconds / 3600 : 0;
+  const quotaHours = capacity ? capacity.listeningSecondsQuota / 3600 : 0;
+  const diskUsedGb = capacity?.diskUsedGb ?? 0;
+  const diskQuotaGb = capacity?.diskQuotaGb ?? 0;
+  const roundTheClockListeners = Math.floor(quotaHours / HOURS_IN_30_DAYS);
+
+  const specs = [
+    {
+      key: 'cpu',
+      icon: DeveloperBoardOutlined,
+      value: t('capacity.server.cpuValue', { count: SERVER_SPECS.cpuCores }),
+    },
+    {
+      key: 'memory',
+      icon: MemoryOutlined,
+      value: `${SERVER_SPECS.memoryGb} GB`,
+    },
+    {
+      key: 'disk',
+      icon: SaveOutlined,
+      value: `${SERVER_SPECS.diskGb} GB`,
+    },
+    {
+      key: 'bandwidth',
+      icon: SwapVertOutlined,
+      value: t('capacity.server.bandwidthValue', {
+        value: SERVER_SPECS.bandwidthTb,
+      }),
+    },
+  ];
 
   return (
-    <DashboardCard title={t('capacity.title')}>
-      <Stack spacing={3} flex={1}>
+    <DashboardCard
+      title={t('capacity.title')}
+      subtitle={t('capacity.subtitle')}
+    >
+      <Stack spacing={2.5}>
         <UsageMeter
           icon={HeadphonesOutlined}
           label={t('capacity.listeningTime')}
           value={t('capacity.hoursValue', {
-            used: listeningHours,
-            quota: listeningQuotaHours,
+            used: formatNumber(usedHours, 1),
+            quota: formatNumber(quotaHours),
           })}
-          percent={
-            capacity
-              ? pct(capacity.listeningSeconds, capacity.listeningSecondsQuota)
-              : 0
-          }
+          percent={pct(usedHours, quotaHours)}
+          caption={t('capacity.hoursLeft', {
+            value: formatNumber(Math.max(0, quotaHours - usedHours)),
+            count: roundTheClockListeners,
+          })}
         />
         <UsageMeter
           icon={StorageOutlined}
           label={t('capacity.diskSpace')}
-          value={t('capacity.gbValue', { used: diskUsed, quota: diskQuota })}
-          percent={capacity ? pct(capacity.diskUsedGb, capacity.diskQuotaGb) : 0}
+          value={t('capacity.gbValue', {
+            used: diskUsedGb.toFixed(2),
+            quota: diskQuotaGb.toFixed(0),
+          })}
+          percent={pct(diskUsedGb, diskQuotaGb)}
+          caption={t('capacity.gbFree', {
+            value: formatNumber(Math.max(0, diskQuotaGb - diskUsedGb), 1),
+          })}
         />
       </Stack>
-      <Link
-        href="#"
-        underline="hover"
-        sx={{
-          mt: 3,
-          fontSize: 13,
-          fontWeight: 500,
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 0.5,
-          alignSelf: 'flex-start',
-        }}
+
+      <Divider sx={{ my: 2.5 }} />
+
+      <Typography
+        variant="body2"
+        fontWeight={600}
+        color="text.secondary"
+        sx={{ textTransform: 'uppercase', letterSpacing: 0.5, mb: 1 }}
       >
-        <AddCircleOutline sx={{ fontSize: 16 }} />
-        {t('capacity.buyStorage')}
-      </Link>
+        {t('capacity.server.title')}
+      </Typography>
+      <Grid container spacing={1}>
+        {specs.map((spec) => (
+          <Grid key={spec.key} size={6}>
+            <SpecItem
+              icon={spec.icon}
+              label={t(`capacity.server.${spec.key}`)}
+              value={spec.value}
+            />
+          </Grid>
+        ))}
+      </Grid>
     </DashboardCard>
   );
 };

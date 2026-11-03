@@ -1,10 +1,16 @@
 import React from 'react';
-import { Paper, Grid, Box, Typography } from '@mui/material';
+import { Paper, Grid, Box, Stack, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
   TrendingUp,
   TrendingDown,
   TrendingFlat,
+  TodayOutlined,
+  HistoryOutlined,
+  DateRangeOutlined,
+  CalendarMonthOutlined,
+  EventRepeatOutlined,
+  EventNoteOutlined,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import type { ListeningSummary } from '@graphql/graphql';
@@ -30,7 +36,7 @@ const changeIcons: Record<ChangeTone, React.ElementType> = {
 const formatCount = (value?: number | null) =>
   value === undefined || value === null ? '–' : value.toLocaleString();
 
-const ChangeBadge: React.FC<{ changePct: number; label: string }> = ({
+export const ChangeBadge: React.FC<{ changePct: number; label: string }> = ({
   changePct,
   label,
 }) => {
@@ -73,9 +79,10 @@ const ChangeBadge: React.FC<{ changePct: number; label: string }> = ({
 
 const SummaryTile: React.FC<{
   label: string;
+  icon: React.ElementType;
   value?: number | null;
   change?: React.ReactNode;
-}> = ({ label, value, change }) => (
+}> = ({ label, icon: Icon, value, change }) => (
   <Paper
     variant="outlined"
     sx={{
@@ -85,49 +92,72 @@ const SummaryTile: React.FC<{
       minWidth: 0,
     }}
   >
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      noWrap
-      title={label}
-      sx={{ fontWeight: 500 }}
-    >
-      {label}
-    </Typography>
-    <Typography
-      sx={{
-        mt: 0.5,
-        fontSize: { xs: '1.5rem', sm: '1.75rem' },
-        fontWeight: 700,
-        lineHeight: 1.2,
-        fontVariantNumeric: 'tabular-nums',
-        color: 'text.primary',
-      }}
-    >
-      {formatCount(value)}
-    </Typography>
+    <Stack direction="row" spacing={1} alignItems="flex-start">
+      <Box flex={1} minWidth={0}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          noWrap
+          title={label}
+          sx={{ fontWeight: 500 }}
+        >
+          {label}
+        </Typography>
+        <Typography
+          sx={{
+            mt: 0.5,
+            fontSize: { xs: '1.5rem', sm: '1.75rem' },
+            fontWeight: 700,
+            lineHeight: 1.2,
+            fontVariantNumeric: 'tabular-nums',
+            color: 'text.primary',
+          }}
+        >
+          {formatCount(value)}
+        </Typography>
+      </Box>
+      <Box
+        sx={(theme) => ({
+          width: 36,
+          height: 36,
+          borderRadius: 2,
+          display: { xs: 'none', sm: 'grid' },
+          placeItems: 'center',
+          flexShrink: 0,
+          color: theme.palette.primary.main,
+          backgroundColor: alpha(theme.palette.primary.main, 0.1),
+        })}
+      >
+        <Icon fontSize="small" />
+      </Box>
+    </Stack>
     {change}
   </Paper>
 );
 
 export const SummaryStrip: React.FC<SummaryStripProps> = ({ summary }) => {
   const { t } = useTranslation('dashboard');
-  const changePct = summary?.last30DaysChangePct;
+  // const changePct = summary?.last30DaysChangePct;
 
   const tiles = [
-    { key: 'today', value: summary?.today },
-    { key: 'yesterday', value: summary?.yesterday },
-    { key: 'last7Days', value: summary?.last7Days },
+    { key: 'today', icon: TodayOutlined, value: summary?.today },
+    { key: 'yesterday', icon: HistoryOutlined, value: summary?.yesterday },
+    { key: 'last7Days', icon: DateRangeOutlined, value: summary?.last7Days },
     {
       key: 'last30Days',
+      icon: CalendarMonthOutlined,
       value: summary?.last30Days,
-      change:
-        changePct === undefined || changePct === null ? undefined : (
-          <ChangeBadge changePct={changePct} label={t('summary.vsPrev30')} />
-        ),
+      // change:
+      //   changePct === undefined || changePct === null ? undefined : (
+      //     <ChangeBadge changePct={changePct} label={t('summary.vsPrev30')} />
+      //   ),
     },
-    { key: 'prev30Days', value: summary?.prev30Days },
-    { key: 'lastMonth', value: summary?.lastMonth },
+    {
+      key: 'prev30Days',
+      icon: EventRepeatOutlined,
+      value: summary?.prev30Days,
+    },
+    { key: 'lastMonth', icon: EventNoteOutlined, value: summary?.lastMonth },
   ];
 
   return (
@@ -136,6 +166,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ summary }) => {
         <Grid key={tile.key} size={{ xs: 6, sm: 4, lg: 2 }}>
           <SummaryTile
             label={t(`summary.${tile.key}`)}
+            icon={tile.icon}
             value={tile.value}
             change={tile.change}
           />

@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { keyframes } from '@emotion/react';
-import { MusicNote } from '@mui/icons-material';
+import { MusicNote, MusicOff } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import type { QueueItem } from '@graphql/graphql';
@@ -172,6 +172,47 @@ const NowPlayingHero: React.FC<{ item: QueueItem }> = ({ item }) => {
   );
 };
 
+const EmptyState: React.FC<{ title: string; hint: string }> = ({
+  title,
+  hint,
+}) => (
+  <Stack
+    direction="row"
+    spacing={2}
+    alignItems="center"
+    sx={(theme) => ({
+      p: { xs: 1.5, sm: 2 },
+      borderRadius: 3,
+      border: '1px dashed',
+      borderColor: theme.palette.divider,
+      backgroundColor: alpha(theme.palette.text.primary, 0.02),
+    })}
+  >
+    <Box
+      sx={(theme) => ({
+        width: 48,
+        height: 48,
+        borderRadius: 2,
+        display: 'grid',
+        placeItems: 'center',
+        flexShrink: 0,
+        color: theme.palette.text.secondary,
+        backgroundColor: alpha(theme.palette.text.primary, 0.06),
+      })}
+    >
+      <MusicOff />
+    </Box>
+    <Box minWidth={0}>
+      <Typography variant="body1" fontWeight={600}>
+        {title}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {hint}
+      </Typography>
+    </Box>
+  </Stack>
+);
+
 const QueueRow: React.FC<{ item: QueueItem }> = ({ item }) => {
   const { t } = useTranslation('dashboard');
 
@@ -231,6 +272,17 @@ export const CurrentQueueSlider: React.FC<CurrentQueueSliderProps> = ({
         dayjs(b.startedAt ?? 0).valueOf() - dayjs(a.startedAt ?? 0).valueOf(),
     );
 
+  if (!current && others.length === 0) {
+    return (
+      <DashboardCard title={t('currentlyTitle')}>
+        <EmptyState
+          title={t('queue.nothingPlaying')}
+          hint={t('queue.nothingPlayingHint')}
+        />
+      </DashboardCard>
+    );
+  }
+
   return (
     <DashboardCard title={t('currentlyTitle')}>
       <Box
@@ -241,9 +293,10 @@ export const CurrentQueueSlider: React.FC<CurrentQueueSliderProps> = ({
         {current ? (
           <NowPlayingHero item={current} />
         ) : (
-          <Typography variant="body2" color="text.secondary">
-            {t('queue.nothingPlaying')}
-          </Typography>
+          <EmptyState
+            title={t('queue.nothingPlaying')}
+            hint={t('queue.nothingPlayingHint')}
+          />
         )}
         <Box minWidth={0}>
           <Typography

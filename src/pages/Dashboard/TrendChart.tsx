@@ -77,7 +77,8 @@ export const TrendChart: React.FC<Props> = ({ data }) => {
         )
       }
     >
-      <Box sx={{ height: { xs: 220, sm: 260, lg: 280 }, mx: -1 }}>
+      {/* Grows to match the card beside it instead of leaving a gap. */}
+      <Box sx={{ flex: 1, minHeight: { xs: 220, sm: 260, lg: 280 }, mx: -1 }}>
         {chartData.length === 0 ? (
           <Box
             height="100%"
