@@ -15,13 +15,19 @@ import {
 import type { UploadItem, UploadSummary } from './types';
 import { computeSHA256, isAudioFile, uploadInChunks } from './utils';
 
+const fileKey = (file: File) =>
+  `${file.name}:${file.size}:${file.lastModified}`;
+
 /**
  * Upload queue for the studio library.
  *
  * Flow per file:
- * 1) requestUpload (GraphQL) -> { uploadId, chunkUrl, uploadToken, trackId }
+ * 0) SHA-256 the file in the browser
+ * 1) requestUpload (GraphQL) with the hash -> { uploadId, chunkUrl, uploadToken, trackId },
+ *    or { duplicateOf } when that exact file is already in the library (nothing is sent)
  * 2) PUT the file in chunks to chunkUrl (see uploadInChunks)
- * 3) finalizeUpload (GraphQL) with an optional SHA-256 -> server queues processing (Celery)
+ * 3) finalizeUpload (GraphQL) -> server queues processing (Celery), which also
+ *    flags likely duplicates by title + artist + length
  *
  * Up to MAX_CONCURRENCY files upload in parallel once "start all" is pressed.
  */
@@ -32,6 +38,7 @@ export const useUploadQueue = (onTracksChanged?: () => void) => {
   const [running, setRunning] = useState(0);
   const [autoStart, setAutoStart] = useState(false);
   const [skippedCount, setSkippedCount] = useState(0);
+  const [alreadyListedCount, setAlreadyListedCount] = useState(0);
 
   const [requestUpload] = useRequestUploadMutation();
   const [finalizeUpload] = useFinalizeUploadMutation();
@@ -51,8 +58,12 @@ export const useUploadQueue = (onTracksChanged?: () => void) => {
     if (!files || files.length === 0) return;
     const all = Array.from(files);
     const audio = all.filter(isAudioFile);
+    // Picking the same file twice would race two uploads of one hash.
+    const listed = new Set(itemsRef.current.map((it) => fileKey(it.file)));
+    const fresh = audio.filter((file) => !listed.has(fileKey(file)));
     setSkippedCount(all.length - audio.length);
-    const newItems: UploadItem[] = audio.map((file) => ({
+    setAlreadyListedCount(audio.length - fresh.length);
+    const newItems: UploadItem[] = fresh.map((file) => ({
       id: crypto.randomUUID(),
       file,
       status: 'queued',
@@ -74,7 +85,7 @@ export const useUploadQueue = (onTracksChanged?: () => void) => {
       const file = item.file;
       const abort = new AbortController();
       updateItem(id, {
-        status: 'requesting',
+        status: 'checking',
         message: undefined,
         abort,
         progress: 0,
@@ -83,16 +94,34 @@ export const useUploadQueue = (onTracksChanged?: () => void) => {
 
       let uploadId: string | undefined;
       try {
+        const checksum = await computeSHA256(file, abort.signal).catch(
+          (err: unknown) => {
+            if (err instanceof Error && err.name === 'AbortError') throw err;
+            return null; // best effort: without a hash only level-2 checks apply
+          },
+        );
+
+        updateItem(id, { status: 'requesting' });
         const req = await requestUpload({
           variables: {
             studioSlug: studioId,
             fileName: file.name,
             sizeBytes: file.size,
             mimeType: file.type || 'application/octet-stream',
+            checksumSha256: checksum,
           },
         });
         const payload = req.data?.requestUpload;
-        if (!payload) throw new Error(t('upload.errors.session'));
+        if (payload?.duplicateOf) {
+          updateItem(id, {
+            status: 'duplicate',
+            message: t('upload.duplicateOf', {
+              title: payload.duplicateOf.title || file.name,
+            }),
+          });
+          return;
+        }
+        if (!payload?.uploadId) throw new Error(t('upload.errors.session'));
         uploadId = payload.uploadId;
 
         updateItem(id, {
@@ -117,8 +146,6 @@ export const useUploadQueue = (onTracksChanged?: () => void) => {
         );
 
         updateItem(id, { status: 'finalizing' });
-        const checksum = await computeSHA256(file).catch(() => null);
-
         const fin = await finalizeUpload({
           variables: { uploadId: payload.uploadId, checksumSha256: checksum },
         });
@@ -210,7 +237,10 @@ export const useUploadQueue = (onTracksChanged?: () => void) => {
     setItems((prev) => prev.filter((it) => it.status !== 'done'));
   }, []);
 
-  const dismissSkipped = useCallback(() => setSkippedCount(0), []);
+  const dismissSkipped = useCallback(() => {
+    setSkippedCount(0);
+    setAlreadyListedCount(0);
+  }, []);
 
   const summary = useMemo<UploadSummary>(() => {
     const totalBytes = items.reduce((acc, i) => acc + i.totalBytes, 0);
@@ -219,6 +249,7 @@ export const useUploadQueue = (onTracksChanged?: () => void) => {
       total: items.length,
       done: items.filter((i) => i.status === 'done').length,
       errors: items.filter((i) => i.status === 'error').length,
+      duplicates: items.filter((i) => i.status === 'duplicate').length,
       uploading: items.filter((i) => ACTIVE_STATUSES.includes(i.status)).length,
       pending: items.filter((i) => i.status === 'queued').length,
       totalBytes,
@@ -246,6 +277,7 @@ export const useUploadQueue = (onTracksChanged?: () => void) => {
     items,
     summary,
     skippedCount,
+    alreadyListedCount,
     addFiles,
     dismissSkipped,
     start,

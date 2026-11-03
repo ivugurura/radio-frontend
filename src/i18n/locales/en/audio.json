@@ -78,7 +78,9 @@
       "uploading": "{{count}} uploading",
       "done": "{{count}} done",
       "errors_one": "{{count}} failed",
-      "errors_other": "{{count}} failed"
+      "errors_other": "{{count}} failed",
+      "duplicates_one": "{{count}} already in library",
+      "duplicates_other": "{{count}} already in library"
     },
     "status": {
       "queued": "Waiting",
@@ -87,7 +89,9 @@
       "finalizing": "Finishing",
       "done": "Done",
       "error": "Failed",
-      "canceled": "Canceled"
+      "canceled": "Canceled",
+      "checking": "Checking",
+      "duplicate": "Duplicate"
     },
     "actions": {
       "start": "Start",
@@ -105,7 +109,9 @@
       "skipped_other": "{{count}} files were skipped because they are not audio files.",
       "largeBatch": "{{count}} files are in the list. Batches of {{batch}} or fewer are easier to follow and recover if the connection drops.",
       "largeFiles_one": "{{count}} file is larger than {{size}}. It will work but take longer. Consider exporting it as MP3 or FLAC instead of WAV.",
-      "largeFiles_other": "{{count}} files are larger than {{size}}. They will work but take longer. Consider exporting them as MP3 or FLAC instead of WAV."
+      "largeFiles_other": "{{count}} files are larger than {{size}}. They will work but take longer. Consider exporting them as MP3 or FLAC instead of WAV.",
+      "alreadyListed_one": "{{count}} file is already in the list and was not added again.",
+      "alreadyListed_other": "{{count}} files are already in the list and were not added again."
     },
     "errors": {
       "session": "Could not start the upload. Please try again.",
@@ -123,12 +129,15 @@
       },
       "tags": {
         "title": "Tags",
-        "body": "Title, artist and album are read from file tags; volume is levelled automatically."
+        "body": "Title, artist and album are read from file tags; volume is levelled automatically. Files already in the library are skipped."
       },
       "connection": {
         "title": "Stay here",
         "body": "Keep this window open until all are Done; Retry any that fail. Tracks are Ready a few minutes later."
       }
-    }
-  }
+    },
+    "duplicateOf": "Already in the library as “{{title}}”"
+  },
+  "possibleDuplicate": "Possible duplicate",
+  "possibleDuplicateOf": "Same title, artist and length as “{{title}}” by {{artist}}. Delete one if they are the same recording."
 }

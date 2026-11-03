@@ -1,11 +1,14 @@
 export type UploadStatus =
   | 'queued'
+  | 'checking'
   | 'requesting'
   | 'uploading'
   | 'finalizing'
   | 'done'
   | 'error'
-  | 'canceled';
+  | 'canceled'
+  /** Exact copy already in the library; rejected before upload. */
+  | 'duplicate';
 
 export type UploadItem = {
   id: string; // local UI id
@@ -31,6 +34,7 @@ export type UploadSummary = {
   total: number;
   done: number;
   errors: number;
+  duplicates: number;
   uploading: number;
   pending: number;
   totalBytes: number;

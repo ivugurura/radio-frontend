@@ -1,5 +1,6 @@
+import { createSHA256 } from 'hash-wasm';
 import { BASE_API_URL } from '@libs/constants';
-import { DEFAULT_CHUNK_SIZE, MAX_CHECKSUM_SIZE } from './constants';
+import { DEFAULT_CHUNK_SIZE, HASH_READ_SIZE } from './constants';
 
 export function formatBytes(n: number) {
   if (n < 1024) return `${n} B`;
@@ -12,15 +13,21 @@ export function formatBytes(n: number) {
   return `${n.toFixed(1)} ${units[i]}`;
 }
 
-export async function computeSHA256(file: File): Promise<string | null> {
-  // Avoid large memory usage on big files; backend accepts checksum as optional
-  if (!('crypto' in window) || !('subtle' in window.crypto)) return null;
-  if (file.size > MAX_CHECKSUM_SIZE) return null;
-  const buf = await file.arrayBuffer();
-  const hash = await window.crypto.subtle.digest('SHA-256', buf);
-  return Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+/**
+ * SHA-256 of the whole file, read in HASH_READ_SIZE slices so memory stays
+ * flat even for long recordings. The server uses it to reject exact duplicates.
+ */
+export async function computeSHA256(
+  file: File,
+  signal: AbortSignal,
+): Promise<string> {
+  const hasher = await createSHA256();
+  for (let start = 0; start < file.size; start += HASH_READ_SIZE) {
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+    const slice = file.slice(start, start + HASH_READ_SIZE);
+    hasher.update(new Uint8Array(await slice.arrayBuffer()));
+  }
+  return hasher.digest('hex');
 }
 
 export function isAudioFile(file: File) {

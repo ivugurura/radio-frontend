@@ -56,6 +56,15 @@ export const UploadSummaryBar = ({
               label={t('upload.summary.errors', { count: summary.errors })}
             />
           )}
+          {summary.duplicates > 0 && (
+            <Chip
+              size="small"
+              color="warning"
+              label={t('upload.summary.duplicates', {
+                count: summary.duplicates,
+              })}
+            />
+          )}
         </Stack>
         {summary.done > 0 && (
           <Button size="small" onClick={onClearFinished}>

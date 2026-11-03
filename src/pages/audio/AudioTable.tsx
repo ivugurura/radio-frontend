@@ -28,6 +28,7 @@ import {
   LibraryMusicOutlined as LibraryMusicOutlinedIcon,
   SearchOffRounded as SearchOffRoundedIcon,
   CloudUploadOutlined as CloudUploadOutlinedIcon,
+  ContentCopyRounded as ContentCopyRoundedIcon,
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
@@ -157,6 +158,30 @@ const getTileColors = (theme: Theme, isCurrent: boolean, failed: boolean) => {
     color: theme.palette.primary.main,
     bgcolor: alpha(theme.palette.primary.main, 0.08),
   };
+};
+
+/** Shown when processing found a library track with the same title, artist and length. */
+const DuplicateFlag = ({ track }: Readonly<{ track: TrackType }>) => {
+  const { t } = useTranslation('audio');
+  const original = track.isDuplicateOf;
+  if (!original) return null;
+  return (
+    <Tooltip
+      title={t('possibleDuplicateOf', {
+        title: original.title || '—',
+        artist: original.artist || t('unknownArtist'),
+      })}
+    >
+      <Chip
+        size="small"
+        color="warning"
+        variant="outlined"
+        icon={<ContentCopyRoundedIcon />}
+        label={t('possibleDuplicate')}
+        sx={{ mt: 0.5, height: 20, '& .MuiChip-label': { px: 0.75 } }}
+      />
+    </Tooltip>
+  );
 };
 
 /** Artwork tile in the title cell: play/pause affordance, playing bars or state icon. */
@@ -447,6 +472,7 @@ export const AudioTable: React.FC<AudioTableProps> = ({
                               >
                                 {r.artist || t('unknownArtist')}
                               </Typography>
+                              <DuplicateFlag track={r} />
                             </Box>
                           </Box>
                         </Tooltip>

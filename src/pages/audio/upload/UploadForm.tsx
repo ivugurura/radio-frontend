@@ -89,6 +89,7 @@ export const UploadForm = ({
             <UploadWarnings
               summary={summary}
               skippedCount={queue.skippedCount}
+              alreadyListedCount={queue.alreadyListedCount}
               onDismissSkipped={queue.dismissSkipped}
             />
             {items.length > 0 && (

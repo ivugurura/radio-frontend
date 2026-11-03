@@ -7,6 +7,7 @@ import { formatBytes } from './utils';
 type UploadWarningsProps = Readonly<{
   summary: UploadSummary;
   skippedCount: number;
+  alreadyListedCount: number;
   onDismissSkipped: () => void;
 }>;
 
@@ -14,6 +15,7 @@ type UploadWarningsProps = Readonly<{
 export const UploadWarnings = ({
   summary,
   skippedCount,
+  alreadyListedCount,
   onDismissSkipped,
 }: UploadWarningsProps) => {
   const { t } = useTranslation('audio');
@@ -23,6 +25,11 @@ export const UploadWarnings = ({
       {skippedCount > 0 && (
         <Alert severity="warning" onClose={onDismissSkipped}>
           {t('upload.warnings.skipped', { count: skippedCount })}
+        </Alert>
+      )}
+      {alreadyListedCount > 0 && (
+        <Alert severity="info" onClose={onDismissSkipped}>
+          {t('upload.warnings.alreadyListed', { count: alreadyListedCount })}
         </Alert>
       )}
       {summary.total > RECOMMENDED_BATCH_SIZE && (

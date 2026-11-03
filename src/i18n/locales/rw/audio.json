@@ -78,7 +78,9 @@
       "uploading": "{{count}} arimo koherezwa",
       "done": "{{count}} yarangiye",
       "errors_one": "{{count}} ryanze",
-      "errors_other": "{{count}} yanze"
+      "errors_other": "{{count}} yanze",
+      "duplicates_one": "{{count}} isanzwe mu bubiko",
+      "duplicates_other": "{{count}} zisanzwe mu bubiko"
     },
     "status": {
       "queued": "Rirategereje",
@@ -87,7 +89,9 @@
       "finalizing": "Birarangira",
       "done": "Byarangiye",
       "error": "Byanze",
-      "canceled": "Byahagaritswe"
+      "canceled": "Byahagaritswe",
+      "checking": "Biragenzurwa",
+      "duplicate": "Isanzwe ihari"
     },
     "actions": {
       "start": "Tangira",
@@ -105,7 +109,9 @@
       "skipped_other": "Dosiye {{count}} zasimbutswe kuko atari amajwi.",
       "largeBatch": "Hari amajwi {{count}} ku rutonde. Kohereza {{batch}} cyangwa munsi yayo byoroshye gukurikirana no gusubukura iyo interineti icitse.",
       "largeFiles_one": "Ijwi {{count}} rirengeje {{size}}. Rizoherezwa ariko bizatinda. Byaba byiza urisohoye nka MP3 cyangwa FLAC aho kuba WAV.",
-      "largeFiles_other": "Amajwi {{count}} arengeje {{size}}. Azoherezwa ariko bizatinda. Byaba byiza uyasohoye nka MP3 cyangwa FLAC aho kuba WAV."
+      "largeFiles_other": "Amajwi {{count}} arengeje {{size}}. Azoherezwa ariko bizatinda. Byaba byiza uyasohoye nka MP3 cyangwa FLAC aho kuba WAV.",
+      "alreadyListed_one": "Ijwi {{count}} risanzwe ku rutonde, ntiryongeye gushyirwaho.",
+      "alreadyListed_other": "Amajwi {{count}} asanzwe ku rutonde, ntiyongeye gushyirwaho."
     },
     "errors": {
       "session": "Ntibyashobotse gutangira kohereza. Ongera ugerageze.",
@@ -123,12 +129,15 @@
       },
       "tags": {
         "title": "Amakuru",
-        "body": "Umutwe, umuhanzi na alubumu bisomwa mu makuru y'ijwi (tags); volume iringanizwa ubwayo."
+        "body": "Umutwe, umuhanzi na alubumu bisomwa mu makuru y'ijwi (tags); volume iringanizwa ubwayo. Amajwi asanzwe mu bubiko arasimbukwa."
       },
       "connection": {
         "title": "Guma hano",
         "body": "Ntufunge iri dirishya kugeza byose birangiye; ongera ugerageze ibyanze. Indirimbo ziba ziteguye nyuma y’iminota mike."
       }
-    }
-  }
+    },
+    "duplicateOf": "Isanzwe iri mu bubiko nka “{{title}}”"
+  },
+  "possibleDuplicate": "Ishobora kuba isanzwe ihari",
+  "possibleDuplicateOf": "Ifite umutwe, umuhanzi n’igihe bimwe na “{{title}}” ya {{artist}}. Siba imwe niba ari ijwi rimwe."
 }

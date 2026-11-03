@@ -18,6 +18,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import {
   ACTIVE_STATUSES,
+  MESSAGE_COLOR,
   PROGRESS_COLOR,
   STARTABLE_STATUSES,
   STATUS_CHIP_COLOR,
@@ -122,7 +123,7 @@ export const UploadRow = ({ item, divider, ...actions }: UploadRowProps) => {
         >
           <Typography
             variant="caption"
-            color={item.message ? 'error' : 'text.secondary'}
+            color={MESSAGE_COLOR[item.status] ?? 'text.secondary'}
             noWrap
             title={item.message}
             sx={{ minWidth: 0 }}

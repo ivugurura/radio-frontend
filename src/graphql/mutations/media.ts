@@ -1,4 +1,4 @@
-import { graphql } from "../generated";
+import { graphql } from '../generated';
 
 export const REQUEST_UPLOAD = graphql(`
   mutation RequestUpload(
@@ -19,6 +19,11 @@ export const REQUEST_UPLOAD = graphql(`
       chunkUrl
       uploadToken
       trackId
+      duplicateOf {
+        id
+        title
+        artist
+      }
     }
   }
 `);

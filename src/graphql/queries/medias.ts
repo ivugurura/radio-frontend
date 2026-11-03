@@ -31,6 +31,11 @@ export const TRACKS_QUERY = graphql(`
           bitrateKbps
           processedRelPath
           createdAt
+          isDuplicateOf {
+            id
+            title
+            artist
+          }
         }
       }
     }
