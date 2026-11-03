@@ -1,12 +1,12 @@
 import { Route, Routes, BrowserRouter } from 'react-router';
 import Layout from './components/Layout';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import Login from './pages/login';
+import Dashboard from './pages/dashboard';
 import AudioManagerPage from './pages/audio';
 import ListenerStatsPage from './pages/listeners';
 import ChatPage from './pages/chat';
 import HomePage from './pages/Home';
-import StreamingConfigPage from './pages/StreamingConfig';
+import StreamingConfigPage from './pages/streaming-config';
 
 export const AppRoutes = () => {
   return (

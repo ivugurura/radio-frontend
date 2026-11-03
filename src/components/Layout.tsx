@@ -28,7 +28,7 @@ import {
 import { Link, Outlet, useLocation } from 'react-router';
 import { useAuth } from './providers/AuthContext';
 import { useStudioId } from './providers/LanguageContext';
-import Login from '../pages/Login';
+import Login from '../pages/login';
 import RadioStreamPlayer from './RadioStreamPlayer';
 import LanguageSelector from './LanguageSelector';
 import SkipTrackButton from './SkipTrackButton';
