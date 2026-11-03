@@ -33,7 +33,7 @@ import { useStudioId } from '@components/providers';
 import { AudioPlayer } from '@components/AudioPlayer';
 import type { TracksQueryVariables, TrackType } from '@graphql/graphql';
 import ConfirmDialog from './ConfirmDialog';
-import { UploadForm } from './UploadForm';
+import { UploadForm } from './upload/UploadForm';
 
 const POLL_INTERVAL_MS = 3000;
 
