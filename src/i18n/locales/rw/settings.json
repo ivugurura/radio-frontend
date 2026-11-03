@@ -1,0 +1,58 @@
+{
+  "title": "Igenamiterere",
+  "intro": "Genzura konti yawe n’igenamiterere ry’iyi sitidiyo.",
+  "tabs": {
+    "profile": "Umwirondoro",
+    "password": "Ijambobanga",
+    "studio": "Sitidiyo"
+  },
+  "save": "Bika impinduka",
+  "saving": "Biri kubikwa…",
+  "reset": "Reka",
+  "saveFailed": "Ntibyashobotse kubika impinduka. Ongera ugerageze.",
+  "profile": {
+    "title": "Umwirondoro wawe",
+    "subtitle": "Uko abandi bakozi bakubona n’uko winjira.",
+    "firstName": "Izina ry’ibanze",
+    "lastName": "Izina ry’umuryango",
+    "userName": "Izina ukoresha",
+    "email": "Imeri",
+    "emailHint": "Ni yo winjiriraho.",
+    "currentPassword": "Ijambobanga ry’ubu",
+    "currentPasswordHint": "Rirakenewe kugira ngo uhindure imeri winjiriraho.",
+    "timezone": "Isaha y’akarere",
+    "saved": "Umwirondoro wavuguruwe"
+  },
+  "password": {
+    "title": "Hindura ijambobanga",
+    "subtitle": "Kurihindura bigusohora ku bindi bikoresho byose.",
+    "current": "Ijambobanga ry’ubu",
+    "new": "Ijambobanga rishya",
+    "confirm": "Emeza ijambobanga rishya",
+    "rules": "Nibura inyuguti {{min}}, ritagizwe n’imibare gusa kandi ridasanzwe cyane.",
+    "mismatch": "Amagambobanga ntahuye",
+    "submit": "Hindura ijambobanga",
+    "changed": "Ijambobanga ryahinduwe. Wasohowe ku bindi bikoresho."
+  },
+  "studio": {
+    "title": "Sitidiyo",
+    "subtitle": "Igenamiterere rya {{studio}}. Hindura ururimi kugira ngo ugenzure indi sitidiyo.",
+    "readOnly": "Ba nyiri sitidiyo n’abayobozi bayo ni bo bonyine bashobora guhindura iri genamiterere.",
+    "loadFailed": "Ntibyashobotse kubona igenamiterere rya sitidiyo.",
+    "displayName": "Izina rya sitidiyo",
+    "description": "Ibisobanuro",
+    "autoNormalize": "Ringaniza ingano y’ijwi ry’indirimbo nshya",
+    "autoNormalizeHint": "Bireba indirimbo zishyirwaho guhera ubu; izisanzwe zigumana ingano zifite.",
+    "loudnessTarget": "Ingano y’ijwi igamijwe: {{value}} LUFS",
+    "loudnessAria": "Ingano y’ijwi igamijwe muri LUFS",
+    "loudnessHint": "-14 LUFS ni ingano isanzwe kuri streaming; -16 iri hasi gato.",
+    "saved": "Igenamiterere rya sitidiyo ryabitswe",
+    "audioTitle": "Imiterere y’amajwi",
+    "audioSubtitle": "Ntihinduka kuri iyi sitidiyo: seriveri ya streaming, encoder ya live n’indirimbo zose zigomba gukoresha imiterere imwe.",
+    "bitrate": "Bitrate",
+    "sampleRate": "Sample rate",
+    "channels": "Imiyoboro",
+    "channelCount_one": "Mono",
+    "channelCount_other": "Stereo"
+  }
+}

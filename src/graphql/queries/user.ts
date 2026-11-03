@@ -8,6 +8,7 @@ export const USER_PROFILE = graphql(`
       firstName
       lastName
       userName
+      timezone
     }
   }
 `);

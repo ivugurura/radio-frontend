@@ -25,6 +25,7 @@ import {
   ForumOutlined,
   SettingsInputAntennaOutlined,
   LogoutOutlined,
+  SettingsOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
 import { logout } from '@graphql/client';
@@ -89,6 +90,59 @@ const Layout: React.FC = () => {
     .filter(Boolean)
     .join(' ');
 
+  // Sits above Sign out at the bottom of the drawer rather than in the main menu.
+  const settingsItem = {
+    text: t('nav.settings'),
+    icon: <SettingsOutlined />,
+    path: '/admin/settings',
+  };
+
+  const renderNavItem = (item: (typeof menuItems)[number]) => (
+    <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+      <ListItemButton
+        component={Link}
+        to={item.path}
+        onClick={closeMobileDrawer}
+        selected={location.pathname === item.path}
+        sx={{
+          mx: 1,
+          borderRadius: 2,
+          '&.Mui-selected': {
+            backgroundColor: theme.palette.primary.light + '20',
+            color: theme.palette.primary.main,
+            '& .MuiListItemIcon-root': {
+              color: theme.palette.primary.main,
+            },
+          },
+          '&:hover': {
+            backgroundColor: theme.palette.primary.light + '10',
+          },
+        }}
+      >
+        <ListItemIcon
+          sx={{
+            color:
+              location.pathname === item.path
+                ? theme.palette.primary.main
+                : theme.palette.text.secondary,
+            minWidth: 40,
+          }}
+        >
+          {item.icon}
+        </ListItemIcon>
+        <ListItemText
+          primary={item.text}
+          slotProps={{
+            primary: {
+              fontSize: '0.9rem',
+              fontWeight: location.pathname === item.path ? 600 : 400,
+            },
+          }}
+        />
+      </ListItemButton>
+    </ListItem>
+  );
+
   const drawer = (
     // Full-height column so the account section sits in the bottom-left corner.
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -107,53 +161,7 @@ const Layout: React.FC = () => {
         </Typography>
       </Box>
       <Divider />
-      <List sx={{ mt: 1 }}>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              component={Link}
-              to={item.path}
-              onClick={closeMobileDrawer}
-              selected={location.pathname === item.path}
-              sx={{
-                mx: 1,
-                borderRadius: 2,
-                '&.Mui-selected': {
-                  backgroundColor: theme.palette.primary.light + '20',
-                  color: theme.palette.primary.main,
-                  '& .MuiListItemIcon-root': {
-                    color: theme.palette.primary.main,
-                  },
-                },
-                '&:hover': {
-                  backgroundColor: theme.palette.primary.light + '10',
-                },
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  color:
-                    location.pathname === item.path
-                      ? theme.palette.primary.main
-                      : theme.palette.text.secondary,
-                  minWidth: 40,
-                }}
-              >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.text}
-                slotProps={{
-                  primary: {
-                    fontSize: '0.9rem',
-                    fontWeight: location.pathname === item.path ? 600 : 400,
-                  },
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      <List sx={{ mt: 1 }}>{menuItems.map(renderNavItem)}</List>
       {isAuthenticated && (
         <Box sx={{ mt: 'auto' }}>
           <Divider />
@@ -174,6 +182,7 @@ const Layout: React.FC = () => {
             </Typography>
           </Box>
           <List sx={{ pb: 1.5 }}>
+            {renderNavItem(settingsItem)}
             <ListItem disablePadding>
               <ListItemButton
                 onClick={handleLogout}
@@ -238,8 +247,9 @@ const Layout: React.FC = () => {
               fontSize: { xs: '1rem', sm: '1.25rem' },
             }}
           >
-            {menuItems.find((item) => item.path === location.pathname)?.text ||
-              t('nav.dashboard')}
+            {[...menuItems, settingsItem].find(
+              (item) => item.path === location.pathname,
+            )?.text || t('nav.dashboard')}
           </Typography>
           <Box sx={{ mx: { xs: 0, sm: 2 }, minWidth: 0, flexShrink: 0 }}>
             <RadioStreamPlayer

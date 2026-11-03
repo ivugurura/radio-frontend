@@ -12,6 +12,7 @@ const AudioManagerPage = lazy(() => import('./pages/audio'));
 const ListenerStatsPage = lazy(() => import('./pages/listeners'));
 const ChatPage = lazy(() => import('./pages/chat'));
 const StreamingConfigPage = lazy(() => import('./pages/streaming-config'));
+const SettingsPage = lazy(() => import('./pages/settings'));
 
 export const AppRoutes = () => {
   return (
@@ -28,6 +29,7 @@ export const AppRoutes = () => {
             <Route path="listeners" element={<ListenerStatsPage />} />
             <Route path="chat" element={<ChatPage />} />
             <Route path="streaming" element={<StreamingConfigPage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Routes>
       </Suspense>

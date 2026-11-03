@@ -5,7 +5,8 @@
     "audioManager": "Audio Manager",
     "listenerStatistics": "Listener Statistics",
     "liveChat": "Live Chat",
-    "streamingApps": "Streaming Apps"
+    "streamingApps": "Streaming Apps",
+    "settings": "Settings"
   },
   "player": {
     "compactTitle": "R-RW"
