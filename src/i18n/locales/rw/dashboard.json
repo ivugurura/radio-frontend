@@ -12,7 +12,8 @@
     "last30Days": "Iminsi 30 ishize",
     "prev30Days": "Iminsi 30 yabanje",
     "lastMonth": "Ukwezi gushize",
-    "vsPrev30": "ugereranyije n'iminsi 30 yabanje"
+    "vsPrev30": "ugereranyije n'iminsi 30 yabanje",
+    "change30Days": "Impinduka mu minsi 30"
   },
   "trend": {
     "title": "Abakurikiye ubu",

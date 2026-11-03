@@ -75,14 +75,14 @@ export const DashboardPage: React.FC = () => {
         </Alert>
       )}
 
-      <Stack spacing={{ xs: 2, sm: 3 }}>
+      <Stack spacing={{ xs: 1.5, md: 2 }}>
         {loading && !summary ? (
           <CardSkeleton height={112} />
         ) : (
           <SummaryStrip summary={summary as ListeningSummary} />
         )}
 
-        <Grid container spacing={{ xs: 2, sm: 3 }}>
+        <Grid container spacing={{ xs: 1.5, md: 2 }}>
           <Grid size={{ xs: 12, lg: 8 }}>
             {loading && !trend ? (
               <CardSkeleton height={360} />

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Paper, Grid, Box, Stack, Typography } from '@mui/material';
+import { Paper, Box, Stack, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
+import type { Theme } from '@mui/material/styles';
 import {
   TrendingUp,
   TrendingDown,
@@ -9,7 +10,7 @@ import {
   HistoryOutlined,
   DateRangeOutlined,
   CalendarMonthOutlined,
-  EventRepeatOutlined,
+  // EventRepeatOutlined,
   EventNoteOutlined,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
@@ -19,70 +20,43 @@ interface SummaryStripProps {
   summary: ListeningSummary | null;
 }
 
-type ChangeTone = 'success' | 'error' | 'neutral';
+type Tone = 'primary' | 'success' | 'error' | 'neutral';
 
-const changeTone = (changePct: number): ChangeTone => {
+const changeTone = (changePct: number): Tone => {
   if (changePct > 0) return 'success';
   if (changePct < 0) return 'error';
   return 'neutral';
 };
 
-const changeIcons: Record<ChangeTone, React.ElementType> = {
+const changeIcons: Record<Tone, React.ElementType> = {
+  primary: TrendingFlat,
   success: TrendingUp,
   error: TrendingDown,
   neutral: TrendingFlat,
 };
 
+const toneColor = (theme: Theme, tone: Tone) => {
+  if (tone === 'neutral') return theme.palette.grey[600];
+  if (tone === 'primary') return theme.palette.primary.main;
+  return theme.palette[tone].dark;
+};
+
 const formatCount = (value?: number | null) =>
   value === undefined || value === null ? '–' : value.toLocaleString();
 
-export const ChangeBadge: React.FC<{ changePct: number; label: string }> = ({
-  changePct,
-  label,
-}) => {
-  const tone = changeTone(changePct);
-  const Icon = changeIcons[tone];
+const formatChange = (changePct?: number | null) => {
+  if (changePct === undefined || changePct === null) return '–';
   const sign = changePct > 0 ? '+' : '';
-
-  return (
-    <Box display="flex" alignItems="center" gap={0.75} flexWrap="wrap" mt={1}>
-      <Box
-        sx={(theme) => {
-          const base =
-            tone === 'neutral'
-              ? theme.palette.grey[600]
-              : theme.palette[tone].dark;
-          return {
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 0.25,
-            px: 0.75,
-            py: 0.125,
-            borderRadius: 999,
-            color: base,
-            backgroundColor: alpha(base, 0.12),
-          };
-        }}
-      >
-        <Icon sx={{ fontSize: 16 }} />
-        <Typography variant="body2" fontWeight={700} color="inherit">
-          {sign}
-          {changePct.toFixed(0)}%
-        </Typography>
-      </Box>
-      <Typography variant="body2" color="text.secondary">
-        {label}
-      </Typography>
-    </Box>
-  );
+  return `${sign}${changePct.toFixed(0)}%`;
 };
 
 const SummaryTile: React.FC<{
   label: string;
   icon: React.ElementType;
-  value?: number | null;
-  change?: React.ReactNode;
-}> = ({ label, icon: Icon, value, change }) => (
+  value: string;
+  caption?: string;
+  tone?: Tone;
+}> = ({ label, icon: Icon, value, caption, tone = 'primary' }) => (
   <Paper
     variant="outlined"
     sx={{
@@ -113,8 +87,19 @@ const SummaryTile: React.FC<{
             color: 'text.primary',
           }}
         >
-          {formatCount(value)}
+          {value}
         </Typography>
+        {caption && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            noWrap
+            title={caption}
+            mt={0.25}
+          >
+            {caption}
+          </Typography>
+        )}
       </Box>
       <Box
         sx={(theme) => ({
@@ -124,20 +109,23 @@ const SummaryTile: React.FC<{
           display: { xs: 'none', sm: 'grid' },
           placeItems: 'center',
           flexShrink: 0,
-          color: theme.palette.primary.main,
-          backgroundColor: alpha(theme.palette.primary.main, 0.1),
+          color: toneColor(theme, tone),
+          backgroundColor: alpha(toneColor(theme, tone), 0.1),
         })}
       >
         <Icon fontSize="small" />
       </Box>
     </Stack>
-    {change}
   </Paper>
 );
 
 export const SummaryStrip: React.FC<SummaryStripProps> = ({ summary }) => {
   const { t } = useTranslation('dashboard');
-  // const changePct = summary?.last30DaysChangePct;
+  const changePct = summary?.last30DaysChangePct;
+  const changeToneValue =
+    changePct === undefined || changePct === null
+      ? 'neutral'
+      : changeTone(changePct);
 
   const tiles = [
     { key: 'today', icon: TodayOutlined, value: summary?.today },
@@ -147,31 +135,37 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ summary }) => {
       key: 'last30Days',
       icon: CalendarMonthOutlined,
       value: summary?.last30Days,
-      // change:
-      //   changePct === undefined || changePct === null ? undefined : (
-      //     <ChangeBadge changePct={changePct} label={t('summary.vsPrev30')} />
-      //   ),
     },
-    {
-      key: 'prev30Days',
-      icon: EventRepeatOutlined,
-      value: summary?.prev30Days,
-    },
+    // {
+    //   key: 'prev30Days',
+    //   icon: EventRepeatOutlined,
+    //   value: summary?.prev30Days,
+    // },
     { key: 'lastMonth', icon: EventNoteOutlined, value: summary?.lastMonth },
   ];
 
   return (
-    <Grid container spacing={{ xs: 1.5, sm: 2 }}>
+    // auto-fill keeps every tile the same width, however many fit per row.
+    <Box
+      display="grid"
+      gap={{ xs: 1.5, md: 2 }}
+      sx={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}
+    >
       {tiles.map((tile) => (
-        <Grid key={tile.key} size={{ xs: 6, sm: 4, lg: 2 }}>
-          <SummaryTile
-            label={t(`summary.${tile.key}`)}
-            icon={tile.icon}
-            value={tile.value}
-            change={tile.change}
-          />
-        </Grid>
+        <SummaryTile
+          key={tile.key}
+          label={t(`summary.${tile.key}`)}
+          icon={tile.icon}
+          value={formatCount(tile.value)}
+        />
       ))}
-    </Grid>
+      <SummaryTile
+        label={t('summary.change30Days')}
+        icon={changeIcons[changeToneValue]}
+        value={formatChange(changePct)}
+        caption={t('summary.vsPrev30')}
+        tone={changeToneValue}
+      />
+    </Box>
   );
 };

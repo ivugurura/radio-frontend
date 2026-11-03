@@ -12,7 +12,8 @@
     "last30Days": "Last 30 days",
     "prev30Days": "Previous 30 days",
     "lastMonth": "Last month",
-    "vsPrev30": "vs previous 30 days"
+    "vsPrev30": "vs previous 30 days",
+    "change30Days": "30-day change"
   },
   "trend": {
     "title": "Active listeners",
