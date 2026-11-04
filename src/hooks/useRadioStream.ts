@@ -1,4 +1,6 @@
 import React from 'react';
+import { STUDIO_URL } from '@libs/constants';
+import { useStudioId } from '@components/providers';
 
 export type RadioStreamStatus =
   | 'idle'
@@ -21,11 +23,6 @@ type StatusResponse = {
 };
 
 type UseRadioStreamParams = {
-  streamUrl: string;
-  /** When provided, polls for current/next track metadata. */
-  nowUrl?: string;
-  /** When provided, polls for live/AutoDJ status. */
-  statusUrl?: string;
   /** Shown on lock-screen / notification media controls. */
   stationName?: string;
   autoPlay?: boolean;
@@ -285,13 +282,16 @@ function startMseStream(
 }
 
 export function useRadioStream({
-  streamUrl,
-  nowUrl,
-  statusUrl,
   stationName = '',
   autoPlay = false,
   pollIntervalMs = 5000,
-}: UseRadioStreamParams): UseRadioStreamResult {
+}: UseRadioStreamParams = {}): UseRadioStreamResult {
+  const studioId = useStudioId();
+  const studioBaseUrl = `${STUDIO_URL}/${studioId}`;
+  const streamUrl = `${studioBaseUrl}/listen`;
+  const nowUrl = `${studioBaseUrl}/now`;
+  const statusUrl = `${studioBaseUrl}/status`;
+
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const abortRef = React.useRef<AbortController | null>(null);
   // Tracks user intent (as opposed to `status`, which reflects the live
@@ -610,11 +610,9 @@ export function useRadioStream({
   const toggleMute = React.useCallback(() => setMuted((m) => !m), []);
 
   React.useEffect(() => {
-    if (!nowUrl && !statusUrl) return undefined;
     let isMounted = true;
 
     const fetchNow = async () => {
-      if (!nowUrl) return;
       try {
         const response = await fetch(nowUrl, { cache: 'no-store' });
         if (!response.ok) throw new Error('metadata fetch failed');
@@ -629,7 +627,6 @@ export function useRadioStream({
     };
 
     const fetchStatus = async () => {
-      if (!statusUrl) return;
       try {
         const response = await fetch(statusUrl, { cache: 'no-store' });
         if (!response.ok) throw new Error('status fetch failed');

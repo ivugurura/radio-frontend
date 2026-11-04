@@ -22,6 +22,8 @@ import {
   RemoveRounded as RemoveRoundedIcon,
 } from '@mui/icons-material';
 import { useRadioStream } from '../hooks/useRadioStream';
+import { useAuth } from './providers/AuthContext';
+import SkipTrackButton from './SkipTrackButton';
 
 const pulse = keyframes`
   0%, 100% { opacity: 1; }
@@ -48,24 +50,12 @@ const toStatus = (status: string | null, errMsg?: string) => {
   return status ? statusMap[status] || status : 'Idle';
 };
 
-export type NowPlayingInfo = {
-  isLive: boolean;
-  currentTrack: string;
-  refreshMetadata: () => void;
-};
-
 type Props = {
   /** 'hero' = big button + now-playing (public listener page). 'compact' = inline bar (admin app bar). */
   variant: 'hero' | 'compact';
-  streamUrl: string;
-  /** Now-playing/live status polling; omit for a minimal compact player. */
-  nowUrl?: string;
-  statusUrl?: string;
   title?: string;
   autoPlay?: boolean;
   showVolumeControl?: boolean;
-  /** Compact only: extra controls rendered after the player's own (e.g. admin skip). */
-  renderActions?: (info: NowPlayingInfo) => React.ReactNode;
 };
 
 function getPlaybackIcon(isPlaying: boolean, isBuffering: boolean) {
@@ -93,15 +83,12 @@ function getVolumeIcon(volume: number, muted: boolean) {
 
 export const RadioStreamPlayer: React.FC<Props> = ({
   variant,
-  streamUrl,
-  nowUrl,
-  statusUrl,
   title = 'Radio Stream',
   autoPlay = false,
   showVolumeControl = false,
-  renderActions,
 }) => {
   const { t } = useTranslation('audio');
+  const { isAuthenticated } = useAuth();
   const {
     status,
     isPlaying,
@@ -120,9 +107,6 @@ export const RadioStreamPlayer: React.FC<Props> = ({
     toggleMute,
     refreshMetadata,
   } = useRadioStream({
-    streamUrl,
-    nowUrl,
-    statusUrl,
     stationName: title,
     autoPlay,
   });
@@ -133,7 +117,6 @@ export const RadioStreamPlayer: React.FC<Props> = ({
   } = getVolumeIcon(volume, muted);
   const step = 0.1;
   if (variant === 'compact') {
-    const showSourceBadge = Boolean(statusUrl);
     const subtitle = isLive
       ? 'Live'
       : currentTrack || toStatus(status, errorMessage);
@@ -160,22 +143,20 @@ export const RadioStreamPlayer: React.FC<Props> = ({
               <Typography variant="body2" noWrap fontWeight={600}>
                 {title}
               </Typography>
-              {showSourceBadge && (
-                <Box
-                  component="span"
-                  sx={{
-                    width: 8,
-                    height: 8,
-                    flexShrink: 0,
-                    borderRadius: '50%',
-                    backgroundColor: isLive ? '#e63946' : '#8191a4',
-                    animation: isLive
-                      ? `${pulse} 1.4s ease-in-out infinite`
-                      : 'none',
-                  }}
-                  title={isLive ? 'Live' : 'AutoDJ'}
-                />
-              )}
+              <Box
+                component="span"
+                sx={{
+                  width: 8,
+                  height: 8,
+                  flexShrink: 0,
+                  borderRadius: '50%',
+                  backgroundColor: isLive ? '#e63946' : '#8191a4',
+                  animation: isLive
+                    ? `${pulse} 1.4s ease-in-out infinite`
+                    : 'none',
+                }}
+                title={isLive ? 'Live' : 'AutoDJ'}
+              />
             </Stack>
             <Typography
               variant="caption"
@@ -224,11 +205,13 @@ export const RadioStreamPlayer: React.FC<Props> = ({
             </IconButton>
           </Tooltip>
 
-          {renderActions?.({
-            isLive,
-            currentTrack,
-            refreshMetadata,
-          })}
+          {isAuthenticated && (
+            <SkipTrackButton
+              isLive={isLive}
+              currentTrack={currentTrack}
+              refreshMetadata={refreshMetadata}
+            />
+          )}
         </Stack>
       </Paper>
     );

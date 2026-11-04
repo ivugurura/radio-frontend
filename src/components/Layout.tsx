@@ -1,6 +1,5 @@
 import React, { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { STUDIO_URL } from '@libs/constants';
 import {
   Box,
   Drawer,
@@ -30,11 +29,9 @@ import {
 import { Link, Outlet, useLocation } from 'react-router';
 import { logout } from '@graphql/client';
 import { useAuth } from './providers/AuthContext';
-import { useStudioId } from './providers/LanguageContext';
 import Login from '../pages/login';
 import RadioStreamPlayer from './RadioStreamPlayer';
 import LanguageSelector from './LanguageSelector';
-import SkipTrackButton from './SkipTrackButton';
 import PageLoader from './PageLoader';
 
 const drawerWidth = 260;
@@ -46,9 +43,6 @@ const Layout: React.FC = () => {
   const { t } = useTranslation('layout');
   const { isAuthenticated, isLoading, user } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
-  const studioId = useStudioId();
-
-  const studioBaseUrl = `${STUDIO_URL}/${studioId}`;
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -254,15 +248,7 @@ const Layout: React.FC = () => {
           <Box sx={{ mx: { xs: 0, sm: 2 }, minWidth: 0, flexShrink: 0 }}>
             <RadioStreamPlayer
               variant="compact"
-              streamUrl={`${studioBaseUrl}/listen`}
-              nowUrl={`${studioBaseUrl}/now`}
-              statusUrl={`${studioBaseUrl}/status`}
               title={t('player.compactTitle')}
-              renderActions={(nowPlaying) =>
-                isAuthenticated && (
-                  <SkipTrackButton studioId={studioId} {...nowPlaying} />
-                )
-              }
             />
           </Box>
           <LanguageSelector variant="short" />

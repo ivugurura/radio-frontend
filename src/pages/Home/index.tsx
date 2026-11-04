@@ -1,19 +1,12 @@
 import React from 'react';
 import { Box, Container, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { STUDIO_URL } from '@libs/constants';
-import { useStudioId } from '@components/providers';
 import LanguageSelector from '@components/LanguageSelector';
 import ListenerChat from '@components/ListenerChat';
 import RadioStreamPlayer from '@components/RadioStreamPlayer';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation('home');
-  const studioId = useStudioId();
-
-  const streamUrl = `${STUDIO_URL}/${studioId}/listen`;
-  const nowUrl = `${STUDIO_URL}/${studioId}/now`;
-  const statusUrl = `${STUDIO_URL}/${studioId}/status`;
 
   return (
     <Box
@@ -33,9 +26,6 @@ const HomePage: React.FC = () => {
 
           <RadioStreamPlayer
             variant="hero"
-            streamUrl={streamUrl}
-            nowUrl={nowUrl}
-            statusUrl={statusUrl}
             title={t('stationTitle')}
             showVolumeControl
           />

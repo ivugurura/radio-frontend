@@ -5,21 +5,25 @@ import { SkipNextRounded as SkipNextRoundedIcon } from '@mui/icons-material';
 import { useSkipTrackMutation } from '@graphql/hooks';
 import { notifier } from '@libs/constants';
 import ConfirmDialog from '../pages/audio/ConfirmDialog';
-import type { NowPlayingInfo } from './RadioStreamPlayer';
+import { useStudioId } from './providers/LanguageContext';
 
-type Props = NowPlayingInfo & { studioId: string };
+type Props = {
+  isLive: boolean;
+  currentTrack: string;
+  refreshMetadata: () => void;
+};
 
 /**
  * Skips the AutoDJ track on air. Goes through the backend, which checks the
  * user's studio role before asking the studio to skip.
  */
 const SkipTrackButton: React.FC<Props> = ({
-  studioId,
   isLive,
   currentTrack,
   refreshMetadata,
 }) => {
   const { t } = useTranslation('layout');
+  const studioId = useStudioId();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [skipTrack, { loading }] = useSkipTrackMutation();
 
