@@ -14,8 +14,8 @@
     "lastMonth": "Ukwezi gushize",
     "vsPrev30": "ugereranyije n'iminsi 30 yabanje",
     "change30Days": "Impinduka mu minsi 30",
-    "uniqueListeners_one": "Umulistener umwe({{formatted}})",
-    "uniqueListeners_other": "Abalistener {{formatted}} batandukanye"
+    "uniqueListeners_one": "Unique({{formatted}})",
+    "uniqueListeners_other": "Unique({{formatted}})"
   },
   "trend": {
     "title": "Abakurikiye ubu",
