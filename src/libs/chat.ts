@@ -2,7 +2,12 @@ import type { ChatMessagesQuery } from '@graphql/graphql';
 
 const LISTENER_CLIENT_ID_KEY = 'listener-chat-client-id';
 
-// Falls back to an in-memory id if localStorage is unavailable (private browsing, etc).
+let inMemoryListenerClientId: string | null = null;
+
+// Stable per-browser listener id, shared by chat and the audio stream (sent as
+// `lid` so radio-studio counts a reconnect as the same listener). Falls back to
+// an id kept for the page's lifetime if localStorage is unavailable (private
+// browsing, etc).
 export const getOrCreateListenerClientId = (): string => {
   try {
     const existing = window.localStorage.getItem(LISTENER_CLIENT_ID_KEY);
@@ -12,7 +17,8 @@ export const getOrCreateListenerClientId = (): string => {
     window.localStorage.setItem(LISTENER_CLIENT_ID_KEY, created);
     return created;
   } catch {
-    return crypto.randomUUID();
+    inMemoryListenerClientId ??= crypto.randomUUID();
+    return inMemoryListenerClientId;
   }
 };
 

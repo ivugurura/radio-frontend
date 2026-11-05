@@ -127,22 +127,53 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ summary }) => {
       ? 'neutral'
       : changeTone(changePct);
 
+  // value counts listens (sessions of 30 s or more); unique counts the
+  // distinct listeners behind them.
   const tiles = [
-    { key: 'today', icon: TodayOutlined, value: summary?.today },
-    { key: 'yesterday', icon: HistoryOutlined, value: summary?.yesterday },
-    { key: 'last7Days', icon: DateRangeOutlined, value: summary?.last7Days },
+    {
+      key: 'today',
+      icon: TodayOutlined,
+      value: summary?.today,
+      unique: summary?.uniqueToday,
+    },
+    {
+      key: 'yesterday',
+      icon: HistoryOutlined,
+      value: summary?.yesterday,
+      unique: summary?.uniqueYesterday,
+    },
+    {
+      key: 'last7Days',
+      icon: DateRangeOutlined,
+      value: summary?.last7Days,
+      unique: summary?.uniqueLast7Days,
+    },
     {
       key: 'last30Days',
       icon: CalendarMonthOutlined,
       value: summary?.last30Days,
+      unique: summary?.uniqueLast30Days,
     },
     // {
     //   key: 'prev30Days',
     //   icon: EventRepeatOutlined,
     //   value: summary?.prev30Days,
     // },
-    { key: 'lastMonth', icon: EventNoteOutlined, value: summary?.lastMonth },
+    {
+      key: 'lastMonth',
+      icon: EventNoteOutlined,
+      value: summary?.lastMonth,
+      unique: summary?.uniqueLastMonth,
+    },
   ];
+
+  const uniqueCaption = (count?: number | null) => {
+    if (count === undefined || count === null) return undefined;
+    return t('summary.uniqueListeners', {
+      count,
+      formatted: count.toLocaleString(),
+    });
+  };
 
   return (
     // auto-fill keeps every tile the same width, however many fit per row.
@@ -157,6 +188,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ summary }) => {
           label={t(`summary.${tile.key}`)}
           icon={tile.icon}
           value={formatCount(tile.value)}
+          caption={uniqueCaption(tile.unique)}
         />
       ))}
       <SummaryTile
