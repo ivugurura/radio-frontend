@@ -1,5 +1,6 @@
 import React from 'react';
 import { STUDIO_URL } from '@libs/constants';
+import { getOrCreateListenerClientId } from '@libs/chat';
 import { useStudioId } from '@components/providers';
 
 export type RadioStreamStatus =
@@ -288,7 +289,8 @@ export function useRadioStream({
 }: UseRadioStreamParams = {}): UseRadioStreamResult {
   const studioId = useStudioId();
   const studioBaseUrl = `${STUDIO_URL}/${studioId}`;
-  const streamUrl = `${studioBaseUrl}/listen`;
+  const [listenerId] = React.useState(getOrCreateListenerClientId);
+  const streamUrl = `${studioBaseUrl}/listen?lid=${encodeURIComponent(listenerId)}`;
   const nowUrl = `${studioBaseUrl}/now`;
   const statusUrl = `${studioBaseUrl}/status`;
 
