@@ -142,7 +142,8 @@ const ListenerChat: React.FC = () => {
             flexDirection: 'column',
             borderRadius: 3,
             overflow: 'hidden',
-            border: '1px solid #d9e2ee',
+            border: '1px solid',
+            borderColor: 'divider',
             boxShadow: '0 18px 40px rgba(45, 87, 133, 0.22)',
           }}
         >
@@ -158,7 +159,12 @@ const ListenerChat: React.FC = () => {
             }}
           >
             <Box>
-              <Typography variant="subtitle1" fontWeight={700} lineHeight={1.2}>
+              <Typography
+                variant="subtitle1"
+                color="inherit"
+                fontWeight={700}
+                lineHeight={1.2}
+              >
                 {t('widget.title')}
               </Typography>
               <Typography
@@ -189,7 +195,7 @@ const ListenerChat: React.FC = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 1.25,
-                  backgroundColor: '#f7fbff',
+                  backgroundColor: 'background.default',
                 }}
               >
                 {messages.length === 0 ? (
@@ -281,12 +287,13 @@ const ListenerChat: React.FC = () => {
                               px: 1.5,
                               py: 1,
                               borderRadius: 2,
-                              backgroundColor: isSelf ? '#53a9e7' : '#fff',
+                              backgroundColor: isSelf ? '#53a9e7' : 'background.paper',
                               color: isSelf ? '#fff' : 'text.primary',
-                              border: isSelf ? 'none' : '1px solid #e1e9f3',
+                              border: isSelf ? 'none' : '1px solid',
+                              borderColor: 'divider',
                             }}
                           >
-                            <Typography variant="body2">
+                            <Typography variant="body2" color="inherit">
                               {message.body}
                             </Typography>
                           </Box>
@@ -306,8 +313,10 @@ const ListenerChat: React.FC = () => {
                   sx={{
                     px: 2,
                     py: 1,
-                    borderTop: '1px solid #e1e9f3',
-                    backgroundColor: '#fff6f6',
+                    borderTop: '1px solid',
+                    borderColor: 'divider',
+                    backgroundColor:
+                      'rgba(var(--mui-palette-error-mainChannel) / 0.08)',
                   }}
                 >
                   <BlockRoundedIcon fontSize="small" sx={{ color: '#c0392b' }} />
@@ -323,8 +332,9 @@ const ListenerChat: React.FC = () => {
                 alignItems="flex-end"
                 sx={{
                   p: 1.5,
-                  borderTop: '1px solid #e1e9f3',
-                  backgroundColor: '#fff',
+                  borderTop: '1px solid',
+                    borderColor: 'divider',
+                  backgroundColor: 'background.paper',
                 }}
               >
                 <TextField
@@ -356,7 +366,7 @@ const ListenerChat: React.FC = () => {
                     color: '#fff',
                     '&:hover': { backgroundColor: '#4498d6' },
                     '&.Mui-disabled': {
-                      backgroundColor: '#d9e2ee',
+                      backgroundColor: 'action.disabledBackground',
                       color: '#fff',
                     },
                   }}
@@ -401,12 +411,17 @@ const ListenerChat: React.FC = () => {
                   color: '#fff',
                   '&:hover': { backgroundColor: '#4498d6' },
                   '&.Mui-disabled': {
-                    backgroundColor: '#d9e2ee',
+                    backgroundColor: 'action.disabledBackground',
                     color: '#fff',
                   },
                 }}
               >
-                <Typography variant="body2" fontWeight={600} sx={{ px: 0.5 }}>
+                <Typography
+                  variant="body2"
+                  color="inherit"
+                  fontWeight={600}
+                  sx={{ px: 0.5 }}
+                >
                   {t('widget.continue')}
                 </Typography>
               </IconButton>

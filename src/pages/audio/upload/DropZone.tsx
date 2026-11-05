@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react';
 import { Box, Typography } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import { CloudUploadOutlined as CloudUploadIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { RECOMMENDED_BATCH_SIZE } from './constants';
@@ -60,7 +59,7 @@ export const DropZone = ({ onFiles }: DropZoneProps) => {
         border: '2px dashed',
         borderColor: dragging ? 'primary.main' : 'divider',
         bgcolor: dragging
-          ? alpha(theme.palette.primary.main, 0.08)
+          ? theme.alpha((theme.vars || theme).palette.primary.main, 0.08)
           : 'action.hover',
         transition: 'border-color 120ms, background-color 120ms',
         '&:hover': { borderColor: 'primary.main' },

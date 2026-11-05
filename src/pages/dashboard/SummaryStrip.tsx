@@ -1,6 +1,5 @@
 import React from 'react';
 import { Paper, Box, Stack, Typography } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import type { Theme } from '@mui/material/styles';
 import {
   TrendingUp,
@@ -36,9 +35,9 @@ const changeIcons: Record<Tone, React.ElementType> = {
 };
 
 const toneColor = (theme: Theme, tone: Tone) => {
-  if (tone === 'neutral') return theme.palette.grey[600];
-  if (tone === 'primary') return theme.palette.primary.main;
-  return theme.palette[tone].dark;
+  if (tone === 'neutral') return (theme.vars || theme).palette.text.secondary;
+  if (tone === 'primary') return (theme.vars || theme).palette.primary.main;
+  return (theme.vars || theme).palette[tone].dark;
 };
 
 const formatCount = (value?: number | null) =>
@@ -110,7 +109,7 @@ const SummaryTile: React.FC<{
           placeItems: 'center',
           flexShrink: 0,
           color: toneColor(theme, tone),
-          backgroundColor: alpha(toneColor(theme, tone), 0.1),
+          backgroundColor: theme.alpha(toneColor(theme, tone), 0.1),
         })}
       >
         <Icon fontSize="small" />

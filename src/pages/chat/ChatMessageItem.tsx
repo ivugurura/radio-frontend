@@ -38,7 +38,7 @@ export const ChatMessageItem: React.FC<Props> = ({
 
   const getBackgroundColor = () => {
     if (isHidden) return 'action.hover';
-    if (isListener) return 'grey.50';
+    if (isListener) return 'background.default';
     return 'primary.50';
   };
 

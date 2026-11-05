@@ -22,6 +22,12 @@
     "success": "\"{{track}}\" yasimbutswe",
     "error": "Ntibyashobotse gusimbuka indirimbo"
   },
+  "theme": {
+    "label": "Amabara",
+    "light": "Urumuri",
+    "dark": "Umwijima",
+    "system": "Systeme"
+  },
   "logout": "Sohoka",
   "signingOut": "Birimo gusohoka…"
 }

@@ -59,8 +59,11 @@ export const TrendChart: React.FC<Props> = ({ data }) => {
   const peak = data?.peak;
   // Today's peak can be older than the charted window.
   const isPeakCharted = chartData.some((point) => point.ts === peak?.ts);
-  const stroke = theme.palette.primary.main;
-  const axisTick = { fill: theme.palette.text.secondary, fontSize: 12 };
+  const stroke = (theme.vars || theme).palette.primary.main;
+  const axisTick = {
+    fill: (theme.vars || theme).palette.text.secondary,
+    fontSize: 12,
+  };
 
   return (
     <DashboardCard
@@ -104,7 +107,7 @@ export const TrendChart: React.FC<Props> = ({ data }) => {
               </defs>
               <CartesianGrid
                 vertical={false}
-                stroke={theme.palette.divider}
+                stroke={(theme.vars || theme).palette.divider}
                 strokeDasharray="3 3"
               />
               <XAxis
@@ -125,7 +128,10 @@ export const TrendChart: React.FC<Props> = ({ data }) => {
               />
               <Tooltip
                 content={(props) => <TrendTooltip {...props} />}
-                cursor={{ stroke: theme.palette.text.secondary, strokeWidth: 1 }}
+                cursor={{
+                  stroke: (theme.vars || theme).palette.text.secondary,
+                  strokeWidth: 1,
+                }}
               />
               <Area
                 type="monotone"
@@ -136,7 +142,7 @@ export const TrendChart: React.FC<Props> = ({ data }) => {
                 activeDot={{
                   r: 5,
                   fill: stroke,
-                  stroke: theme.palette.background.paper,
+                  stroke: (theme.vars || theme).palette.background.paper,
                   strokeWidth: 2,
                 }}
                 isAnimationActive={false}
@@ -146,8 +152,8 @@ export const TrendChart: React.FC<Props> = ({ data }) => {
                   x={peak.ts}
                   y={peak.active}
                   r={5}
-                  fill={theme.palette.warning.main}
-                  stroke={theme.palette.background.paper}
+                  fill={(theme.vars || theme).palette.warning.main}
+                  stroke={(theme.vars || theme).palette.background.paper}
                   strokeWidth={2}
                 />
               )}

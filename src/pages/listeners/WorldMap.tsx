@@ -138,7 +138,7 @@ const countBadge = (count: number, color: string) => {
     className: '',
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font:600 13px/1 Roboto,Helvetica,Arial,sans-serif;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)">${count}</div>`,
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font:600 13px/1 'Roboto Slab',Georgia,serif;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)">${count}</div>`,
   });
 };
 
@@ -316,7 +316,7 @@ export const WorldMap: React.FC<Props> = ({ data, height = 560 }) => {
               sx={{
                 bgcolor: 'background.paper',
                 boxShadow: 1,
-                '&:hover': { bgcolor: 'grey.100' },
+                '&:hover': { bgcolor: 'action.hover' },
               }}
             >
               {fullscreen ? (
@@ -332,7 +332,7 @@ export const WorldMap: React.FC<Props> = ({ data, height = 560 }) => {
               sx={{
                 bgcolor: 'background.paper',
                 boxShadow: 1,
-                '&:hover': { bgcolor: 'grey.100' },
+                '&:hover': { bgcolor: 'action.hover' },
               }}
             >
               <CenterFocusStrongRoundedIcon />

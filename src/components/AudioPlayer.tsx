@@ -9,7 +9,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import {
   PlayArrowRounded as PlayArrowRoundedIcon,
   PauseRounded as PauseRoundedIcon,
@@ -131,8 +130,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         px: { xs: 1.5, sm: 2.5 },
         py: 1.5,
         borderRadius: 3,
-        border: `1px solid ${theme.palette.divider}`,
-        background: `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.06)}, ${theme.palette.background.paper} 45%)`,
+        border: `1px solid ${(theme.vars || theme).palette.divider}`,
+        background: `linear-gradient(90deg, ${theme.alpha((theme.vars || theme).palette.primary.main, 0.06)}, ${(theme.vars || theme).palette.background.paper} 45%)`,
       })}
     >
       <audio
@@ -190,9 +189,9 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
               borderRadius: 2,
               display: 'grid',
               placeItems: 'center',
-              color: theme.palette.primary.contrastText,
-              background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.light})`,
-              boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.35)}`,
+              color: (theme.vars || theme).palette.primary.contrastText,
+              background: `linear-gradient(135deg, ${(theme.vars || theme).palette.primary.dark}, ${(theme.vars || theme).palette.secondary.light})`,
+              boxShadow: `0 4px 12px ${theme.alpha((theme.vars || theme).palette.primary.main, 0.35)}`,
             })}
           >
             <MusicNoteRoundedIcon />
@@ -259,7 +258,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 height: 44,
                 bgcolor: 'primary.main',
                 color: 'primary.contrastText',
-                boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}`,
+                boxShadow: `0 4px 12px ${theme.alpha((theme.vars || theme).palette.primary.main, 0.4)}`,
                 '&:hover': { bgcolor: 'primary.dark' },
                 '&.Mui-disabled': {
                   bgcolor: 'action.disabledBackground',

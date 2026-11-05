@@ -7,7 +7,6 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import { keyframes } from '@emotion/react';
 import { MusicNote, MusicOff } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
@@ -73,8 +72,11 @@ const Cover: React.FC<{ item: QueueItem; size: number }> = ({ item, size }) => (
       width: size,
       height: size,
       borderRadius: 2,
-      color: theme.palette.primary.main,
-      backgroundColor: alpha(theme.palette.primary.main, 0.1),
+      color: (theme.vars || theme).palette.primary.main,
+      backgroundColor: theme.alpha(
+        (theme.vars || theme).palette.primary.main,
+        0.1,
+      ),
     })}
   >
     <MusicNote sx={{ fontSize: size * 0.5 }} />
@@ -96,12 +98,15 @@ const NowPlayingHero: React.FC<{ item: QueueItem }> = ({ item }) => {
         minWidth: 0,
         p: { xs: 1.5, sm: 2 },
         borderRadius: 3,
-        background: `linear-gradient(135deg, ${alpha(
-          theme.palette.primary.main,
+        background: `linear-gradient(135deg, ${theme.alpha(
+          (theme.vars || theme).palette.primary.main,
           0.1,
-        )} 0%, ${alpha(theme.palette.secondary.main, 0.04)} 100%)`,
+        )} 0%, ${theme.alpha((theme.vars || theme).palette.secondary.main, 0.04)} 100%)`,
         border: '1px solid',
-        borderColor: alpha(theme.palette.primary.main, 0.2),
+        borderColor: theme.alpha(
+          (theme.vars || theme).palette.primary.main,
+          0.2,
+        ),
       })}
     >
       <Stack direction="row" spacing={2} alignItems="center">
@@ -150,7 +155,10 @@ const NowPlayingHero: React.FC<{ item: QueueItem }> = ({ item }) => {
             sx={(theme) => ({
               height: 6,
               borderRadius: 3,
-              backgroundColor: alpha(theme.palette.primary.main, 0.15),
+              backgroundColor: theme.alpha(
+                (theme.vars || theme).palette.primary.main,
+                0.15,
+              ),
               '& .MuiLinearProgress-bar': { borderRadius: 3 },
             })}
           />
@@ -186,8 +194,11 @@ const EmptyState: React.FC<{ title: string; hint: string }> = ({
       p: { xs: 1.5, sm: 2 },
       borderRadius: 3,
       border: '1px dashed',
-      borderColor: theme.palette.divider,
-      backgroundColor: alpha(theme.palette.text.primary, 0.02),
+      borderColor: (theme.vars || theme).palette.divider,
+      backgroundColor: theme.alpha(
+        (theme.vars || theme).palette.text.primary,
+        0.02,
+      ),
     })}
   >
     <Box
@@ -198,8 +209,11 @@ const EmptyState: React.FC<{ title: string; hint: string }> = ({
         display: 'grid',
         placeItems: 'center',
         flexShrink: 0,
-        color: theme.palette.text.secondary,
-        backgroundColor: alpha(theme.palette.text.primary, 0.06),
+        color: (theme.vars || theme).palette.text.secondary,
+        backgroundColor: theme.alpha(
+          (theme.vars || theme).palette.text.primary,
+          0.06,
+        ),
       })}
     >
       <MusicOff />

@@ -16,7 +16,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import { NetworkStatus } from '@apollo/client';
 import {
   CloudUploadOutlined as CloudUploadOutlinedIcon,
@@ -310,7 +309,10 @@ export default function AudioManagerPage() {
             borderColor: 'divider',
             transition: 'background-color 150ms',
             ...(selected.length > 0 && {
-              bgcolor: alpha(theme.palette.primary.main, 0.08),
+              bgcolor: theme.alpha(
+                (theme.vars || theme).palette.primary.main,
+                0.08,
+              ),
             }),
           })}
         >
@@ -348,7 +350,7 @@ export default function AudioManagerPage() {
                   maxWidth: { sm: 420 },
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
-                    bgcolor: 'grey.50',
+                    bgcolor: 'background.default',
                   },
                 }}
                 slotProps={{

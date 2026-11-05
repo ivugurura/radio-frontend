@@ -10,7 +10,7 @@ import { AuthProvider, LanguageProvider } from '@components/providers';
 
 const App: React.FC = () => (
   <ApolloAppProvider>
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme} defaultMode="light" noSsr>
       <ErrorBoundary location={null}>
         <CssBaseline />
         <ToastContainer />

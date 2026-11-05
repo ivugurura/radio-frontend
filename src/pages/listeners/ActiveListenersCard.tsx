@@ -26,7 +26,7 @@ export const ActiveListenersCard: React.FC<Props> = ({ count }) => {
       <Typography variant="h3" fontWeight={500} lineHeight={1.1}>
         {count}
       </Typography>
-      <Typography variant="subtitle1">
+      <Typography variant="subtitle1" color="inherit">
         {t('connectedListener', { count })}
       </Typography>
       <Box

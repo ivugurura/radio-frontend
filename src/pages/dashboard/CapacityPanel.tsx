@@ -7,7 +7,6 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import {
   HeadphonesOutlined,
   StorageOutlined,
@@ -71,8 +70,11 @@ const UsageMeter: React.FC<{
             display: 'grid',
             placeItems: 'center',
             flexShrink: 0,
-            color: theme.palette[color].main,
-            backgroundColor: alpha(theme.palette[color].main, 0.12),
+            color: (theme.vars || theme).palette[color].main,
+            backgroundColor: theme.alpha(
+              (theme.vars || theme).palette[color].main,
+              0.12,
+            ),
           })}
         >
           <Icon fontSize="small" />
@@ -106,7 +108,10 @@ const UsageMeter: React.FC<{
         sx={(theme) => ({
           height: 8,
           borderRadius: 4,
-          backgroundColor: alpha(theme.palette.text.primary, 0.08),
+          backgroundColor: theme.alpha(
+            (theme.vars || theme).palette.text.primary,
+            0.08,
+          ),
           '& .MuiLinearProgress-bar': { borderRadius: 4 },
         })}
       />
@@ -130,7 +135,10 @@ const SpecItem: React.FC<{
       p: 1,
       borderRadius: 2,
       minWidth: 0,
-      backgroundColor: alpha(theme.palette.text.primary, 0.03),
+      backgroundColor: theme.alpha(
+        (theme.vars || theme).palette.text.primary,
+        0.03,
+      ),
     })}
   >
     <Icon sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />

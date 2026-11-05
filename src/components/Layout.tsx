@@ -33,6 +33,7 @@ import Login from '../pages/login';
 import RadioStreamPlayer from './RadioStreamPlayer';
 import LanguageSelector from './LanguageSelector';
 import PageLoader from './PageLoader';
+import ThemeModeToggle from './ThemeModeToggle';
 
 const drawerWidth = 260;
 
@@ -102,14 +103,20 @@ const Layout: React.FC = () => {
           mx: 1,
           borderRadius: 2,
           '&.Mui-selected': {
-            backgroundColor: theme.palette.primary.light + '20',
-            color: theme.palette.primary.main,
+            backgroundColor: theme.alpha(
+              (theme.vars || theme).palette.primary.light,
+              0.125,
+            ),
+            color: (theme.vars || theme).palette.primary.main,
             '& .MuiListItemIcon-root': {
-              color: theme.palette.primary.main,
+              color: (theme.vars || theme).palette.primary.main,
             },
           },
           '&:hover': {
-            backgroundColor: theme.palette.primary.light + '10',
+            backgroundColor: theme.alpha(
+              (theme.vars || theme).palette.primary.light,
+              0.0625,
+            ),
           },
         }}
       >
@@ -117,8 +124,8 @@ const Layout: React.FC = () => {
           sx={{
             color:
               location.pathname === item.path
-                ? theme.palette.primary.main
-                : theme.palette.text.secondary,
+                ? (theme.vars || theme).palette.primary.main
+                : (theme.vars || theme).palette.text.secondary,
             minWidth: 40,
           }}
         >
@@ -145,7 +152,7 @@ const Layout: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           p: 2,
-          backgroundColor: theme.palette.primary.main,
+          backgroundColor: (theme.vars || theme).palette.primary.main,
           color: 'white',
         }}
       >
@@ -177,6 +184,7 @@ const Layout: React.FC = () => {
           </Box>
           <List sx={{ pb: 1.5 }}>
             {renderNavItem(settingsItem)}
+            <ThemeModeToggle />
             <ListItem disablePadding>
               <ListItemButton
                 onClick={handleLogout}
@@ -184,9 +192,12 @@ const Layout: React.FC = () => {
                 sx={{
                   mx: 1,
                   borderRadius: 2,
-                  color: theme.palette.error.main,
+                  color: (theme.vars || theme).palette.error.main,
                   '&:hover': {
-                    backgroundColor: theme.palette.error.light + '15',
+                    backgroundColor: theme.alpha(
+                      (theme.vars || theme).palette.error.light,
+                      0.08,
+                    ),
                   },
                 }}
               >
@@ -299,7 +310,7 @@ const Layout: React.FC = () => {
           p: { xs: 1.5, sm: 2 },
           width: { md: `calc(100% - ${drawerWidth}px)` },
           minHeight: '100dvh',
-          backgroundColor: theme.palette.background.default,
+          backgroundColor: (theme.vars || theme).palette.background.default,
         }}
       >
         {/* Spacer matching the app bar height, which MUI shrinks on phones. */}

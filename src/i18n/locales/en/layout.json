@@ -22,6 +22,12 @@
     "success": "Skipped \"{{track}}\"",
     "error": "Could not skip the track"
   },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
   "logout": "Sign out",
   "signingOut": "Signing out…"
 }

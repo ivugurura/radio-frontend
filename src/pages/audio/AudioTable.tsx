@@ -17,7 +17,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { alpha, type Theme } from '@mui/material/styles';
+import { type Theme } from '@mui/material/styles';
 import { keyframes } from '@mui/system';
 import {
   PlayArrowRounded as PlayArrowRoundedIcon,
@@ -110,11 +110,11 @@ const StateChip: React.FC<Readonly<{ state: MediasTrackStateChoices }>> = ({
       sx={{
         fontWeight: 500,
         ...(busy && {
-          bgcolor: (th) => alpha(th.palette.info.main, 0.12),
+          bgcolor: (th) => th.alpha((th.vars || th).palette.info.main, 0.12),
           color: 'info.dark',
         }),
         ...(state === 'FAILED' && {
-          bgcolor: (th) => alpha(th.palette.error.main, 0.12),
+          bgcolor: (th) => th.alpha((th.vars || th).palette.error.main, 0.12),
           color: 'error.dark',
         }),
         '& .MuiChip-icon': { ml: 1 },
@@ -144,19 +144,19 @@ const getIdleIcon = ({ track, isCurrent, playing }: TrackTileProps) => {
 const getTileColors = (theme: Theme, isCurrent: boolean, failed: boolean) => {
   if (isCurrent) {
     return {
-      color: theme.palette.primary.contrastText,
-      bgcolor: theme.palette.primary.main,
+      color: (theme.vars || theme).palette.primary.contrastText,
+      bgcolor: (theme.vars || theme).palette.primary.main,
     };
   }
   if (failed) {
     return {
-      color: theme.palette.error.main,
-      bgcolor: alpha(theme.palette.error.main, 0.1),
+      color: (theme.vars || theme).palette.error.main,
+      bgcolor: theme.alpha((theme.vars || theme).palette.error.main, 0.1),
     };
   }
   return {
-    color: theme.palette.primary.main,
-    bgcolor: alpha(theme.palette.primary.main, 0.08),
+    color: (theme.vars || theme).palette.primary.main,
+    bgcolor: theme.alpha((theme.vars || theme).palette.primary.main, 0.08),
   };
 };
 
@@ -205,8 +205,8 @@ const TrackTile: React.FC<TrackTileProps> = (props) => {
         '& .hover-icon': { display: 'none' },
         ...(playable && {
           'tr:hover &': {
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
+            bgcolor: (theme.vars || theme).palette.primary.main,
+            color: (theme.vars || theme).palette.primary.contrastText,
           },
           'tr:hover & .idle-icon': { display: 'none' },
           'tr:hover & .hover-icon': { display: 'grid' },
@@ -250,7 +250,10 @@ const EmptyState: React.FC<
           display: 'grid',
           placeItems: 'center',
           color: 'primary.main',
-          bgcolor: alpha(theme.palette.primary.main, 0.08),
+          bgcolor: theme.alpha(
+            (theme.vars || theme).palette.primary.main,
+            0.08,
+          ),
         })}
       >
         <Icon fontSize="large" />
@@ -329,7 +332,7 @@ export const AudioTable: React.FC<AudioTableProps> = ({
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: 0.6,
-              bgcolor: 'grey.50',
+              bgcolor: 'background.default',
               whiteSpace: 'nowrap',
               py: 1.25,
             },
@@ -420,8 +423,11 @@ export const AudioTable: React.FC<AudioTableProps> = ({
                       sx={(theme) => ({
                         cursor: playable ? 'pointer' : 'default',
                         ...(isCurrent && {
-                          bgcolor: alpha(theme.palette.primary.main, 0.06),
-                          boxShadow: `inset 3px 0 0 ${theme.palette.primary.main}`,
+                          bgcolor: theme.alpha(
+                            (theme.vars || theme).palette.primary.main,
+                            0.06,
+                          ),
+                          boxShadow: `inset 3px 0 0 ${(theme.vars || theme).palette.primary.main}`,
                         }),
                       })}
                     >
@@ -492,7 +498,7 @@ export const AudioTable: React.FC<AudioTableProps> = ({
                           <Chip
                             size="small"
                             label={r.genre}
-                            sx={{ bgcolor: 'grey.100', maxWidth: 140 }}
+                            sx={{ bgcolor: 'action.selected', maxWidth: 140 }}
                           />
                         ) : (
                           <Typography variant="body2" color="text.disabled">

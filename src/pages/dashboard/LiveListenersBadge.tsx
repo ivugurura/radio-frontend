@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import { keyframes } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
@@ -24,8 +23,10 @@ export const LiveListenersBadge: React.FC<{ count: number }> = ({ count }) => {
         py: 0.5,
         borderRadius: 999,
         whiteSpace: 'nowrap',
-        backgroundColor: alpha(
-          hasListeners ? theme.palette.success.main : theme.palette.grey[500],
+        backgroundColor: theme.alpha(
+          hasListeners
+            ? (theme.vars || theme).palette.success.main
+            : (theme.vars || theme).palette.text.secondary,
           0.12,
         ),
       })}
