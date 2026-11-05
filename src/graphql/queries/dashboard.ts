@@ -20,6 +20,11 @@ export const DASHBOARD_OVERVIEW = graphql(`
       last30DaysChangePct
       prev30Days
       lastMonth
+      uniqueToday
+      uniqueYesterday
+      uniqueLast7Days
+      uniqueLast30Days
+      uniqueLastMonth
     }
     studioCapacity(studioId: $studioId) {
       listeningSeconds

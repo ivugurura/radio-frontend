@@ -13,7 +13,9 @@
     "prev30Days": "Previous 30 days",
     "lastMonth": "Last month",
     "vsPrev30": "vs previous 30 days",
-    "change30Days": "30-day change"
+    "change30Days": "30-day change",
+    "uniqueListeners_one": "{{formatted}} unique listener",
+    "uniqueListeners_other": "{{formatted}} unique listeners"
   },
   "trend": {
     "title": "Active listeners",
