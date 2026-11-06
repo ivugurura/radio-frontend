@@ -26,12 +26,6 @@ export const DASHBOARD_OVERVIEW = graphql(`
       uniqueLast30Days
       uniqueLastMonth
     }
-    studioCapacity(studioId: $studioId) {
-      listeningSeconds
-      listeningSecondsQuota
-      diskUsedGb
-      diskQuotaGb
-    }
     currentQueue(studioId: $studioId, limit: 4) {
       items {
         id
@@ -45,6 +39,17 @@ export const DASHBOARD_OVERVIEW = graphql(`
     }
     listenerOverview(studioId: $studioId) {
       activeNow
+    }
+  }
+`);
+
+export const STUDIO_CAPACITY = graphql(`
+  query StudioCapacity($studioId: String!) {
+    studioCapacity(studioId: $studioId) {
+      listeningSeconds
+      listeningSecondsQuota
+      diskUsedGb
+      diskQuotaGb
     }
   }
 `);

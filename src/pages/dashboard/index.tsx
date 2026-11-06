@@ -15,7 +15,10 @@ import { CapacityPanel } from './CapacityPanel';
 import { SummaryStrip } from './SummaryStrip';
 import { CurrentQueueSlider } from './CurrentQueueSlider';
 import { LiveListenersBadge } from './LiveListenersBadge';
-import { useDashboardOverviewQuery } from '@graphql/hooks';
+import {
+  useDashboardOverviewQuery,
+  useStudioCapacityQuery,
+} from '@graphql/hooks';
 import type {
   ListeningSummary,
   ListeningTrend,
@@ -23,10 +26,8 @@ import type {
   StudioCapacity,
 } from '@graphql/graphql';
 
-/**
- * If you want periodic refresh for near-real-time graph:
- * set pollInterval in useQuery options (e.g., pollInterval: 15000)
- */
+// Capacity changes slowly and the API caches it for 60 s, so it polls less often.
+const CAPACITY_POLL_MS = 60_000;
 
 const CardSkeleton: React.FC<{ height: number }> = ({ height }) => (
   <Skeleton variant="rounded" height={height} sx={{ borderRadius: 3 }} />
@@ -40,10 +41,16 @@ export const DashboardPage: React.FC = () => {
     fetchPolicy: 'network-only',
     pollInterval: 5000,
   });
+  const { data: capacityData, loading: capacityLoading } =
+    useStudioCapacityQuery({
+      variables: { studioId },
+      fetchPolicy: 'network-only',
+      pollInterval: CAPACITY_POLL_MS,
+    });
 
   const trend = data?.listeningTrend ?? null;
   const summary = data?.listeningSummaryCount ?? null;
-  const capacity = data?.studioCapacity ?? null;
+  const capacity = capacityData?.studioCapacity ?? null;
   const queueItems = data?.currentQueue?.items ?? [];
   const liveListeners = data?.listenerOverview?.activeNow;
 
@@ -91,7 +98,7 @@ export const DashboardPage: React.FC = () => {
             )}
           </Grid>
           <Grid size={{ xs: 12, lg: 4 }}>
-            {loading && !capacity ? (
+            {capacityLoading && !capacity ? (
               <CardSkeleton height={360} />
             ) : (
               <CapacityPanel capacity={capacity as StudioCapacity} />
