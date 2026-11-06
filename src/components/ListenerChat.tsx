@@ -160,7 +160,7 @@ const ListenerChat: React.FC = () => {
           >
             <Box>
               <Typography
-                variant="subtitle1"
+                variant="h5"
                 color="inherit"
                 fontWeight={700}
                 lineHeight={1.2}
@@ -168,7 +168,7 @@ const ListenerChat: React.FC = () => {
                 {t('widget.title')}
               </Typography>
               <Typography
-                variant="caption"
+                variant="body1"
                 sx={{ color: 'rgba(255, 255, 255, 0.85)' }}
               >
                 {t('widget.subtitle')}
@@ -356,6 +356,7 @@ const ListenerChat: React.FC = () => {
                   }}
                   multiline
                   maxRows={3}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '1.0625rem' } }}
                 />
                 <IconButton
                   onClick={handleSend}
