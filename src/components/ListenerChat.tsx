@@ -224,9 +224,9 @@ const ListenerChat: React.FC = () => {
                         {!isSelf && (
                           <Avatar
                             sx={{
-                              width: 28,
-                              height: 28,
-                              fontSize: '0.75rem',
+                              width: 32,
+                              height: 32,
+                              fontSize: '0.875rem',
                               bgcolor: '#53a9e7',
                             }}
                           >
@@ -235,7 +235,7 @@ const ListenerChat: React.FC = () => {
                         )}
                         <Box>
                           <Typography
-                            variant="caption"
+                            variant="body2"
                             color="text.secondary"
                             sx={{
                               display: 'block',
@@ -260,7 +260,7 @@ const ListenerChat: React.FC = () => {
                               }}
                             >
                               <Typography
-                                variant="caption"
+                                variant="body2"
                                 color="text.secondary"
                                 sx={{ display: 'block', fontWeight: 600 }}
                               >
@@ -269,7 +269,7 @@ const ListenerChat: React.FC = () => {
                                   : message.quotedMessage.listenerDisplayName}
                               </Typography>
                               <Typography
-                                variant="caption"
+                                variant="body2"
                                 color="text.secondary"
                                 sx={{
                                   display: '-webkit-box',
@@ -293,7 +293,7 @@ const ListenerChat: React.FC = () => {
                               borderColor: 'divider',
                             }}
                           >
-                            <Typography variant="body2" color="inherit">
+                            <Typography variant="body1" color="inherit">
                               {message.body}
                             </Typography>
                           </Box>
@@ -320,7 +320,7 @@ const ListenerChat: React.FC = () => {
                   }}
                 >
                   <BlockRoundedIcon fontSize="small" sx={{ color: '#c0392b' }} />
-                  <Typography variant="caption" color="#c0392b">
+                  <Typography variant="body2" color="#c0392b">
                     {t('widget.mutedNow')}
                   </Typography>
                 </Stack>

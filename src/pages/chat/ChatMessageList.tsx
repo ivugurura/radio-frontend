@@ -35,7 +35,10 @@ export const ChatMessageList: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation('chat');
   const getDayLabel = useDayLabel();
-  const dayGroups = React.useMemo(() => groupMessagesByDay(messages), [messages]);
+  const dayGroups = React.useMemo(
+    () => groupMessagesByDay(messages),
+    [messages],
+  );
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const topSentinelRef = React.useRef<HTMLDivElement | null>(null);
   const nearBottomRef = React.useRef(true);
@@ -122,25 +125,25 @@ export const ChatMessageList: React.FC<Props> = ({
             )}
           </Box>
           {dayGroups.map((group) => (
-          <React.Fragment key={group.dayKey}>
-            <Divider sx={{ my: 0.5 }}>
-              <Chip
-                label={getDayLabel(group.date)}
-                size="small"
-                variant="outlined"
-                sx={{ fontSize: '0.7rem', color: 'text.secondary' }}
-              />
-            </Divider>
-            {group.messages.map((message) => (
-              <ChatMessageItem
-                key={message.id}
-                message={message}
-                onReply={onReply}
-                onToggleHide={onToggleHide}
-                onMute={onMute}
-              />
-            ))}
-          </React.Fragment>
+            <React.Fragment key={group.dayKey}>
+              <Divider sx={{ my: 0.5 }}>
+                <Chip
+                  label={getDayLabel(group.date)}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.7rem', color: 'text.secondary' }}
+                />
+              </Divider>
+              {group.messages.map((message) => (
+                <ChatMessageItem
+                  key={message.id}
+                  message={message}
+                  onReply={onReply}
+                  onToggleHide={onToggleHide}
+                  onMute={onMute}
+                />
+              ))}
+            </React.Fragment>
           ))}
         </>
       )}

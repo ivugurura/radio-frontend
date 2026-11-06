@@ -62,7 +62,7 @@ export const ChatMessageItem: React.FC<Props> = ({
       >
         <Box sx={{ minWidth: 0 }}>
           <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="subtitle2" fontWeight={700}>
+            <Typography variant="body1" fontWeight={700}>
               {getAuthorLabel(message)}
             </Typography>
             <Chip
@@ -70,9 +70,9 @@ export const ChatMessageItem: React.FC<Props> = ({
               size="small"
               color={isListener ? 'default' : 'primary'}
               variant="outlined"
-              sx={{ height: 18, fontSize: '0.65rem' }}
+              sx={{ height: 20, fontSize: '0.75rem' }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="body2" color="text.secondary">
               {dayjs(message.createdAt).format('HH:mm')}
             </Typography>
             {isHidden && (
@@ -80,7 +80,7 @@ export const ChatMessageItem: React.FC<Props> = ({
                 label={t('hiddenBadge')}
                 size="small"
                 color="warning"
-                sx={{ height: 18, fontSize: '0.65rem' }}
+                sx={{ height: 20, fontSize: '0.75rem' }}
               />
             )}
           </Stack>
@@ -98,7 +98,7 @@ export const ChatMessageItem: React.FC<Props> = ({
               }}
             >
               <Typography
-                variant="caption"
+                variant="body2"
                 color="text.secondary"
                 sx={{ display: 'block', fontWeight: 600 }}
               >
@@ -107,7 +107,7 @@ export const ChatMessageItem: React.FC<Props> = ({
                   : message.quotedMessage.listenerDisplayName}
               </Typography>
               <Typography
-                variant="caption"
+                variant="body2"
                 color="text.secondary"
                 sx={{
                   display: '-webkit-box',
@@ -122,7 +122,7 @@ export const ChatMessageItem: React.FC<Props> = ({
           )}
 
           <Typography
-            variant="body2"
+            variant="body1"
             sx={{
               mt: 0.5,
               textDecoration: isHidden ? 'line-through' : 'none',
