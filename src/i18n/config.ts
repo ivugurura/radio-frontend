@@ -15,10 +15,13 @@ export const DEFAULT_LANGUAGE: AppLanguage = 'rw';
 /** localStorage key i18next's language detector reads/writes. */
 export const LANGUAGE_STORAGE_KEY = 'app-language';
 
-/** Studio slug that serves each language. */
+/**
+ * Studio slug that serves each language. Studios are named after the language
+ * they serve, but only `rw` exists so far, so English plays it too.
+ */
 export const STUDIO_BY_LANGUAGE: Record<AppLanguage, string> = {
-  rw: 'reformation-rw',
-  en: 'reformation-en',
+  rw: 'rw',
+  en: 'rw', // Switch to 'en' once that studio exists in the backend.
 };
 
 /** Native label shown in the language selector. */

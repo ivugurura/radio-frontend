@@ -5,7 +5,7 @@ import i18n from '../../i18n';
 import {
   LANGUAGE_STORAGE_KEY,
   SUPPORTED_LANGUAGES,
-  // STUDIO_BY_LANGUAGE,
+  STUDIO_BY_LANGUAGE,
   normalizeLanguage,
   type AppLanguage,
 } from '../../i18n/config';
@@ -56,8 +56,7 @@ export const LanguageProvider = ({
     () => ({
       language: languageState,
       // The studio ID is derived from the language, so it updates automatically when the language changes.
-      // studioId: STUDIO_BY_LANGUAGE[language],
-      studioId: 'reformation-rw',
+      studioId: STUDIO_BY_LANGUAGE[languageState],
       languages: SUPPORTED_LANGUAGES,
       setLanguage,
     }),
