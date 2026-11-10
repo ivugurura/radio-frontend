@@ -7,6 +7,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useStudioAccess, type StudioPermission } from './providers';
+import { useAuth } from './providers/AuthContext';
 
 type NoticeKind = 'noStudio' | 'forbidden';
 
@@ -64,5 +65,14 @@ export const RequireStudioPermission: React.FC<
   const access = useStudioAccess();
   if (!access.current) return <AccessNotice kind="noStudio" />;
   if (!access.can(permission)) return <AccessNotice kind="forbidden" />;
+  return <>{children}</>;
+};
+
+/** Platform-admin pages (e.g. user management). */
+export const RequireSuperuser: React.FC<
+  Readonly<{ children: React.ReactNode }>
+> = ({ children }) => {
+  const { user } = useAuth();
+  if (!user?.isSuperuser) return <AccessNotice kind="forbidden" />;
   return <>{children}</>;
 };

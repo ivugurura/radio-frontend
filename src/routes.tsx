@@ -1,7 +1,10 @@
 import { lazy, Suspense } from 'react';
 import { Route, Routes, BrowserRouter } from 'react-router';
 import PageLoader from './components/PageLoader';
-import { RequireStudioPermission as Require } from './components/RequireStudioPermission';
+import {
+  RequireStudioPermission as Require,
+  RequireSuperuser,
+} from './components/RequireStudioPermission';
 // The public listener page is what most visitors open, so it ships in the
 // main bundle; everything staff-only is split out and fetched on demand.
 import HomePage from './pages/Home';
@@ -14,6 +17,11 @@ const ListenerStatsPage = lazy(() => import('./pages/listeners'));
 const ChatPage = lazy(() => import('./pages/chat'));
 const StreamingConfigPage = lazy(() => import('./pages/streaming-config'));
 const SettingsPage = lazy(() => import('./pages/settings'));
+const UsersPage = lazy(() => import('./pages/users'));
+const SetPasswordPage = lazy(() => import('./pages/account/SetPasswordPage'));
+const ForgotPasswordPage = lazy(
+  () => import('./pages/account/ForgotPasswordPage'),
+);
 
 export const AppRoutes = () => {
   return (
@@ -24,6 +32,16 @@ export const AppRoutes = () => {
         <Routes>
           <Route index element={<HomePage />} />
           <Route path="login" element={<Login shouldRedirect />} />
+          {/* One-time links from invite and reset emails. */}
+          <Route
+            path="accept-invite"
+            element={<SetPasswordPage mode="invite" />}
+          />
+          <Route
+            path="reset-password"
+            element={<SetPasswordPage mode="reset" />}
+          />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
           <Route path="admin" element={<Layout />}>
             {/* Each studio page needs a permission in the active studio;
                 settings (profile, password) is open to every signed-in user. */}
@@ -65,6 +83,14 @@ export const AppRoutes = () => {
                 <Require permission="VIEW_STREAM_CREDS">
                   <StreamingConfigPage />
                 </Require>
+              }
+            />
+            <Route
+              path="users"
+              element={
+                <RequireSuperuser>
+                  <UsersPage />
+                </RequireSuperuser>
               }
             />
             <Route path="settings" element={<SettingsPage />} />

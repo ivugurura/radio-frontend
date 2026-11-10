@@ -59,13 +59,13 @@
   "members": {
     "title": "Members",
     "subtitle": "People who can work on {{studio}} and what each may do.",
-    "addTitle": "Add a member",
+    "addTitle": "Invite a member",
     "addSubtitle": "Give someone access to {{studio}}.",
-    "addHint": "Enter the email of an existing account. They get access the next time they open the dashboard.",
+    "addHint": "Someone who already has an account joins right away. A new person gets a one-time link to choose a password; first and last name are needed for them.",
     "email": "Email address",
     "role": "Role",
-    "add": "Add member",
-    "adding": "Adding…",
+    "add": "Invite",
+    "adding": "Inviting…",
     "added": "{{email}} added as {{role}}",
     "roleChanged": "Role updated for {{name}}",
     "remove": "Remove from studio",
@@ -93,6 +93,9 @@
       "DJ": "Goes live, skips tracks and moderates the chat",
       "ANALYST": "Sees the dashboard and listener statistics",
       "VIEWER": "Sees the dashboard and the audio library"
-    }
+    },
+    "firstName": "First name",
+    "lastName": "Last name",
+    "pending": "Invited"
   }
 }

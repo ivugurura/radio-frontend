@@ -1,0 +1,90 @@
+{
+  "title": "Abakoresha",
+  "intro": "Konti zose ziri kuri uru rubuga. Tumira abantu, uvugurure amakuru yabo kandi ubuze kwinjira igihe bibaye ngombwa.",
+  "search": "Shakisha ukoresheje izina cyangwa imeri",
+  "empty": "Nta mukoresha uhuye n’ibyo ushaka.",
+  "you": "(wowe)",
+  "never": "Nta na rimwe",
+  "superuser": "Umuyobozi w’urubuga",
+  "noStudios": "Nta sitidiyo",
+  "rowsPerPage": "Imirongo kuri paji",
+  "cancel": "Reka",
+  "actionFailed": "Hari ikitagenze neza. Ongera ugerageze.",
+  "columns": {
+    "user": "Umukoresha",
+    "studios": "Sitidiyo",
+    "status": "Uko ahagaze",
+    "lastLogin": "Aheruka kwinjira"
+  },
+  "status": {
+    "ALL": "Bose",
+    "ACTIVE": "Arakora",
+    "INVITED": "Yatumiwe",
+    "DISABLED": "Yahagaritswe"
+  },
+  "fields": {
+    "email": "Imeri",
+    "firstName": "Izina",
+    "lastName": "Irindi zina",
+    "userName": "Izina ry’ukoresha",
+    "phone": "Telefoni",
+    "role": "Uruhare"
+  },
+  "invite": {
+    "open": "Tumira umukoresha",
+    "title": "Tumira umukoresha",
+    "studio": "Sitidiyo",
+    "studioHint": "Si ngombwa. Hitamo sitidiyo kugira ngo ahite ahabwa uruhare muri yo.",
+    "noStudio": "Nta sitidiyo ubu",
+    "hint": "Amazina arakenewe kuri konti nshya. Niba imeri isanzwe ifite konti, yongerwa gusa muri sitidiyo.",
+    "submit": "Ohereza ubutumire",
+    "sending": "Biri gutumirwa…",
+    "addedExisting": "{{email}} asanzwe afite konti kandi yongewe muri sitidiyo"
+  },
+  "edit": {
+    "title": "Hindura umukoresha",
+    "emailHint": "Ni yo akoresha yinjira.",
+    "submit": "Bika impinduka",
+    "saving": "Biri kubikwa…",
+    "saved": "Umukoresha yavuguruwe"
+  },
+  "actions": {
+    "label": "Ibikorwa kuri {{name}}",
+    "edit": "Hindura amakuru",
+    "sendReset": "Ohereza guhindura ijambobanga",
+    "resendInvite": "Ongera wohereze ubutumire",
+    "signOut": "Musohore ahantu hose",
+    "enable": "Ongera ukoreshe konti",
+    "disable": "Hagarika konti"
+  },
+  "confirm": {
+    "disable": {
+      "title": "Uhagarika {{name}}?",
+      "body": "Asohorwa ahantu hose kandi ntashobora kwinjira kugeza konti yongeye gukoreshwa. Inshingano afite muri sitidiyo ziragumaho.",
+      "action": "Hagarika",
+      "done": "{{name}} yahagaritswe"
+    },
+    "enable": {
+      "title": "Wongera gukoresha konti ya {{name}}?",
+      "body": "Azongera kwinjira akoresheje ijambobanga n’inshingano yari asanganywe.",
+      "action": "Ongera ukoreshe",
+      "done": "Konti ya {{name}} yongeye gukora"
+    },
+    "signOut": {
+      "title": "Usohora {{name}} ahantu hose?",
+      "body": "Buri gikoresho kizasabwa kongera kwinjira. Paji zifunguye zishobora gukomeza gukora iminota igera kuri 30.",
+      "action": "Musohore",
+      "done": "{{name}} yasohowe ahantu hose"
+    }
+  },
+  "link": {
+    "inviteTitle": "Link y’ubutumire yabonetse",
+    "resetTitle": "Link yo guhindura ijambobanga yabonetse",
+    "emailed": "Link twayohereje kuri {{email}}. Ushobora no kuyimwoherereza ubwawe.",
+    "notEmailed": "Imeri ntiratunganywa kuri seriveri, bityo oherereza {{email}} iyi link ubwawe (urugero kuri WhatsApp).",
+    "label": "Link ikoreshwa rimwe",
+    "inviteHint": "Ikora rimwe gusa kandi irangira mu minsi 7. Uyifite wese ashobora gushyiraho ijambobanga, bityo yohereze uyu muntu wenyine.",
+    "resetHint": "Ikora rimwe gusa kandi irangira mu isaha 1. Uyifite wese ashobora gushyiraho ijambobanga, bityo yohereze uyu muntu wenyine.",
+    "done": "Ndangije"
+  }
+}

@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { Box, Button, Stack, TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useChangePasswordMutation } from '@graphql/hooks';
-import { lStorage, notifier } from '@libs/constants';
+import { lStorage, MIN_PASSWORD_LENGTH, notifier } from '@libs/constants';
 import { SettingsCard } from './SettingsCard';
 import { errorMessage } from './errors';
 
-// Mirrors Django's MinimumLengthValidator default; the server has the final say.
-const MIN_LENGTH = 8;
+const MIN_LENGTH = MIN_PASSWORD_LENGTH;
 
 const EMPTY = { current: '', next: '', confirm: '' };
 

@@ -8,6 +8,9 @@ export const APP_SCHEMA = import.meta.env.VITE_APP_SCHEMA;
 
 export const STUDIO_URL = import.meta.env.VITE_STUDIO_URL;
 
+// Mirrors Django's MinimumLengthValidator default; the server has the final say.
+export const MIN_PASSWORD_LENGTH = 8;
+
 /**
  * Stations are language specific. Inside React, read the active studio with
  * `useStudioId()` / `useLanguage()` from `@components/providers` so it tracks the

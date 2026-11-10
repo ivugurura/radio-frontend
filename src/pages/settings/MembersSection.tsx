@@ -18,7 +18,7 @@ import {
 import { PersonRemoveOutlined as PersonRemoveOutlinedIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import {
-  useAddStudioMemberMutation,
+  useInviteUserMutation,
   useRemoveStudioMemberMutation,
   useStudioMembersQuery,
   useUpdateStudioMemberRoleMutation,
@@ -31,6 +31,10 @@ import {
   type StudioRole,
 } from '@components/providers';
 import { useAuth } from '@components/providers/AuthContext';
+import {
+  LinkResultDialog,
+  type AccountLinkResult,
+} from '@components/LinkResultDialog';
 import ConfirmDialog from '../audio/ConfirmDialog';
 import { SettingsCard } from './SettingsCard';
 import { errorMessage } from './errors';
@@ -100,28 +104,57 @@ const RoleSelect = ({
   );
 };
 
-const AddMemberForm = ({
+const EMPTY_INVITE = { email: '', firstName: '', lastName: '' };
+
+/**
+ * Invites by email. An existing account joins the studio at once; a new one
+ * gets a one-time link (emailed when the server can, always shown to copy).
+ */
+const InviteMemberForm = ({
   roles,
 }: Readonly<{ roles: readonly StudioRole[] }>) => {
   const { t } = useTranslation('settings');
   const studioId = useStudioId();
-  const [email, setEmail] = useState('');
+  const [form, setForm] = useState(EMPTY_INVITE);
   const [role, setRole] = useState<StudioRole | ''>('');
-  const [addMember, { loading }] = useAddStudioMemberMutation(REFETCH);
+  const [linkResult, setLinkResult] = useState<AccountLinkResult | null>(null);
+  const [inviteUser, { loading }] = useInviteUserMutation(REFETCH);
+
+  const field =
+    (key: keyof typeof EMPTY_INVITE) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!role) return;
+    const email = form.email.trim();
     try {
-      await addMember({ variables: { studioId, email: email.trim(), role } });
-      notifier.success(
-        t('members.added', {
-          email: email.trim(),
-          role: t(`members.roles.${role}`),
-        }),
-      );
-      setEmail('');
+      const res = await inviteUser({
+        variables: {
+          studioId,
+          email,
+          role,
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
+        },
+      });
+      const result = res.data?.inviteUser;
+      if (!result) return;
+      setForm(EMPTY_INVITE);
       setRole('');
+      if (result.inviteLink) {
+        setLinkResult({
+          email,
+          link: result.inviteLink,
+          purpose: 'INVITE',
+          emailed: result.emailed,
+        });
+        return;
+      }
+      notifier.success(
+        t('members.added', { email, role: t(`members.roles.${role}`) }),
+      );
     } catch (err) {
       notifier.error(errorMessage(err, t('members.actionFailed')));
     }
@@ -129,34 +162,56 @@ const AddMemberForm = ({
 
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-        <TextField
-          size="small"
-          type="email"
-          label={t('members.email')}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="off"
-          fullWidth
-        />
-        <RoleSelect
-          label={t('members.role')}
-          value={role}
-          roles={roles}
-          onChange={setRole}
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={loading || !email.trim() || !role}
-          sx={{ flexShrink: 0 }}
-        >
-          {loading ? t('members.adding') : t('members.add')}
-        </Button>
+      <Stack spacing={1.5}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+          <TextField
+            size="small"
+            type="email"
+            label={t('members.email')}
+            value={form.email}
+            onChange={field('email')}
+            autoComplete="off"
+            fullWidth
+          />
+          <RoleSelect
+            label={t('members.role')}
+            value={role}
+            roles={roles}
+            onChange={setRole}
+          />
+        </Stack>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+          <TextField
+            size="small"
+            label={t('members.firstName')}
+            value={form.firstName}
+            onChange={field('firstName')}
+            fullWidth
+          />
+          <TextField
+            size="small"
+            label={t('members.lastName')}
+            value={form.lastName}
+            onChange={field('lastName')}
+            fullWidth
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={loading || !form.email.trim() || !role}
+            sx={{ flexShrink: 0 }}
+          >
+            {loading ? t('members.adding') : t('members.add')}
+          </Button>
+        </Stack>
       </Stack>
       <Typography variant="caption" color="text.secondary" component="p" mt={1}>
         {t('members.addHint')}
       </Typography>
+      <LinkResultDialog
+        result={linkResult}
+        onClose={() => setLinkResult(null)}
+      />
     </Box>
   );
 };
@@ -234,6 +289,15 @@ const MemberRow = ({ member, isSelf, roles, onRemove }: MemberRowProps) => {
                 >
                   {t('members.you')}
                 </Typography>
+              )}
+              {member.user.isPending && (
+                <Chip
+                  size="small"
+                  color="warning"
+                  variant="outlined"
+                  label={t('members.pending')}
+                  sx={{ ml: 1, height: 20 }}
+                />
               )}
             </Typography>
             <Typography
@@ -362,7 +426,7 @@ export const MembersSection = () => {
         title={t('members.addTitle')}
         subtitle={t('members.addSubtitle', { studio: studioName })}
       >
-        <AddMemberForm roles={assignableRoles} />
+        <InviteMemberForm roles={assignableRoles} />
       </SettingsCard>
       <SettingsCard
         title={t('members.title')}

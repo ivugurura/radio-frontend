@@ -25,6 +25,7 @@ import {
   SettingsInputAntennaOutlined,
   LogoutOutlined,
   SettingsOutlined,
+  ManageAccountsOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
 import { logout } from '@graphql/client';
@@ -73,6 +74,7 @@ const Layout: React.FC = () => {
     icon: React.ReactNode;
     path: string;
     permission?: StudioPermission;
+    superuserOnly?: boolean;
   }[] = [
     {
       text: t('nav.dashboard'),
@@ -104,10 +106,18 @@ const Layout: React.FC = () => {
       path: '/admin/streaming',
       permission: 'VIEW_STREAM_CREDS',
     },
+    {
+      text: t('nav.users'),
+      icon: <ManageAccountsOutlined />,
+      path: '/admin/users',
+      superuserOnly: true,
+    },
   ];
-  const menuItems = allMenuItems.filter(
-    (item) => !item.permission || access.can(item.permission),
-  );
+  const canSee = (item: (typeof allMenuItems)[number]) => {
+    if (item.superuserOnly) return Boolean(user?.isSuperuser);
+    return !item.permission || access.can(item.permission);
+  };
+  const menuItems = allMenuItems.filter(canSee);
 
   const handleLogout = async () => {
     setLoggingOut(true);

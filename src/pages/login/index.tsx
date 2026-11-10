@@ -6,15 +6,17 @@ import {
   Checkbox,
   Container,
   FormControlLabel,
+  Link,
   Typography,
 } from '@mui/material';
+import { Link as RouterLink } from 'react-router';
 
 import { Copyright } from '../../components/Copyright';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { loginSchema } from './schema';
 import { MFForm } from 'react-mui-form';
-import { useLoginUserMutation } from '@graphql/hooks';
+import { useAuthOptionsQuery, useLoginUserMutation } from '@graphql/hooks';
 import { lStorage, notifier } from '@libs/constants';
 import { useAuth } from '@components/providers/AuthContext';
 import type { UserType } from '@graphql/graphql';
@@ -32,6 +34,9 @@ const Login = ({ shouldRedirect = false }) => {
   const { t } = useTranslation('auth');
   const [loginInfo, setLoginInfo] = useState(initialStates);
   const [loginUser, { loading, data }] = useLoginUserMutation();
+  // Self-service reset needs email delivery on the server.
+  const canResetPassword =
+    useAuthOptionsQuery().data?.authOptions.passwordResetAvailable ?? false;
 
   const { isAuthenticated, setAuthUser } = useAuth();
 
@@ -98,6 +103,17 @@ const Login = ({ shouldRedirect = false }) => {
           >
             {loading ? t('signingIn') : t('signIn')}
           </Button>
+          {canResetPassword && (
+            <Box sx={{ textAlign: 'right' }}>
+              <Link
+                component={RouterLink}
+                to="/forgot-password"
+                variant="body2"
+              >
+                {t('forgotPassword')}
+              </Link>
+            </Box>
+          )}
         </Box>
       </Box>
       <Copyright sx={{ mt: 8, mb: 4 }} />

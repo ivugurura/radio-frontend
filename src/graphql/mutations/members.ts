@@ -1,19 +1,6 @@
 import { graphql } from '../generated';
 
-export const ADD_STUDIO_MEMBER = graphql(`
-  mutation AddStudioMember(
-    $studioId: String!
-    $email: String!
-    $role: StudioRole!
-  ) {
-    addStudioMember(studioId: $studioId, email: $email, role: $role) {
-      member {
-        id
-        role
-      }
-    }
-  }
-`);
+// Adding a member is `inviteUser` with a studio and role (mutations/users.ts).
 
 export const UPDATE_STUDIO_MEMBER_ROLE = graphql(`
   mutation UpdateStudioMemberRole(

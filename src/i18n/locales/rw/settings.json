@@ -59,13 +59,13 @@
   "members": {
     "title": "Abanyamuryango",
     "subtitle": "Abantu bakora kuri {{studio}} n’icyo buri wese yemerewe gukora.",
-    "addTitle": "Ongeraho umunyamuryango",
+    "addTitle": "Tumira umunyamuryango",
     "addSubtitle": "Ha umuntu uburenganzira bwo kugera kuri {{studio}}.",
-    "addHint": "Andika imeri ya konti isanzweho. Azabona uburenganzira ubutaha naramuka afunguye dashboard.",
+    "addHint": "Usanzwe afite konti ahita yinjira. Umuntu mushya ahabwa link ikoreshwa rimwe yo guhitamo ijambobanga; izina n’irindi zina bye birakenewe.",
     "email": "Imeri",
     "role": "Uruhare",
-    "add": "Ongeraho",
-    "adding": "Biri kongerwaho…",
+    "add": "Tumira",
+    "adding": "Biri gutumirwa…",
     "added": "{{email}} yongeweho nka {{role}}",
     "roleChanged": "Uruhare rwa {{name}} rwahinduwe",
     "remove": "Mukure muri sitidiyo",
@@ -93,6 +93,9 @@
       "DJ": "Ajya live, asimbuka indirimbo kandi agenzura ibiganiro",
       "ANALYST": "Abona dashboard n’imibare y’abumva",
       "VIEWER": "Abona dashboard n’isomero ry’indirimbo"
-    }
+    },
+    "firstName": "Izina",
+    "lastName": "Irindi zina",
+    "pending": "Yatumiwe"
   }
 }

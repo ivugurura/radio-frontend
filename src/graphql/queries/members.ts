@@ -12,6 +12,7 @@ export const STUDIO_MEMBERS = graphql(`
         email
         firstName
         lastName
+        isPending
       }
     }
   }
