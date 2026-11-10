@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Route, Routes, BrowserRouter } from 'react-router';
 import PageLoader from './components/PageLoader';
+import { RequireStudioPermission as Require } from './components/RequireStudioPermission';
 // The public listener page is what most visitors open, so it ships in the
 // main bundle; everything staff-only is split out and fetched on demand.
 import HomePage from './pages/Home';
@@ -24,11 +25,48 @@ export const AppRoutes = () => {
           <Route index element={<HomePage />} />
           <Route path="login" element={<Login shouldRedirect />} />
           <Route path="admin" element={<Layout />}>
-            <Route path="" element={<Dashboard />} />
-            <Route path="medias" element={<AudioManagerPage />} />
-            <Route path="listeners" element={<ListenerStatsPage />} />
-            <Route path="chat" element={<ChatPage />} />
-            <Route path="streaming" element={<StreamingConfigPage />} />
+            {/* Each studio page needs a permission in the active studio;
+                settings (profile, password) is open to every signed-in user. */}
+            <Route
+              path=""
+              element={
+                <Require permission="VIEW_ANALYTICS">
+                  <Dashboard />
+                </Require>
+              }
+            />
+            <Route
+              path="medias"
+              element={
+                <Require permission="VIEW_MEDIA">
+                  <AudioManagerPage />
+                </Require>
+              }
+            />
+            <Route
+              path="listeners"
+              element={
+                <Require permission="VIEW_ANALYTICS">
+                  <ListenerStatsPage />
+                </Require>
+              }
+            />
+            <Route
+              path="chat"
+              element={
+                <Require permission="MODERATE_CHAT">
+                  <ChatPage />
+                </Require>
+              }
+            />
+            <Route
+              path="streaming"
+              element={
+                <Require permission="VIEW_STREAM_CREDS">
+                  <StreamingConfigPage />
+                </Require>
+              }
+            />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Routes>

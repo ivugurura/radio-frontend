@@ -9,6 +9,14 @@ export const USER_PROFILE = graphql(`
       lastName
       userName
       timezone
+      isSuperuser
+      studioAccess {
+        studioId
+        displayName
+        role
+        permissions
+        assignableRoles
+      }
     }
   }
 `);

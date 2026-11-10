@@ -13,6 +13,8 @@ import type {
 } from '@libs/chat';
 
 const MAX_BACKOFF_MS = 15000;
+/** Close code the API uses for a signed-in user who can't moderate this studio. */
+const FORBIDDEN_CLOSE_CODE = 4003;
 const INITIAL_BACKOFF_MS = 1000;
 
 const buildWsUrl = (params: {
@@ -226,10 +228,12 @@ export function useChatSocket(
         }
       };
 
-      ws.onclose = () => {
+      ws.onclose = (event) => {
         wsRef.current = null;
         setStatus('closed');
         if (closedByEffectRef.current) return;
+        // 4003: signed in but not a moderator of this studio; retrying won't help.
+        if (event.code === FORBIDDEN_CLOSE_CODE) return;
 
         const attempt = reconnectAttemptRef.current + 1;
         reconnectAttemptRef.current = attempt;

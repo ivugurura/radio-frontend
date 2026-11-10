@@ -21,13 +21,15 @@ import {
   useRegenerateStreamingCredentialMutation,
 } from '@graphql/hooks';
 import { notifier } from '@libs/constants';
-import { useStudioId } from '@components/providers';
+import { useStudioAccess, useStudioId } from '@components/providers';
 import CopyField from './CopyField';
 import ConfirmDialog from '../audio/ConfirmDialog';
 
 export default function StreamingConfigPage() {
   const { t } = useTranslation('streaming');
   const studioId = useStudioId();
+  // DJs read the encoder settings; only owners and admins rotate the password.
+  const canRotate = useStudioAccess().can('ROTATE_STREAM_CREDS');
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   const { data, loading, error, refetch } = useStreamingConfigQuery({
@@ -147,38 +149,40 @@ export default function StreamingConfigPage() {
             </CardContent>
           </Card>
 
-          <Card variant="outlined">
-            <CardContent>
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                alignItems={{ sm: 'center' }}
-                justifyContent="space-between"
-                spacing={2}
-              >
-                <Box>
-                  <Typography variant="subtitle2">
-                    {t('regeneratePassword')}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {config.rotatedAt
-                      ? `Last rotated ${new Date(config.rotatedAt).toLocaleString()}`
-                      : 'Never rotated'}
-                    . Any BUTT client using the current password will need to be
-                    updated.
-                  </Typography>
-                </Box>
-                <Button
-                  variant="outlined"
-                  color="warning"
-                  startIcon={<AutorenewIcon />}
-                  onClick={() => setConfirmOpen(true)}
-                  disabled={regenerating}
+          {canRotate && (
+            <Card variant="outlined">
+              <CardContent>
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  alignItems={{ sm: 'center' }}
+                  justifyContent="space-between"
+                  spacing={2}
                 >
-                  {t('regeneratePassword')}
-                </Button>
-              </Stack>
-            </CardContent>
-          </Card>
+                  <Box>
+                    <Typography variant="subtitle2">
+                      {t('regeneratePassword')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {config.rotatedAt
+                        ? `Last rotated ${new Date(config.rotatedAt).toLocaleString()}`
+                        : 'Never rotated'}
+                      . Any BUTT client using the current password will need to
+                      be updated.
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    color="warning"
+                    startIcon={<AutorenewIcon />}
+                    onClick={() => setConfirmOpen(true)}
+                    disabled={regenerating}
+                  >
+                    {t('regeneratePassword')}
+                  </Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
         </Stack>
       )}
 

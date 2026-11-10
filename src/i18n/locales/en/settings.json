@@ -4,7 +4,8 @@
   "tabs": {
     "profile": "Profile",
     "password": "Password",
-    "studio": "Studio"
+    "studio": "Studio",
+    "members": "Members"
   },
   "save": "Save changes",
   "saving": "Saving…",
@@ -54,5 +55,44 @@
     "channels": "Channels",
     "channelCount_one": "Mono",
     "channelCount_other": "Stereo"
+  },
+  "members": {
+    "title": "Members",
+    "subtitle": "People who can work on {{studio}} and what each may do.",
+    "addTitle": "Add a member",
+    "addSubtitle": "Give someone access to {{studio}}.",
+    "addHint": "Enter the email of an existing account. They get access the next time they open the dashboard.",
+    "email": "Email address",
+    "role": "Role",
+    "add": "Add member",
+    "adding": "Adding…",
+    "added": "{{email}} added as {{role}}",
+    "roleChanged": "Role updated for {{name}}",
+    "remove": "Remove from studio",
+    "removeConfirmTitle": "Remove {{name}}?",
+    "removeConfirmBody": "They lose access to this studio right away. You can add them back later.",
+    "removeConfirmAction": "Remove",
+    "removed": "{{name}} removed",
+    "cancel": "Cancel",
+    "you": "(you)",
+    "empty": "No members yet.",
+    "loadFailed": "Could not load the studio members.",
+    "actionFailed": "Could not update the member. Please try again.",
+    "roles": {
+      "OWNER": "Owner",
+      "ADMIN": "Admin",
+      "EDITOR": "Editor",
+      "DJ": "DJ",
+      "ANALYST": "Analyst",
+      "VIEWER": "Viewer"
+    },
+    "roleHints": {
+      "OWNER": "Everything, including managing admins and owners",
+      "ADMIN": "Everything except managing admins and owners",
+      "EDITOR": "Uploads and deletes audio",
+      "DJ": "Goes live, skips tracks and moderates the chat",
+      "ANALYST": "Sees the dashboard and listener statistics",
+      "VIEWER": "Sees the dashboard and the audio library"
+    }
   }
 }

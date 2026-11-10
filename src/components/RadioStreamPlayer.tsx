@@ -22,7 +22,7 @@ import {
   RemoveRounded as RemoveRoundedIcon,
 } from '@mui/icons-material';
 import { useRadioStream } from '../hooks/useRadioStream';
-import { useAuth } from './providers/AuthContext';
+import { useStudioAccess } from './providers';
 import SkipTrackButton from './SkipTrackButton';
 
 const pulse = keyframes`
@@ -88,7 +88,7 @@ export const RadioStreamPlayer: React.FC<Props> = ({
   showVolumeControl = false,
 }) => {
   const { t } = useTranslation('audio');
-  const { isAuthenticated } = useAuth();
+  const canSkip = useStudioAccess().can('CONTROL_PLAYBACK');
   const {
     status,
     isPlaying,
@@ -205,7 +205,7 @@ export const RadioStreamPlayer: React.FC<Props> = ({
             </IconButton>
           </Tooltip>
 
-          {isAuthenticated && (
+          {canSkip && (
             <SkipTrackButton
               isLive={isLive}
               currentTrack={currentTrack}

@@ -4,7 +4,8 @@
   "tabs": {
     "profile": "Umwirondoro",
     "password": "Ijambobanga",
-    "studio": "Sitidiyo"
+    "studio": "Sitidiyo",
+    "members": "Abanyamuryango"
   },
   "save": "Bika impinduka",
   "saving": "Biri kubikwa…",
@@ -54,5 +55,44 @@
     "channels": "Imiyoboro",
     "channelCount_one": "Mono",
     "channelCount_other": "Stereo"
+  },
+  "members": {
+    "title": "Abanyamuryango",
+    "subtitle": "Abantu bakora kuri {{studio}} n’icyo buri wese yemerewe gukora.",
+    "addTitle": "Ongeraho umunyamuryango",
+    "addSubtitle": "Ha umuntu uburenganzira bwo kugera kuri {{studio}}.",
+    "addHint": "Andika imeri ya konti isanzweho. Azabona uburenganzira ubutaha naramuka afunguye dashboard.",
+    "email": "Imeri",
+    "role": "Uruhare",
+    "add": "Ongeraho",
+    "adding": "Biri kongerwaho…",
+    "added": "{{email}} yongeweho nka {{role}}",
+    "roleChanged": "Uruhare rwa {{name}} rwahinduwe",
+    "remove": "Mukure muri sitidiyo",
+    "removeConfirmTitle": "Ukuraho {{name}}?",
+    "removeConfirmBody": "Ahita atakaza uburenganzira kuri iyi sitidiyo. Ushobora kuzongera kumwongeraho nyuma.",
+    "removeConfirmAction": "Kuraho",
+    "removed": "{{name}} yakuweho",
+    "cancel": "Reka",
+    "you": "(wowe)",
+    "empty": "Nta banyamuryango barahari.",
+    "loadFailed": "Ntibyashobotse kubona abanyamuryango ba sitidiyo.",
+    "actionFailed": "Ntibyashobotse guhindura umunyamuryango. Ongera ugerageze.",
+    "roles": {
+      "OWNER": "Nyirayo",
+      "ADMIN": "Umuyobozi",
+      "EDITOR": "Umwanditsi",
+      "DJ": "DJ",
+      "ANALYST": "Umusesenguzi",
+      "VIEWER": "Ureba gusa"
+    },
+    "roleHints": {
+      "OWNER": "Byose, harimo no gucunga abayobozi na ba nyirayo",
+      "ADMIN": "Byose uretse gucunga abayobozi na ba nyirayo",
+      "EDITOR": "Ashyiraho kandi agasiba indirimbo",
+      "DJ": "Ajya live, asimbuka indirimbo kandi agenzura ibiganiro",
+      "ANALYST": "Abona dashboard n’imibare y’abumva",
+      "VIEWER": "Abona dashboard n’isomero ry’indirimbo"
+    }
   }
 }

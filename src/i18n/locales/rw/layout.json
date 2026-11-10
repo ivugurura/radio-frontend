@@ -29,5 +29,13 @@
     "system": "Systeme"
   },
   "logout": "Sohoka",
-  "signingOut": "Birimo gusohoka…"
+  "signingOut": "Birimo gusohoka…",
+  "access": {
+    "noStudioTitle": "Nta sitidiyo urabona uburenganzira",
+    "noStudioBody": "Konti yawe ntiri muri sitidiyo n’imwe. Saba nyiri sitidiyo cyangwa umuyobozi wayo kukongeramo. Ushobora gukomeza guhindura umwirondoro n’ijambobanga muri Igenamiterere.",
+    "forbiddenTitle": "Ntibiri mu ruhare rwawe",
+    "forbiddenBody": "Uruhare ufite muri iyi sitidiyo ntirukwemerera kugera kuri iyi paji. Saba nyiri sitidiyo cyangwa umuyobozi wayo niba uyikeneye.",
+    "openSettings": "Fungura igenamiterere",
+    "backToDashboard": "Subira kuri dashboard"
+  }
 }

@@ -14,6 +14,7 @@ import {
   LANGUAGE_LABELS,
   LANGUAGE_SHORT_LABELS,
   isSupportedLanguage,
+  type AppLanguage,
 } from '../i18n/config';
 
 interface LanguageSelectorProps {
@@ -22,15 +23,22 @@ interface LanguageSelectorProps {
   size?: 'small' | 'medium';
   /** Render a floating label above the control. */
   withLabel?: boolean;
+  /**
+   * Limit the choices, e.g. to languages whose studio a staff member can open.
+   * Ignored when empty, so the selector never ends up with no options.
+   */
+  allowedLanguages?: readonly AppLanguage[];
 }
 
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   variant = 'full',
   size = 'small',
   withLabel = false,
+  allowedLanguages,
 }) => {
   const { t } = useTranslation('common');
-  const { language, languages, setLanguage } = useLanguage();
+  const { language, languages: allLanguages, setLanguage } = useLanguage();
+  const languages = allowedLanguages?.length ? allowedLanguages : allLanguages;
 
   const handleChange = (event: SelectChangeEvent) => {
     const next = event.target.value;
