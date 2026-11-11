@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'react';
 import {
   DEFAULT_LANGUAGE,
+  DEFAULT_STUDIO,
   SUPPORTED_LANGUAGES,
-  STUDIO_BY_LANGUAGE,
   type AppLanguage,
 } from '../../i18n/config';
 
@@ -13,14 +13,17 @@ export interface LanguageContextState {
   studioId: string;
   /** All selectable languages. */
   languages: readonly AppLanguage[];
+  /** Studio a language plays, given which studios are active right now. */
+  studioFor: (language: AppLanguage) => string;
   /** Switch language + station; persisted for reload / refresh / reopen. */
   setLanguage: (language: AppLanguage) => void;
 }
 
 export const initialLanguageState: LanguageContextState = {
   language: DEFAULT_LANGUAGE,
-  studioId: STUDIO_BY_LANGUAGE[DEFAULT_LANGUAGE],
+  studioId: DEFAULT_STUDIO,
   languages: SUPPORTED_LANGUAGES,
+  studioFor: () => DEFAULT_STUDIO,
   setLanguage: () => {},
 };
 

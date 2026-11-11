@@ -19,6 +19,7 @@ import enChat from './locales/en/chat.json';
 import enAudio from './locales/en/audio.json';
 import enSettings from './locales/en/settings.json';
 import enUsers from './locales/en/users.json';
+import enStudios from './locales/en/studios.json';
 
 import rwCommon from './locales/rw/common.json';
 import rwHome from './locales/rw/home.json';
@@ -31,6 +32,7 @@ import rwChat from './locales/rw/chat.json';
 import rwAudio from './locales/rw/audio.json';
 import rwSettings from './locales/rw/settings.json';
 import rwUsers from './locales/rw/users.json';
+import rwStudios from './locales/rw/studios.json';
 
 /**
  * Translation sections. `common` holds shared strings; every other namespace is
@@ -48,6 +50,7 @@ export const NAMESPACES = [
   'audio',
   'settings',
   'users',
+  'studios',
 ] as const;
 
 export const DEFAULT_NAMESPACE = 'common';
@@ -65,6 +68,7 @@ export const resources = {
     audio: enAudio,
     settings: enSettings,
     users: enUsers,
+    studios: enStudios,
   },
   rw: {
     common: rwCommon,
@@ -78,6 +82,7 @@ export const resources = {
     audio: rwAudio,
     settings: rwSettings,
     users: rwUsers,
+    studios: rwStudios,
   },
 } as const;
 

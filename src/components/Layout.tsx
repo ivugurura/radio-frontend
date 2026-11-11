@@ -26,6 +26,7 @@ import {
   LogoutOutlined,
   SettingsOutlined,
   ManageAccountsOutlined,
+  RadioOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
 import { logout } from '@graphql/client';
@@ -110,6 +111,12 @@ const Layout: React.FC = () => {
       text: t('nav.users'),
       icon: <ManageAccountsOutlined />,
       path: '/admin/users',
+      superuserOnly: true,
+    },
+    {
+      text: t('nav.studios'),
+      icon: <RadioOutlined />,
+      path: '/admin/studios',
       superuserOnly: true,
     },
   ];

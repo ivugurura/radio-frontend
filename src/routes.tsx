@@ -18,6 +18,7 @@ const ChatPage = lazy(() => import('./pages/chat'));
 const StreamingConfigPage = lazy(() => import('./pages/streaming-config'));
 const SettingsPage = lazy(() => import('./pages/settings'));
 const UsersPage = lazy(() => import('./pages/users'));
+const StudiosPage = lazy(() => import('./pages/studios'));
 const SetPasswordPage = lazy(() => import('./pages/account/SetPasswordPage'));
 const ForgotPasswordPage = lazy(
   () => import('./pages/account/ForgotPasswordPage'),
@@ -90,6 +91,14 @@ export const AppRoutes = () => {
               element={
                 <RequireSuperuser>
                   <UsersPage />
+                </RequireSuperuser>
+              }
+            />
+            <Route
+              path="studios"
+              element={
+                <RequireSuperuser>
+                  <StudiosPage />
                 </RequireSuperuser>
               }
             />

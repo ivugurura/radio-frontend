@@ -1,12 +1,8 @@
 import { useMemo } from 'react';
 import type { StudioPermission, StudioRole } from '@graphql/graphql';
-import {
-  SUPPORTED_LANGUAGES,
-  STUDIO_BY_LANGUAGE,
-  type AppLanguage,
-} from '../../i18n/config';
+import { SUPPORTED_LANGUAGES, type AppLanguage } from '../../i18n/config';
 import { useAuth } from './AuthContext';
-import { useStudioId } from './LanguageContext';
+import { useLanguage } from './LanguageContext';
 
 export type { StudioPermission, StudioRole };
 
@@ -37,7 +33,7 @@ export type StudioAccessState = Readonly<{
  */
 export function useStudioAccess(): StudioAccessState {
   const { user } = useAuth();
-  const studioId = useStudioId();
+  const { studioId, studioFor } = useLanguage();
   const studios = user?.studioAccess;
 
   return useMemo(() => {
@@ -50,10 +46,10 @@ export function useStudioAccess(): StudioAccessState {
       current,
       role: current?.role ?? null,
       languages: SUPPORTED_LANGUAGES.filter((lng) =>
-        reachable.has(STUDIO_BY_LANGUAGE[lng]),
+        reachable.has(studioFor(lng)),
       ),
       assignableRoles: current?.assignableRoles ?? [],
       can: (permission) => permissions.has(permission),
     };
-  }, [studios, studioId]);
+  }, [studios, studioId, studioFor]);
 }

@@ -1,0 +1,57 @@
+{
+  "title": "Studios",
+  "intro": "Every station on the platform. Each studio broadcasts in one language, and the language picker decides which studio people hear.",
+  "empty": "No studios yet.",
+  "cancel": "Cancel",
+  "actionFailed": "Something went wrong. Please try again.",
+  "audio": "{{kbps}} kbps · {{khz}} kHz · {{channels}} ch",
+  "columns": {
+    "studio": "Studio",
+    "status": "Status",
+    "members": "Members",
+    "tracks": "Tracks",
+    "audio": "Audio format",
+    "created": "Created"
+  },
+  "status": {
+    "active": "On air",
+    "inactive": "Deactivated"
+  },
+  "actions": {
+    "label": "Actions for {{name}}",
+    "openSettings": "Open studio settings",
+    "activate": "Reactivate",
+    "deactivate": "Deactivate",
+    "lastActive": "At least one studio must stay on air"
+  },
+  "create": {
+    "open": "New studio",
+    "title": "New studio",
+    "language": "Language",
+    "languageHint": "The studio broadcasts in this language. It can't be changed later.",
+    "displayName": "Studio name",
+    "description": "Description",
+    "owner": "Owner",
+    "ownerHint": "Optional. You can also add people later from the studio's settings.",
+    "noOwnerMatch": "No matching account",
+    "permanentHint": "The studio uses the platform audio format (bitrate, sample rate, channels) so tracks and live shows play back smoothly. Its media folder and encoder credentials are created for you.",
+    "submit": "Create studio",
+    "creating": "Creating…",
+    "done": "{{name}} is ready. Upload music and share the encoder credentials to go on air.",
+    "noneAvailable": "Every supported language already has a studio."
+  },
+  "confirm": {
+    "deactivate": {
+      "title": "Deactivate {{name}}?",
+      "body": "The stream goes off air within 5 minutes and current listeners are disconnected. Listeners of this language hear the default studio instead. Members lose access until it is reactivated. Music, members and statistics are kept.",
+      "action": "Deactivate",
+      "done": "{{name}} was deactivated"
+    },
+    "activate": {
+      "title": "Reactivate {{name}}?",
+      "body": "The stream comes back on air within 5 minutes with its music, members and settings as they were.",
+      "action": "Reactivate",
+      "done": "{{name}} was reactivated"
+    }
+  }
+}

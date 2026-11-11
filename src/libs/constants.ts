@@ -11,13 +11,6 @@ export const STUDIO_URL = import.meta.env.VITE_STUDIO_URL;
 // Mirrors Django's MinimumLengthValidator default; the server has the final say.
 export const MIN_PASSWORD_LENGTH = 8;
 
-/**
- * Stations are language specific. Inside React, read the active studio with
- * `useStudioId()` / `useLanguage()` from `@components/providers` so it tracks the
- * selected language. This non-reactive helper is only for module-scope code.
- */
-export { studioForLanguage } from '../i18n/config';
-
 const ACCESS_TOKEN_KEY = 'user-token';
 const REFRESH_TOKEN_KEY = 'refresh-token';
 

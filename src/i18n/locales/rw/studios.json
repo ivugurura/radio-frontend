@@ -1,0 +1,57 @@
+{
+  "title": "Sitidiyo",
+  "intro": "Radiyo zose ziri kuri uru rubuga. Buri sitidiyo ivuga mu rurimi rumwe, kandi ururimi umuntu ahisemo ni rwo rugena sitidiyo yumva.",
+  "empty": "Nta sitidiyo irabaho.",
+  "cancel": "Reka",
+  "actionFailed": "Hari ikitagenze neza. Ongera ugerageze.",
+  "audio": "{{kbps}} kbps · {{khz}} kHz · {{channels}} ch",
+  "columns": {
+    "studio": "Sitidiyo",
+    "status": "Uko ihagaze",
+    "members": "Abanyamuryango",
+    "tracks": "Indirimbo",
+    "audio": "Imiterere y’ijwi",
+    "created": "Yashyizweho"
+  },
+  "status": {
+    "active": "Iri ku murongo",
+    "inactive": "Yahagaritswe"
+  },
+  "actions": {
+    "label": "Ibikorwa kuri {{name}}",
+    "openSettings": "Fungura igenamiterere rya sitidiyo",
+    "activate": "Ongera uyikoreshe",
+    "deactivate": "Hagarika",
+    "lastActive": "Nibura sitidiyo imwe igomba guhora iri ku murongo"
+  },
+  "create": {
+    "open": "Sitidiyo nshya",
+    "title": "Sitidiyo nshya",
+    "language": "Ururimi",
+    "languageHint": "Sitidiyo izavuga muri uru rurimi. Ntibizashoboka kuruhindura nyuma.",
+    "displayName": "Izina rya sitidiyo",
+    "description": "Ibisobanuro",
+    "owner": "Nyirayo",
+    "ownerHint": "Si ngombwa. Ushobora no kongeramo abantu nyuma mu igenamiterere rya sitidiyo.",
+    "noOwnerMatch": "Nta konti ihuye n’ibyo ushaka",
+    "permanentHint": "Sitidiyo ikoresha imiterere y’ijwi y’urubuga (bitrate, sample rate, channels) kugira ngo indirimbo n’ibiganiro bya live bigende neza. Ububiko bwayo n’ibyangombwa bya encoder bihita bishyirwaho.",
+    "submit": "Shyiraho sitidiyo",
+    "creating": "Biri gushyirwaho…",
+    "done": "{{name}} yiteguye. Shyiramo indirimbo kandi utange ibyangombwa bya encoder kugira ngo ijye ku murongo.",
+    "noneAvailable": "Buri rurimi rwemewe rusanzwe rufite sitidiyo."
+  },
+  "confirm": {
+    "deactivate": {
+      "title": "Uhagarika {{name}}?",
+      "body": "Mu minota 5 radiyo iva ku murongo kandi abayumva bagahagarikwa. Abumva uru rurimi bazumva sitidiyo y’ibanze. Abanyamuryango ntibazongera kuyigeraho kugeza yongeye gukoreshwa. Indirimbo, abanyamuryango n’imibare biragumaho.",
+      "action": "Hagarika",
+      "done": "{{name}} yahagaritswe"
+    },
+    "activate": {
+      "title": "Wongera gukoresha {{name}}?",
+      "body": "Mu minota 5 radiyo isubira ku murongo ifite indirimbo, abanyamuryango n’igenamiterere yari isanganywe.",
+      "action": "Ongera uyikoreshe",
+      "done": "{{name}} yongeye gukora"
+    }
+  }
+}
