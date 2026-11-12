@@ -7,5 +7,13 @@
   },
   "enable": "Enable",
   "listenLive": "Listen live",
-  "nowPlaying": "Iri kumvikana"
+  "nowPlaying": "Iri kumvikana",
+  "share": {
+    "button": "Sangiza",
+    "whatsapp": "WhatsApp",
+    "facebook": "Facebook",
+    "copyLink": "Koporora link",
+    "copied": "Link yakoporowe",
+    "message": "Umva {{station}} imbonankubone:"
+  }
 }

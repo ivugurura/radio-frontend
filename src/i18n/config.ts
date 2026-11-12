@@ -15,6 +15,9 @@ export const DEFAULT_LANGUAGE: AppLanguage = 'rw';
 /** localStorage key i18next's language detector reads/writes. */
 export const LANGUAGE_STORAGE_KEY = 'app-language';
 
+/** Query param that carries the language in shared links (`/?lang=fr`). */
+export const LANGUAGE_QUERY_PARAM = 'lang';
+
 /** Studio played for a language that has no active studio of its own. */
 export const DEFAULT_STUDIO = DEFAULT_LANGUAGE;
 

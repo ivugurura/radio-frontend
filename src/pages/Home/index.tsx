@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageSelector from '@components/LanguageSelector';
 import ListenerChat from '@components/ListenerChat';
 import RadioStreamPlayer from '@components/RadioStreamPlayer';
+import ShareRadioButton from '@components/ShareRadioButton';
 import ThemeModeToggle from '@components/ThemeModeToggle';
 
 const HomePage: React.FC = () => {
@@ -34,6 +35,7 @@ const HomePage: React.FC = () => {
             alignItems="center"
             sx={{ alignSelf: 'flex-end' }}
           >
+            <ShareRadioButton />
             <ThemeModeToggle variant="compact" />
             <LanguageSelector />
           </Stack>

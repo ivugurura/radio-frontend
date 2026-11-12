@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Box,
+  IconButton,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
@@ -23,19 +24,54 @@ const MODES: { value: ThemeMode; icon: React.ReactElement }[] = [
 ];
 
 interface ThemeModeToggleProps {
-  /** `drawer` shows a "Theme" label beside the buttons; `compact` shows the buttons only. */
+  /**
+   * `drawer` shows a "Theme" label beside light / system / dark buttons;
+   * `compact` is a single button that flips between light and dark.
+   */
   variant?: 'drawer' | 'compact';
 }
 
-/** Light / system / dark switch. MUI persists the choice in localStorage. */
+/** One button: shows the theme it switches to, starting from what's on screen. */
+const ThemeOnOffButton: React.FC<{
+  isDark: boolean;
+  onToggle: () => void;
+}> = ({ isDark, onToggle }) => {
+  const { t } = useTranslation('layout');
+  const label = isDark ? t('theme.light') : t('theme.dark');
+
+  return (
+    <Tooltip title={label}>
+      <IconButton size="small" onClick={onToggle} aria-label={label}>
+        {isDark ? (
+          <LightModeOutlined fontSize="small" />
+        ) : (
+          <DarkModeOutlined fontSize="small" />
+        )}
+      </IconButton>
+    </Tooltip>
+  );
+};
+
+/** Theme switch. MUI persists the choice in localStorage. */
 const ThemeModeToggle: React.FC<ThemeModeToggleProps> = ({
   variant = 'drawer',
 }) => {
   const { t } = useTranslation('layout');
-  const { mode, setMode } = useColorScheme();
+  const { mode, systemMode, setMode } = useColorScheme();
 
   // `mode` is undefined until the color scheme provider has mounted.
   if (!mode) return null;
+
+  if (variant === 'compact') {
+    // In `system` mode the screen follows the OS, so flip from that.
+    const isDark = (mode === 'system' ? systemMode : mode) === 'dark';
+    return (
+      <ThemeOnOffButton
+        isDark={isDark}
+        onToggle={() => setMode(isDark ? 'light' : 'dark')}
+      />
+    );
+  }
 
   const handleChange = (_: React.MouseEvent, next: ThemeMode | null) => {
     if (next) setMode(next);
@@ -62,8 +98,6 @@ const ThemeModeToggle: React.FC<ThemeModeToggleProps> = ({
       ))}
     </ToggleButtonGroup>
   );
-
-  if (variant === 'compact') return buttons;
 
   return (
     <Box

@@ -4,8 +4,11 @@ import { initReactI18next } from 'react-i18next';
 
 import {
   DEFAULT_LANGUAGE,
+  LANGUAGE_QUERY_PARAM,
   LANGUAGE_STORAGE_KEY,
   SUPPORTED_LANGUAGES,
+  isSupportedLanguage,
+  type AppLanguage,
 } from './config';
 
 import enCommon from './locales/en/common.json';
@@ -140,12 +143,41 @@ export const resources = {
   },
 } as const;
 
+/**
+ * A shared link carries the sharer's language as `?lang=xx`. Save it as the
+ * visitor's choice and drop it from the address bar: left in place, it would
+ * win again on the reload that `setLanguage` does, and the language selector
+ * would stop working. Runs before the router reads the URL.
+ */
+const takeLanguageFromUrl = (): AppLanguage | undefined => {
+  if (typeof window === 'undefined') return undefined;
+  const url = new URL(window.location.href);
+  const requested = url.searchParams.get(LANGUAGE_QUERY_PARAM);
+  if (requested === null) return undefined;
+
+  url.searchParams.delete(LANGUAGE_QUERY_PARAM);
+  window.history.replaceState(window.history.state, '', url);
+
+  const normalized = requested.toLowerCase();
+  if (!isSupportedLanguage(normalized)) return undefined;
+  try {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, normalized);
+  } catch {
+    // Storage unavailable (private mode): `lng` below still applies it for
+    // this visit.
+  }
+  return normalized;
+};
+
 if (!i18n.isInitialized) {
+  const languageFromUrl = takeLanguageFromUrl();
   void i18n
     .use(LanguageDetector)
     .use(initReactI18next)
     .init({
       resources,
+      // Set only when the URL named a language; otherwise the detector decides.
+      lng: languageFromUrl,
       supportedLngs: [...SUPPORTED_LANGUAGES],
       fallbackLng: DEFAULT_LANGUAGE,
       ns: [...NAMESPACES],

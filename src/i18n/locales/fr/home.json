@@ -7,5 +7,13 @@
   },
   "enable": "Activer",
   "listenLive": "Écouter en direct",
-  "nowPlaying": "En cours de lecture"
+  "nowPlaying": "En cours de lecture",
+  "share": {
+    "button": "Partager",
+    "whatsapp": "WhatsApp",
+    "facebook": "Facebook",
+    "copyLink": "Copier le lien",
+    "copied": "Lien copié",
+    "message": "Écoutez {{station}} en direct :"
+  }
 }
