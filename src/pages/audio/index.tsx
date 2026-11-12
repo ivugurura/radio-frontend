@@ -28,7 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { AudioTable } from './AudioTable';
 import { IN_PROGRESS_STATES, isPlayable } from '@libs/tracks';
 import { useDeleteTrackMutation, useTracksQuery } from '@graphql/hooks';
-import { useStudioId } from '@components/providers';
+import { useStudioAccess, useStudioId } from '@components/providers';
 import { AudioPlayer } from '@components/AudioPlayer';
 import type { TracksQueryVariables, TrackType } from '@graphql/graphql';
 import ConfirmDialog from './ConfirmDialog';
@@ -63,6 +63,8 @@ type SnackbarState = {
 export default function AudioManagerPage() {
   const { t } = useTranslation('audio');
   const studioId = useStudioId();
+  // Viewers browse and preview; uploading and deleting need MANAGE_MEDIA.
+  const canManage = useStudioAccess().can('MANAGE_MEDIA');
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
   const [selected, setSelected] = React.useState<string[]>([]);
@@ -264,14 +266,16 @@ export default function AudioManagerPage() {
               </IconButton>
             </span>
           </Tooltip>
-          <Button
-            variant="contained"
-            startIcon={<CloudUploadOutlinedIcon />}
-            onClick={() => setCreateOpen(true)}
-            sx={{ borderRadius: 2, px: 2.5 }}
-          >
-            {t('newAudio')}
-          </Button>
+          {canManage && (
+            <Button
+              variant="contained"
+              startIcon={<CloudUploadOutlinedIcon />}
+              onClick={() => setCreateOpen(true)}
+              sx={{ borderRadius: 2, px: 2.5 }}
+            >
+              {t('newAudio')}
+            </Button>
+          )}
         </Stack>
       </Stack>
 
@@ -404,6 +408,7 @@ export default function AudioManagerPage() {
           currentId={nowPlaying?.id ?? null}
           playing={playing}
           onPlay={handlePlay}
+          canManage={canManage}
           onDelete={setPendingDelete}
           onUploadClick={() => setCreateOpen(true)}
           page={Math.min(page, lastPage)}
@@ -429,7 +434,7 @@ export default function AudioManagerPage() {
       )}
 
       <UploadForm
-        open={createOpen}
+        open={canManage && createOpen}
         onClose={() => {
           setCreateOpen(false);
           refreshTracks();

@@ -18,6 +18,8 @@ import enStreaming from './locales/en/streaming.json';
 import enChat from './locales/en/chat.json';
 import enAudio from './locales/en/audio.json';
 import enSettings from './locales/en/settings.json';
+import enUsers from './locales/en/users.json';
+import enStudios from './locales/en/studios.json';
 
 import rwCommon from './locales/rw/common.json';
 import rwHome from './locales/rw/home.json';
@@ -29,6 +31,34 @@ import rwStreaming from './locales/rw/streaming.json';
 import rwChat from './locales/rw/chat.json';
 import rwAudio from './locales/rw/audio.json';
 import rwSettings from './locales/rw/settings.json';
+import rwUsers from './locales/rw/users.json';
+import rwStudios from './locales/rw/studios.json';
+
+import frCommon from './locales/fr/common.json';
+import frHome from './locales/fr/home.json';
+import frAuth from './locales/fr/auth.json';
+import frLayout from './locales/fr/layout.json';
+import frDashboard from './locales/fr/dashboard.json';
+import frListeners from './locales/fr/listeners.json';
+import frStreaming from './locales/fr/streaming.json';
+import frChat from './locales/fr/chat.json';
+import frAudio from './locales/fr/audio.json';
+import frSettings from './locales/fr/settings.json';
+import frUsers from './locales/fr/users.json';
+import frStudios from './locales/fr/studios.json';
+
+import swCommon from './locales/sw/common.json';
+import swHome from './locales/sw/home.json';
+import swAuth from './locales/sw/auth.json';
+import swLayout from './locales/sw/layout.json';
+import swDashboard from './locales/sw/dashboard.json';
+import swListeners from './locales/sw/listeners.json';
+import swStreaming from './locales/sw/streaming.json';
+import swChat from './locales/sw/chat.json';
+import swAudio from './locales/sw/audio.json';
+import swSettings from './locales/sw/settings.json';
+import swUsers from './locales/sw/users.json';
+import swStudios from './locales/sw/studios.json';
 
 /**
  * Translation sections. `common` holds shared strings; every other namespace is
@@ -45,6 +75,8 @@ export const NAMESPACES = [
   'chat',
   'audio',
   'settings',
+  'users',
+  'studios',
 ] as const;
 
 export const DEFAULT_NAMESPACE = 'common';
@@ -61,6 +93,8 @@ export const resources = {
     chat: enChat,
     audio: enAudio,
     settings: enSettings,
+    users: enUsers,
+    studios: enStudios,
   },
   rw: {
     common: rwCommon,
@@ -73,6 +107,36 @@ export const resources = {
     chat: rwChat,
     audio: rwAudio,
     settings: rwSettings,
+    users: rwUsers,
+    studios: rwStudios,
+  },
+  fr: {
+    common: frCommon,
+    home: frHome,
+    auth: frAuth,
+    layout: frLayout,
+    dashboard: frDashboard,
+    listeners: frListeners,
+    streaming: frStreaming,
+    chat: frChat,
+    audio: frAudio,
+    settings: frSettings,
+    users: frUsers,
+    studios: frStudios,
+  },
+  sw: {
+    common: swCommon,
+    home: swHome,
+    auth: swAuth,
+    layout: swLayout,
+    dashboard: swDashboard,
+    listeners: swListeners,
+    streaming: swStreaming,
+    chat: swChat,
+    audio: swAudio,
+    settings: swSettings,
+    users: swUsers,
+    studios: swStudios,
   },
 } as const;
 

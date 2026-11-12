@@ -6,7 +6,7 @@
  * switches the active studio for every studio-scoped query/mutation/socket.
  */
 
-export const SUPPORTED_LANGUAGES = ['rw', 'en'] as const;
+export const SUPPORTED_LANGUAGES = ['rw', 'en', 'fr', 'sw'] as const;
 
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
@@ -15,25 +15,36 @@ export const DEFAULT_LANGUAGE: AppLanguage = 'rw';
 /** localStorage key i18next's language detector reads/writes. */
 export const LANGUAGE_STORAGE_KEY = 'app-language';
 
+/** Studio played for a language that has no active studio of its own. */
+export const DEFAULT_STUDIO = DEFAULT_LANGUAGE;
+
+/** localStorage key caching the active studio slugs from the last visit. */
+export const ACTIVE_STUDIOS_STORAGE_KEY = 'active-studios';
+
 /**
- * Studio slug that serves each language. Studios are named after the language
- * they serve, but only `rw` exists so far, so English plays it too.
+ * Studio that serves a language. Studios are named after their language, so a
+ * language plays its own studio while that studio is active and the default
+ * studio otherwise (not created yet, or deactivated).
  */
-export const STUDIO_BY_LANGUAGE: Record<AppLanguage, string> = {
-  rw: 'rw',
-  en: 'rw', // Switch to 'en' once that studio exists in the backend.
-};
+export const studioForLanguage = (
+  language: AppLanguage,
+  activeStudios: ReadonlySet<string>,
+): string => (activeStudios.has(language) ? language : DEFAULT_STUDIO);
 
 /** Native label shown in the language selector. */
 export const LANGUAGE_LABELS: Record<AppLanguage, string> = {
   rw: 'Ikinyarwanda',
   en: 'English',
+  fr: 'Français',
+  sw: 'Kiswahili',
 };
 
 /** Short code shown in compact selectors. */
 export const LANGUAGE_SHORT_LABELS: Record<AppLanguage, string> = {
   rw: 'RW',
   en: 'EN',
+  fr: 'FR',
+  sw: 'SW',
 };
 
 export const isSupportedLanguage = (value: unknown): value is AppLanguage =>
@@ -48,6 +59,3 @@ export const normalizeLanguage = (value: unknown): AppLanguage => {
   }
   return DEFAULT_LANGUAGE;
 };
-
-export const studioForLanguage = (value: unknown): string =>
-  STUDIO_BY_LANGUAGE[normalizeLanguage(value)];

@@ -6,10 +6,12 @@
     "listenerStatistics": "Listener Statistics",
     "liveChat": "Live Chat",
     "streamingApps": "Streaming Apps",
-    "settings": "Settings"
+    "settings": "Settings",
+    "users": "Users",
+    "studios": "Studios"
   },
   "player": {
-    "compactTitle": "R-RW"
+    "compactTitle": "R-RV"
   },
   "skip": {
     "tooltip": "Skip current track",
@@ -29,5 +31,13 @@
     "system": "System"
   },
   "logout": "Sign out",
-  "signingOut": "Signing out…"
+  "signingOut": "Signing out…",
+  "access": {
+    "noStudioTitle": "No studio access yet",
+    "noStudioBody": "Your account isn't part of a studio. Ask a studio owner or admin to add you. You can still manage your profile and password in Settings.",
+    "forbiddenTitle": "Not available for your role",
+    "forbiddenBody": "Your role in this studio doesn't include this page. Ask a studio owner or admin if you need it.",
+    "openSettings": "Open settings",
+    "backToDashboard": "Back to dashboard"
+  }
 }

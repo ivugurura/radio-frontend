@@ -44,6 +44,8 @@ export type AudioTableProps = Readonly<{
   currentId: string | null;
   playing: boolean;
   onPlay: (track: TrackType) => void;
+  /** Show selection, delete and upload controls (MANAGE_MEDIA). */
+  canManage: boolean;
   onDelete: (tracks: TrackType[]) => void;
   onUploadClick: () => void;
   page: number;
@@ -234,8 +236,8 @@ const hideBelow = (bp: 'sm' | 'md' | 'lg') => ({
 });
 
 const EmptyState: React.FC<
-  Readonly<{ search: string; onUploadClick: () => void }>
-> = ({ search, onUploadClick }) => {
+  Readonly<{ search: string; canManage: boolean; onUploadClick: () => void }>
+> = ({ search, canManage, onUploadClick }) => {
   const { t } = useTranslation('audio');
   const Icon = search ? SearchOffRoundedIcon : LibraryMusicOutlinedIcon;
   return (
@@ -264,7 +266,7 @@ const EmptyState: React.FC<
       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
         {search ? t('noResultsBody', { query: search }) : t('emptyBody')}
       </Typography>
-      {!search && (
+      {!search && canManage && (
         <Button
           variant="contained"
           startIcon={<CloudUploadOutlinedIcon />}
@@ -287,6 +289,7 @@ export const AudioTable: React.FC<AudioTableProps> = ({
   currentId,
   playing,
   onPlay,
+  canManage,
   onDelete,
   onUploadClick,
   page,
@@ -317,7 +320,13 @@ export const AudioTable: React.FC<AudioTableProps> = ({
   const showSkeleton = loading && rows.length === 0;
 
   if (!showSkeleton && rows.length === 0) {
-    return <EmptyState search={search} onUploadClick={onUploadClick} />;
+    return (
+      <EmptyState
+        search={search}
+        canManage={canManage}
+        onUploadClick={onUploadClick}
+      />
+    );
   }
 
   return (
@@ -342,16 +351,18 @@ export const AudioTable: React.FC<AudioTableProps> = ({
         >
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  size="small"
-                  checked={allSelected}
-                  indeterminate={selectedOnPage.length > 0 && !allSelected}
-                  onChange={toggleAll}
-                  disabled={rows.length === 0}
-                  slotProps={{ input: { 'aria-label': t('selectAll') } }}
-                />
-              </TableCell>
+              {canManage && (
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    size="small"
+                    checked={allSelected}
+                    indeterminate={selectedOnPage.length > 0 && !allSelected}
+                    onChange={toggleAll}
+                    disabled={rows.length === 0}
+                    slotProps={{ input: { 'aria-label': t('selectAll') } }}
+                  />
+                </TableCell>
+              )}
               <TableCell>{t('columns.title')}</TableCell>
               <TableCell sx={hideBelow('md')}>{t('columns.album')}</TableCell>
               <TableCell sx={hideBelow('lg')}>{t('columns.genre')}</TableCell>
@@ -370,14 +381,16 @@ export const AudioTable: React.FC<AudioTableProps> = ({
             {showSkeleton
               ? SKELETON_KEYS.slice(0, rowsPerPage).map((key) => (
                   <TableRow key={key}>
-                    <TableCell padding="checkbox">
-                      <Skeleton
-                        variant="rounded"
-                        width={18}
-                        height={18}
-                        sx={{ mx: 'auto' }}
-                      />
-                    </TableCell>
+                    {canManage && (
+                      <TableCell padding="checkbox">
+                        <Skeleton
+                          variant="rounded"
+                          width={18}
+                          height={18}
+                          sx={{ mx: 'auto' }}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Box
                         sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}
@@ -431,17 +444,19 @@ export const AudioTable: React.FC<AudioTableProps> = ({
                         }),
                       })}
                     >
-                      <TableCell
-                        padding="checkbox"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Checkbox
-                          size="small"
-                          checked={isSelected}
-                          onChange={() => toggleOne(r.id)}
-                          slotProps={{ input: { 'aria-label': r.title } }}
-                        />
-                      </TableCell>
+                      {canManage && (
+                        <TableCell
+                          padding="checkbox"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Checkbox
+                            size="small"
+                            checked={isSelected}
+                            onChange={() => toggleOne(r.id)}
+                            slotProps={{ input: { 'aria-label': r.title } }}
+                          />
+                        </TableCell>
+                      )}
                       <TableCell sx={{ maxWidth: 0, width: '40%' }}>
                         <Tooltip
                           title={playable ? '' : t('notPlayable')}
@@ -544,21 +559,23 @@ export const AudioTable: React.FC<AudioTableProps> = ({
                         align="right"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Tooltip title={t('delete')}>
-                          <span>
-                            <IconButton
-                              size="small"
-                              onClick={() => onDelete([r])}
-                              disabled={r.state === 'PROCESSING'}
-                              sx={{
-                                color: 'text.secondary',
-                                '&:hover': { color: 'error.main' },
-                              }}
-                            >
-                              <DeleteOutlineRoundedIcon fontSize="small" />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
+                        {canManage && (
+                          <Tooltip title={t('delete')}>
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => onDelete([r])}
+                                disabled={r.state === 'PROCESSING'}
+                                sx={{
+                                  color: 'text.secondary',
+                                  '&:hover': { color: 'error.main' },
+                                }}
+                              >
+                                <DeleteOutlineRoundedIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        )}
                       </TableCell>
                     </TableRow>
                   );

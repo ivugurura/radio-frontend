@@ -1,0 +1,63 @@
+{
+  "title": "Studios",
+  "intro": "Every station on the platform. Each studio broadcasts in one language, and the language picker decides which studio people hear.",
+  "empty": "No studios yet.",
+  "cancel": "Cancel",
+  "actionFailed": "Something went wrong. Please try again.",
+  "audio": "{{kbps}} kbps · {{khz}} kHz · {{channels}} ch",
+  "columns": {
+    "studio": "Studio",
+    "status": "Status",
+    "members": "Members",
+    "tracks": "Tracks",
+    "audio": "Audio format",
+    "created": "Created"
+  },
+  "status": {
+    "active": "On air",
+    "inactive": "Deactivated"
+  },
+  "actions": {
+    "label": "Actions for {{name}}",
+    "openSettings": "Open studio settings",
+    "activate": "Reactivate",
+    "deactivate": "Deactivate",
+    "lastActive": "At least one studio must stay on air"
+  },
+  "create": {
+    "open": "New studio",
+    "title": "New studio",
+    "language": "Language",
+    "languageHint": "The studio broadcasts in this language. It can't be changed later.",
+    "displayName": "Studio name",
+    "description": "Description",
+    "owner": "Owner",
+    "ownerHint": "Optional. You can also add people later from the studio's settings.",
+    "noOwnerMatch": "No matching account",
+    "permanentHint": "The studio uses the platform audio format (bitrate, sample rate, channels) so tracks and live shows play back smoothly. Its media folder and encoder credentials are created for you.",
+    "submit": "Create studio",
+    "creating": "Creating…",
+    "done": "{{name}} is on air. Upload music and share the encoder credentials to start broadcasting.",
+    "noneAvailable": "Every supported language already has a studio.",
+    "pending": "{{name}} was created. The stream server couldn't confirm it yet; it comes on air within 5 minutes."
+  },
+  "confirm": {
+    "deactivate": {
+      "title": "Deactivate {{name}}?",
+      "body": "The stream goes off air right away and current listeners move to the default studio. Members lose access until it is reactivated. Music, members and statistics are kept.",
+      "action": "Deactivate",
+      "done": "{{name}} is off air",
+      "pending": "{{name}} was deactivated. The stream server couldn't confirm it yet; it goes off air within 5 minutes."
+    },
+    "activate": {
+      "title": "Reactivate {{name}}?",
+      "body": "The stream comes back on air right away with its music, members and settings as they were.",
+      "action": "Reactivate",
+      "done": "{{name}} is back on air",
+      "pending": "{{name}} was reactivated. The stream server couldn't confirm it yet; it comes on air within 5 minutes."
+    }
+  },
+  "applied": {
+    "checking": "Switching…"
+  }
+}

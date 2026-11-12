@@ -1,0 +1,52 @@
+{
+  "title": "Live Chat",
+  "listenerChatTitle": "Studio chat",
+  "historyLoadFailed": "Failed to load chat history: {{message}}",
+  "mutesLoadFailed": "Failed to load muted listeners: {{message}}",
+  "noMessages": "No messages yet.",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "startOfConversation": "Start of the conversation",
+  "noMessagesListener": "Aucun message pour l'instant. Dites bonjour au studio 👋",
+  "roleListener": "Auditeur",
+  "roleAdmin": "Admin",
+  "roleStudio": "Studio",
+  "hiddenBadge": "Hidden",
+  "replyingTo": "Replying to {{name}}",
+  "typeMessage": "Type a message...",
+  "sendMessage": "Envoyer le message",
+  "mutedListeners": "Muted listeners",
+  "noMutedListeners": "No muted listeners.",
+  "reason": "Reason: {{reason}}",
+  "mutedUntil": "Until {{date}}",
+  "mutedPermanent": "Permanent",
+  "actions": {
+    "reply": "Reply",
+    "hide": "Hide",
+    "unhide": "Unhide",
+    "mute": "Mute listener",
+    "unmute": "Unmute"
+  },
+  "identityPrompt": "Dites-nous votre nom pour que le studio sache qui parle.",
+  "widget": {
+    "title": "Chat des auditeurs",
+    "subtitle": "Questions, commentaires et suggestions",
+    "joinTitle": "Rejoindre la discussion",
+    "yourName": "Votre nom",
+    "continue": "Continuer",
+    "you": "Vous",
+    "typeYourMessage": "Écrivez votre message...",
+    "youAreMuted": "Vous êtes en sourdine",
+    "mutedNow": "Le studio vous a mis en sourdine ; vous ne pouvez pas envoyer de messages pour le moment.",
+    "open": "Ouvrir le chat",
+    "close": "Fermer le chat"
+  },
+  "mutedNotice": "You've been muted by the studio and can't send messages",
+  "errors": {
+    "muted": "You've been muted by the studio and can't send messages",
+    "invalid_body": "That message can't be sent.",
+    "forbidden": "You're not allowed to do that.",
+    "not_found": "That message no longer exists.",
+    "invalid_listener": "Unknown listener."
+  }
+}

@@ -1,4 +1,4 @@
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -25,10 +25,17 @@ import {
   SettingsInputAntennaOutlined,
   LogoutOutlined,
   SettingsOutlined,
+  ManageAccountsOutlined,
+  RadioOutlined,
 } from '@mui/icons-material';
 import { Link, Outlet, useLocation } from 'react-router';
 import { logout } from '@graphql/client';
 import { useAuth } from './providers/AuthContext';
+import {
+  useLanguage,
+  useStudioAccess,
+  type StudioPermission,
+} from './providers';
 import Login from '../pages/login';
 import RadioStreamPlayer from './RadioStreamPlayer';
 import LanguageSelector from './LanguageSelector';
@@ -44,6 +51,16 @@ const Layout: React.FC = () => {
   const { t } = useTranslation('layout');
   const { isAuthenticated, isLoading, user } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
+  const access = useStudioAccess();
+  const { setLanguage } = useLanguage();
+
+  // Language decides the studio. If the active one isn't open to this user,
+  // move to the first language whose studio is.
+  const firstReachable = access.languages[0];
+  useEffect(() => {
+    if (!isAuthenticated || access.current || !firstReachable) return;
+    setLanguage(firstReachable);
+  }, [isAuthenticated, access.current, firstReachable, setLanguage]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -52,29 +69,62 @@ const Layout: React.FC = () => {
   // On phones the drawer overlays the page, so close it once a page is picked.
   const closeMobileDrawer = () => setMobileOpen(false);
 
-  const menuItems = [
-    { text: t('nav.dashboard'), icon: <Dashboard />, path: '/admin' },
+  // Each entry needs the same permission as its route (see routes.tsx).
+  const allMenuItems: {
+    text: string;
+    icon: React.ReactNode;
+    path: string;
+    permission?: StudioPermission;
+    superuserOnly?: boolean;
+  }[] = [
+    {
+      text: t('nav.dashboard'),
+      icon: <Dashboard />,
+      path: '/admin',
+      permission: 'VIEW_ANALYTICS',
+    },
     {
       text: t('nav.audioManager'),
       icon: <MusicVideoOutlined />,
       path: '/admin/medias',
+      permission: 'VIEW_MEDIA',
     },
     {
       text: t('nav.listenerStatistics'),
       icon: <CommitOutlined />,
       path: '/admin/listeners',
+      permission: 'VIEW_ANALYTICS',
     },
     {
       text: t('nav.liveChat'),
       icon: <ForumOutlined />,
       path: '/admin/chat',
+      permission: 'MODERATE_CHAT',
     },
     {
       text: t('nav.streamingApps'),
       icon: <SettingsInputAntennaOutlined />,
       path: '/admin/streaming',
+      permission: 'VIEW_STREAM_CREDS',
+    },
+    {
+      text: t('nav.users'),
+      icon: <ManageAccountsOutlined />,
+      path: '/admin/users',
+      superuserOnly: true,
+    },
+    {
+      text: t('nav.studios'),
+      icon: <RadioOutlined />,
+      path: '/admin/studios',
+      superuserOnly: true,
     },
   ];
+  const canSee = (item: (typeof allMenuItems)[number]) => {
+    if (item.superuserOnly) return Boolean(user?.isSuperuser);
+    return !item.permission || access.can(item.permission);
+  };
+  const menuItems = allMenuItems.filter(canSee);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -92,7 +142,7 @@ const Layout: React.FC = () => {
     path: '/admin/settings',
   };
 
-  const renderNavItem = (item: (typeof menuItems)[number]) => (
+  const renderNavItem = (item: (typeof allMenuItems)[number]) => (
     <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
       <ListItemButton
         component={Link}
@@ -252,7 +302,7 @@ const Layout: React.FC = () => {
               fontSize: { xs: '1rem', sm: '1.25rem' },
             }}
           >
-            {[...menuItems, settingsItem].find(
+            {[...allMenuItems, settingsItem].find(
               (item) => item.path === location.pathname,
             )?.text || t('nav.dashboard')}
           </Typography>
@@ -262,7 +312,10 @@ const Layout: React.FC = () => {
               title={t('player.compactTitle')}
             />
           </Box>
-          <LanguageSelector variant="short" />
+          <LanguageSelector
+            variant="short"
+            allowedLanguages={isAuthenticated ? access.languages : undefined}
+          />
         </Toolbar>
       </AppBar>
 

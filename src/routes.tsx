@@ -1,6 +1,10 @@
 import { lazy, Suspense } from 'react';
 import { Route, Routes, BrowserRouter } from 'react-router';
 import PageLoader from './components/PageLoader';
+import {
+  RequireStudioPermission as Require,
+  RequireSuperuser,
+} from './components/RequireStudioPermission';
 // The public listener page is what most visitors open, so it ships in the
 // main bundle; everything staff-only is split out and fetched on demand.
 import HomePage from './pages/Home';
@@ -13,6 +17,12 @@ const ListenerStatsPage = lazy(() => import('./pages/listeners'));
 const ChatPage = lazy(() => import('./pages/chat'));
 const StreamingConfigPage = lazy(() => import('./pages/streaming-config'));
 const SettingsPage = lazy(() => import('./pages/settings'));
+const UsersPage = lazy(() => import('./pages/users'));
+const StudiosPage = lazy(() => import('./pages/studios'));
+const SetPasswordPage = lazy(() => import('./pages/account/SetPasswordPage'));
+const ForgotPasswordPage = lazy(
+  () => import('./pages/account/ForgotPasswordPage'),
+);
 
 export const AppRoutes = () => {
   return (
@@ -23,12 +33,75 @@ export const AppRoutes = () => {
         <Routes>
           <Route index element={<HomePage />} />
           <Route path="login" element={<Login shouldRedirect />} />
+          {/* One-time links from invite and reset emails. */}
+          <Route
+            path="accept-invite"
+            element={<SetPasswordPage mode="invite" />}
+          />
+          <Route
+            path="reset-password"
+            element={<SetPasswordPage mode="reset" />}
+          />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
           <Route path="admin" element={<Layout />}>
-            <Route path="" element={<Dashboard />} />
-            <Route path="medias" element={<AudioManagerPage />} />
-            <Route path="listeners" element={<ListenerStatsPage />} />
-            <Route path="chat" element={<ChatPage />} />
-            <Route path="streaming" element={<StreamingConfigPage />} />
+            {/* Each studio page needs a permission in the active studio;
+                settings (profile, password) is open to every signed-in user. */}
+            <Route
+              path=""
+              element={
+                <Require permission="VIEW_ANALYTICS">
+                  <Dashboard />
+                </Require>
+              }
+            />
+            <Route
+              path="medias"
+              element={
+                <Require permission="VIEW_MEDIA">
+                  <AudioManagerPage />
+                </Require>
+              }
+            />
+            <Route
+              path="listeners"
+              element={
+                <Require permission="VIEW_ANALYTICS">
+                  <ListenerStatsPage />
+                </Require>
+              }
+            />
+            <Route
+              path="chat"
+              element={
+                <Require permission="MODERATE_CHAT">
+                  <ChatPage />
+                </Require>
+              }
+            />
+            <Route
+              path="streaming"
+              element={
+                <Require permission="VIEW_STREAM_CREDS">
+                  <StreamingConfigPage />
+                </Require>
+              }
+            />
+            <Route
+              path="users"
+              element={
+                <RequireSuperuser>
+                  <UsersPage />
+                </RequireSuperuser>
+              }
+            />
+            <Route
+              path="studios"
+              element={
+                <RequireSuperuser>
+                  <StudiosPage />
+                </RequireSuperuser>
+              }
+            />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Routes>
