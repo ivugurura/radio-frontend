@@ -1,0 +1,11 @@
+{
+  "stationTitle": "Radio Ijwi Ry' Ubugorozi",
+  "voiceControl": "Commande vocale",
+  "voiceControlStatus": {
+    "disabled": "Désactivée",
+    "enabled": "Activée"
+  },
+  "enable": "Activer",
+  "listenLive": "Écouter en direct",
+  "nowPlaying": "En cours de lecture"
+}

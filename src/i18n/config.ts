@@ -6,7 +6,7 @@
  * switches the active studio for every studio-scoped query/mutation/socket.
  */
 
-export const SUPPORTED_LANGUAGES = ['rw', 'en'] as const;
+export const SUPPORTED_LANGUAGES = ['rw', 'en', 'fr', 'sw'] as const;
 
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
@@ -35,12 +35,16 @@ export const studioForLanguage = (
 export const LANGUAGE_LABELS: Record<AppLanguage, string> = {
   rw: 'Ikinyarwanda',
   en: 'English',
+  fr: 'Français',
+  sw: 'Kiswahili',
 };
 
 /** Short code shown in compact selectors. */
 export const LANGUAGE_SHORT_LABELS: Record<AppLanguage, string> = {
   rw: 'RW',
   en: 'EN',
+  fr: 'FR',
+  sw: 'SW',
 };
 
 export const isSupportedLanguage = (value: unknown): value is AppLanguage =>

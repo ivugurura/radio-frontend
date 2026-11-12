@@ -1,0 +1,52 @@
+{
+  "title": "Live Chat",
+  "listenerChatTitle": "Studio chat",
+  "historyLoadFailed": "Failed to load chat history: {{message}}",
+  "mutesLoadFailed": "Failed to load muted listeners: {{message}}",
+  "noMessages": "No messages yet.",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "startOfConversation": "Start of the conversation",
+  "noMessagesListener": "Bado hakuna ujumbe. Wasalimie studio 👋",
+  "roleListener": "Msikilizaji",
+  "roleAdmin": "Admin",
+  "roleStudio": "Studio",
+  "hiddenBadge": "Hidden",
+  "replyingTo": "Replying to {{name}}",
+  "typeMessage": "Type a message...",
+  "sendMessage": "Tuma ujumbe",
+  "mutedListeners": "Muted listeners",
+  "noMutedListeners": "No muted listeners.",
+  "reason": "Reason: {{reason}}",
+  "mutedUntil": "Until {{date}}",
+  "mutedPermanent": "Permanent",
+  "actions": {
+    "reply": "Reply",
+    "hide": "Hide",
+    "unhide": "Unhide",
+    "mute": "Mute listener",
+    "unmute": "Unmute"
+  },
+  "identityPrompt": "Tuambie jina lako ili studio ijue nani anazungumza.",
+  "widget": {
+    "title": "Gumzo la wasikilizaji",
+    "subtitle": "Maswali, maoni na mapendekezo",
+    "joinTitle": "Jiunge na gumzo",
+    "yourName": "Jina lako",
+    "continue": "Endelea",
+    "you": "Wewe",
+    "typeYourMessage": "Andika ujumbe wako...",
+    "youAreMuted": "Umenyamazishwa",
+    "mutedNow": "Studio imekunyamazisha; huwezi kutuma ujumbe kwa sasa.",
+    "open": "Fungua gumzo",
+    "close": "Funga gumzo"
+  },
+  "mutedNotice": "You've been muted by the studio and can't send messages",
+  "errors": {
+    "muted": "You've been muted by the studio and can't send messages",
+    "invalid_body": "That message can't be sent.",
+    "forbidden": "You're not allowed to do that.",
+    "not_found": "That message no longer exists.",
+    "invalid_listener": "Unknown listener."
+  }
+}

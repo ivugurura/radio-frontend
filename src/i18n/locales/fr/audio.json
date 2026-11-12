@@ -1,0 +1,143 @@
+{
+  "title": "Audio Library",
+  "subtitle_one": "{{count}} track in this studio",
+  "subtitle_other": "{{count}} tracks in this studio",
+  "totalCount": "{{count}} total",
+  "refresh": "Refresh",
+  "refreshed": "Library refreshed",
+  "newAudio": "Upload audio",
+  "search": "Search title, artist, album or genre",
+  "clearSearch": "Clear search",
+  "resultsFor_one": "{{count}} result for “{{query}}”",
+  "resultsFor_other": "{{count}} results for “{{query}}”",
+  "selectAll": "Select all on this page",
+  "selected_one": "{{count}} track selected",
+  "selected_other": "{{count}} tracks selected",
+  "clearSelection": "Clear selection",
+  "delete": "Delete",
+  "deleting": "Deleting…",
+  "cancel": "Cancel",
+  "deleteSelected": "Delete selected ({{count}})",
+  "audioDeleted_one": "Track deleted",
+  "audioDeleted_other": "{{count}} tracks deleted",
+  "deleteFailed_one": "{{count}} track could not be deleted",
+  "deleteFailed_other": "{{count}} tracks could not be deleted",
+  "confirmDeleteTitle_one": "Delete track?",
+  "confirmDeleteTitle_other": "Delete {{count}} tracks?",
+  "confirmDeleteOne": "“{{title}}” and its files will be removed from the server. This action cannot be undone.",
+  "confirmDeleteBody": "You are about to delete {{count}} audio file(s). This action cannot be undone.",
+  "confirmDeleteAction": "Delete",
+  "processingHint_one": "{{count}} upload is being processed. This list updates automatically.",
+  "processingHint_other": "{{count}} uploads are being processed. This list updates automatically.",
+  "columns": {
+    "title": "Title",
+    "album": "Album",
+    "genre": "Genre",
+    "added": "Added",
+    "duration": "Duration",
+    "quality": "Quality",
+    "status": "Status"
+  },
+  "states": {
+    "READY": "Ready",
+    "UPLOADING": "Uploading",
+    "PENDING": "Pending",
+    "PROCESSING": "Processing",
+    "FAILED": "Failed",
+    "ARCHIVED": "Archived"
+  },
+  "unknownArtist": "Unknown artist",
+  "notPlayable": "Not ready for playback yet",
+  "emptyTitle": "Your library is empty",
+  "emptyBody": "Upload your first tracks to start building the station's library.",
+  "noResultsTitle": "No matches",
+  "noResultsBody": "Nothing matches “{{query}}”. Try a different search.",
+  "rowsPerPage": "Rows per page",
+  "displayedRows": "{{from}}–{{to}} of {{count}}",
+  "nowPlaying": "Now playing",
+  "play": "Play",
+  "pause": "Pause",
+  "next": "Suivant",
+  "previous": "Previous",
+  "seek": "Seek",
+  "mute": "Mute",
+  "unmute": "Unmute",
+  "volume": "Volume",
+  "closePlayer": "Close player",
+  "playbackError": "Could not load this track",
+  "upload": {
+    "title": "Upload audio",
+    "subtitle": "Add tracks to this studio's library. They are converted for broadcast automatically.",
+    "dropTitle": "Drag and drop audio files here, or click to browse",
+    "dropHint": "You can select several files at once (up to {{batch}} per batch works best)",
+    "concurrencyHint_one": "{{count}} file uploads at a time",
+    "concurrencyHint_other": "{{count}} files upload at a time",
+    "summary": {
+      "files_one": "{{count}} file • {{size}}",
+      "files_other": "{{count}} files • {{size}}",
+      "uploading": "{{count}} uploading",
+      "done": "{{count}} done",
+      "errors_one": "{{count}} failed",
+      "errors_other": "{{count}} failed",
+      "duplicates_one": "{{count}} already in library",
+      "duplicates_other": "{{count}} already in library"
+    },
+    "status": {
+      "queued": "Waiting",
+      "requesting": "Preparing",
+      "uploading": "Uploading",
+      "finalizing": "Finishing",
+      "done": "Done",
+      "error": "Failed",
+      "canceled": "Canceled",
+      "checking": "Checking",
+      "duplicate": "Duplicate"
+    },
+    "actions": {
+      "start": "Start",
+      "retry": "Retry",
+      "cancel": "Cancel",
+      "remove": "Remove from list",
+      "close": "Close",
+      "clearFinished": "Clear finished",
+      "cancelRunning": "Cancel running",
+      "startAll_one": "Upload {{count}} file",
+      "startAll_other": "Upload {{count}} files"
+    },
+    "warnings": {
+      "skipped_one": "{{count}} file was skipped because it is not an audio file.",
+      "skipped_other": "{{count}} files were skipped because they are not audio files.",
+      "largeBatch": "{{count}} files are in the list. Batches of {{batch}} or fewer are easier to follow and recover if the connection drops.",
+      "largeFiles_one": "{{count}} file is larger than {{size}}. It will work but take longer. Consider exporting it as MP3 or FLAC instead of WAV.",
+      "largeFiles_other": "{{count}} files are larger than {{size}}. They will work but take longer. Consider exporting them as MP3 or FLAC instead of WAV.",
+      "alreadyListed_one": "{{count}} file is already in the list and was not added again.",
+      "alreadyListed_other": "{{count}} files are already in the list and were not added again."
+    },
+    "errors": {
+      "session": "Could not start the upload. Please try again.",
+      "finalize": "The file was sent but could not be queued for processing."
+    },
+    "guidelines": {
+      "title": "Upload tips",
+      "formats": {
+        "title": "Formats",
+        "body": "MP3, WAV, FLAC, M4A or OGG; best at 192 kbps+ or lossless. Converted to {{kbps}} kbps MP3."
+      },
+      "batch": {
+        "title": "Batch",
+        "body": "Up to {{batch}} files, ideally under {{size}} each; {{concurrency}} upload at once."
+      },
+      "tags": {
+        "title": "Tags",
+        "body": "Title, artist and album are read from file tags; volume is levelled automatically. Files already in the library are skipped."
+      },
+      "connection": {
+        "title": "Stay here",
+        "body": "Keep this window open until all are Done; Retry any that fail. Tracks are Ready a few minutes later."
+      }
+    },
+    "duplicateOf": "Already in the library as “{{title}}”"
+  },
+  "possibleDuplicate": "Possible duplicate",
+  "possibleDuplicateOf": "Same title, artist and length as “{{title}}” by {{artist}}. Delete one if they are the same recording."
+}

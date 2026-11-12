@@ -1,0 +1,28 @@
+{
+  "appName": "Radio Ijwi Ry' Ubugorozi",
+  "appShortName": "RRV Radio",
+  "language": "Langue",
+  "station": "Station",
+  "selectLanguage": "Choisir la langue",
+  "loading": "Loading...",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "save": "Save",
+  "close": "Close",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
+  "enable": "Enable",
+  "disable": "Disable",
+  "yes": "Yes",
+  "no": "No",
+  "error": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Check your connection and try again."
+  },
+  "languageName": {
+    "rw": "Kinyarwanda",
+    "en": "English",
+    "fr": "Français",
+    "sw": "Kiswahili"
+  }
+}

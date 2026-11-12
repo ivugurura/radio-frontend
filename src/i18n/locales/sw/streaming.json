@@ -1,0 +1,12 @@
+{
+  "title": "Streaming Apps",
+  "refresh": "Refresh",
+  "intro": "Connect a live encoder such as BUTT using the settings below. Enter the server address and port on BUTT's \"Main\" tab, and match the format settings on its \"Stream\" tab.",
+  "loadFailed": "Could not load streaming configuration.",
+  "regenerateSuccess": "Password regenerated. Update BUTT before reconnecting.",
+  "regenerateError": "Could not regenerate the password",
+  "regeneratePassword": "Regenerate password",
+  "confirmTitle": "Regenerate streaming password?",
+  "confirmBody": "The current password will stop working immediately. Any live encoder connected with the old password will be disconnected.",
+  "confirmAction": "Regenerate"
+}

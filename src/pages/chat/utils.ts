@@ -76,7 +76,12 @@ export const groupMessagesByDay = (
 };
 
 // en-GB gives "Thu 22 Sept"; the year is only shown for past years.
-const DAY_LABEL_LOCALES: Record<string, string> = { en: 'en-GB', rw: 'rw' };
+const DAY_LABEL_LOCALES: Record<string, string> = {
+  en: 'en-GB',
+  rw: 'rw',
+  fr: 'fr-FR',
+  sw: 'sw',
+};
 
 export const useDayLabel = () => {
   const { t, i18n } = useTranslation('chat');

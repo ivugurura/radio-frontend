@@ -1,0 +1,11 @@
+{
+  "stationTitle": "Radio Ijwi Ry' Ubugorozi",
+  "voiceControl": "Udhibiti wa sauti",
+  "voiceControlStatus": {
+    "disabled": "Imezimwa",
+    "enabled": "Imewashwa"
+  },
+  "enable": "Washa",
+  "listenLive": "Sikiliza mubashara",
+  "nowPlaying": "Inachezwa sasa"
+}
