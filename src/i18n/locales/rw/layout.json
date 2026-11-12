@@ -1,28 +1,28 @@
 {
-  "brand": "Radio RRV",
+  "brand": "RRV Radio",
   "nav": {
     "dashboard": "Dashboard",
-    "audioManager": "Indirimbo",
-    "listenerStatistics": "Imibare y aba Listeners",
-    "liveChat": "Isangizabitekerezo",
-    "streamingApps": "Apps za streaming",
-    "settings": "Igenamiterere",
-    "users": "Abakoresha",
-    "studios": "Sitidiyo"
+    "audioManager": "Audio Manager",
+    "listenerStatistics": "Listener Statistics",
+    "liveChat": "Live Chat",
+    "streamingApps": "Streaming Apps",
+    "settings": "Settings",
+    "users": "Users",
+    "studios": "Studios"
   },
   "player": {
     "compactTitle": "R-RW"
   },
   "skip": {
-    "tooltip": "Simbuka indirimbo irimo",
-    "disabledLive": "Gusimbuka bishoboka gusa tutari Live",
-    "disabledNoTrack": "Nta ndirimbo irimo gucurangwa",
-    "confirmTitle": "Murashaka gusimbuke iyi ndirimbo?",
-    "confirmMessage": "\"{{track}}\" irahagarara ku bumva bose maze hajyeho ikurikira.",
-    "confirm": "Simbuka",
-    "cancel": "Bireke",
-    "success": "\"{{track}}\" yasimbutswe",
-    "error": "Ntibyashobotse gusimbuka indirimbo"
+    "tooltip": "Skip current track",
+    "disabledLive": "Skipping is only available while AutoDJ is on air",
+    "disabledNoTrack": "No AutoDJ track playing",
+    "confirmTitle": "Skip this track?",
+    "confirmMessage": "\"{{track}}\" will stop for all listeners and AutoDJ will move to the next track.",
+    "confirm": "Skip",
+    "cancel": "Cancel",
+    "success": "Skipped \"{{track}}\"",
+    "error": "Could not skip the track"
   },
   "theme": {
     "label": "Amabara",
@@ -30,14 +30,14 @@
     "dark": "Umwijima",
     "system": "Systeme"
   },
-  "logout": "Sohoka",
-  "signingOut": "Birimo gusohoka…",
+  "logout": "Sign out",
+  "signingOut": "Signing out…",
   "access": {
-    "noStudioTitle": "Nta sitidiyo urabona uburenganzira",
-    "noStudioBody": "Konti yawe ntiri muri sitidiyo n’imwe. Saba nyiri sitidiyo cyangwa umuyobozi wayo kukongeramo. Ushobora gukomeza guhindura umwirondoro n’ijambobanga muri Igenamiterere.",
-    "forbiddenTitle": "Ntibiri mu ruhare rwawe",
-    "forbiddenBody": "Uruhare ufite muri iyi sitidiyo ntirukwemerera kugera kuri iyi paji. Saba nyiri sitidiyo cyangwa umuyobozi wayo niba uyikeneye.",
-    "openSettings": "Fungura igenamiterere",
-    "backToDashboard": "Subira kuri dashboard"
+    "noStudioTitle": "No studio access yet",
+    "noStudioBody": "Your account isn't part of a studio. Ask a studio owner or admin to add you. You can still manage your profile and password in Settings.",
+    "forbiddenTitle": "Not available for your role",
+    "forbiddenBody": "Your role in this studio doesn't include this page. Ask a studio owner or admin if you need it.",
+    "openSettings": "Open settings",
+    "backToDashboard": "Back to dashboard"
   }
 }

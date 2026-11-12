@@ -1,26 +1,26 @@
 {
   "appName": "Radio Ijwi Ry' Ubugorozi",
-  "appShortName": "Radio RRV",
+  "appShortName": "RRV Radio",
   "language": "Ururimi",
-  "station": "Sitasiyo",
+  "station": "Station",
   "selectLanguage": "Hitamo ururimi",
-  "loading": "Mube mutegereje...",
-  "retry": "Ongera ugerageze",
-  "cancel": "Bireke",
-  "save": "Bika",
-  "close": "Funga",
+  "loading": "Loading...",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "save": "Save",
+  "close": "Close",
   "enabled": "Enabled",
   "disabled": "Disabled",
   "enable": "Enable",
   "disable": "Disable",
-  "yes": "Yego",
-  "no": "Oya",
+  "yes": "Yes",
+  "no": "No",
   "error": {
-    "generic": "Hari ibitagenze neza. Mwongera mugerageze.",
-    "network": "Ikibazo cy'umuyoboro. Reba interineti yawe wongere ugerageze."
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Check your connection and try again."
   },
   "languageName": {
-    "rw": "Ikinyarwanda",
-    "en": "Icyongereza"
+    "rw": "Kinyarwanda",
+    "en": "English"
   }
 }

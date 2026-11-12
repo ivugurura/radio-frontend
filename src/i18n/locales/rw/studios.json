@@ -1,63 +1,63 @@
 {
-  "title": "Sitidiyo",
-  "intro": "Radiyo zose ziri kuri uru rubuga. Buri sitidiyo ivuga mu rurimi rumwe, kandi ururimi umuntu ahisemo ni rwo rugena sitidiyo yumva.",
-  "empty": "Nta sitidiyo irabaho.",
-  "cancel": "Reka",
-  "actionFailed": "Hari ikitagenze neza. Ongera ugerageze.",
+  "title": "Studios",
+  "intro": "Every station on the platform. Each studio broadcasts in one language, and the language picker decides which studio people hear.",
+  "empty": "No studios yet.",
+  "cancel": "Cancel",
+  "actionFailed": "Something went wrong. Please try again.",
   "audio": "{{kbps}} kbps · {{khz}} kHz · {{channels}} ch",
   "columns": {
-    "studio": "Sitidiyo",
-    "status": "Uko ihagaze",
-    "members": "Abanyamuryango",
-    "tracks": "Indirimbo",
-    "audio": "Imiterere y’ijwi",
-    "created": "Yashyizweho"
+    "studio": "Studio",
+    "status": "Status",
+    "members": "Members",
+    "tracks": "Tracks",
+    "audio": "Audio format",
+    "created": "Created"
   },
   "status": {
-    "active": "Iri ku murongo",
-    "inactive": "Yahagaritswe"
+    "active": "On air",
+    "inactive": "Deactivated"
   },
   "actions": {
-    "label": "Ibikorwa kuri {{name}}",
-    "openSettings": "Fungura igenamiterere rya sitidiyo",
-    "activate": "Ongera uyikoreshe",
-    "deactivate": "Hagarika",
-    "lastActive": "Nibura sitidiyo imwe igomba guhora iri ku murongo"
+    "label": "Actions for {{name}}",
+    "openSettings": "Open studio settings",
+    "activate": "Reactivate",
+    "deactivate": "Deactivate",
+    "lastActive": "At least one studio must stay on air"
   },
   "create": {
-    "open": "Sitidiyo nshya",
-    "title": "Sitidiyo nshya",
-    "language": "Ururimi",
-    "languageHint": "Sitidiyo izavuga muri uru rurimi. Ntibizashoboka kuruhindura nyuma.",
-    "displayName": "Izina rya sitidiyo",
-    "description": "Ibisobanuro",
-    "owner": "Nyirayo",
-    "ownerHint": "Si ngombwa. Ushobora no kongeramo abantu nyuma mu igenamiterere rya sitidiyo.",
-    "noOwnerMatch": "Nta konti ihuye n’ibyo ushaka",
-    "permanentHint": "Sitidiyo ikoresha imiterere y’ijwi y’urubuga (bitrate, sample rate, channels) kugira ngo indirimbo n’ibiganiro bya live bigende neza. Ububiko bwayo n’ibyangombwa bya encoder bihita bishyirwaho.",
-    "submit": "Shyiraho sitidiyo",
-    "creating": "Biri gushyirwaho…",
-    "done": "{{name}} iri ku murongo. Shyiramo indirimbo kandi utange ibyangombwa bya encoder kugira ngo utangire gutambutsa.",
-    "noneAvailable": "Buri rurimi rwemewe rusanzwe rufite sitidiyo.",
-    "pending": "{{name}} yashyizweho. Seriveri ya radiyo ntirabyemeza; ijya ku murongo mu minota 5."
+    "open": "New studio",
+    "title": "New studio",
+    "language": "Language",
+    "languageHint": "The studio broadcasts in this language. It can't be changed later.",
+    "displayName": "Studio name",
+    "description": "Description",
+    "owner": "Owner",
+    "ownerHint": "Optional. You can also add people later from the studio's settings.",
+    "noOwnerMatch": "No matching account",
+    "permanentHint": "The studio uses the platform audio format (bitrate, sample rate, channels) so tracks and live shows play back smoothly. Its media folder and encoder credentials are created for you.",
+    "submit": "Create studio",
+    "creating": "Creating…",
+    "done": "{{name}} is on air. Upload music and share the encoder credentials to start broadcasting.",
+    "noneAvailable": "Every supported language already has a studio.",
+    "pending": "{{name}} was created. The stream server couldn't confirm it yet; it comes on air within 5 minutes."
   },
   "confirm": {
     "deactivate": {
-      "title": "Uhagarika {{name}}?",
-      "body": "Radiyo ihita iva ku murongo kandi abayumva bakimurirwa kuri sitidiyo y’ibanze. Abanyamuryango ntibazongera kuyigeraho kugeza yongeye gukoreshwa. Indirimbo, abanyamuryango n’imibare biragumaho.",
-      "action": "Hagarika",
-      "done": "{{name}} yavuye ku murongo",
-      "pending": "{{name}} yahagaritswe. Seriveri ya radiyo ntirabyemeza; iva ku murongo mu minota 5."
+      "title": "Deactivate {{name}}?",
+      "body": "The stream goes off air right away and current listeners move to the default studio. Members lose access until it is reactivated. Music, members and statistics are kept.",
+      "action": "Deactivate",
+      "done": "{{name}} is off air",
+      "pending": "{{name}} was deactivated. The stream server couldn't confirm it yet; it goes off air within 5 minutes."
     },
     "activate": {
-      "title": "Wongera gukoresha {{name}}?",
-      "body": "Radiyo ihita isubira ku murongo ifite indirimbo, abanyamuryango n’igenamiterere yari isanganywe.",
-      "action": "Ongera uyikoreshe",
-      "done": "{{name}} yasubiye ku murongo",
-      "pending": "{{name}} yongeye gukoreshwa. Seriveri ya radiyo ntirabyemeza; ijya ku murongo mu minota 5."
+      "title": "Reactivate {{name}}?",
+      "body": "The stream comes back on air right away with its music, members and settings as they were.",
+      "action": "Reactivate",
+      "done": "{{name}} is back on air",
+      "pending": "{{name}} was reactivated. The stream server couldn't confirm it yet; it comes on air within 5 minutes."
     }
   },
   "applied": {
-    "checking": "Birimo guhinduka…"
+    "checking": "Switching…"
   }
 }

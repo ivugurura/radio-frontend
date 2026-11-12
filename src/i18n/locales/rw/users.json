@@ -1,90 +1,90 @@
 {
-  "title": "Abakoresha",
-  "intro": "Konti zose ziri kuri uru rubuga. Tumira abantu, uvugurure amakuru yabo kandi ubuze kwinjira igihe bibaye ngombwa.",
-  "search": "Shakisha ukoresheje izina cyangwa imeri",
-  "empty": "Nta mukoresha uhuye n’ibyo ushaka.",
-  "you": "(wowe)",
-  "never": "Nta na rimwe",
-  "superuser": "Umuyobozi w’urubuga",
-  "noStudios": "Nta sitidiyo",
-  "rowsPerPage": "Imirongo kuri paji",
-  "cancel": "Reka",
-  "actionFailed": "Hari ikitagenze neza. Ongera ugerageze.",
+  "title": "Users",
+  "intro": "Every account on the platform. Invite people, keep details up to date and block access when needed.",
+  "search": "Search by name or email",
+  "empty": "No users match.",
+  "you": "(you)",
+  "never": "Never",
+  "superuser": "Platform admin",
+  "noStudios": "No studio",
+  "rowsPerPage": "Rows per page",
+  "cancel": "Cancel",
+  "actionFailed": "Something went wrong. Please try again.",
   "columns": {
-    "user": "Umukoresha",
-    "studios": "Sitidiyo",
-    "status": "Uko ahagaze",
-    "lastLogin": "Aheruka kwinjira"
+    "user": "User",
+    "studios": "Studios",
+    "status": "Status",
+    "lastLogin": "Last sign-in"
   },
   "status": {
-    "ALL": "Bose",
-    "ACTIVE": "Arakora",
-    "INVITED": "Yatumiwe",
-    "DISABLED": "Yahagaritswe"
+    "ALL": "All",
+    "ACTIVE": "Active",
+    "INVITED": "Invited",
+    "DISABLED": "Disabled"
   },
   "fields": {
-    "email": "Imeri",
-    "firstName": "Izina",
-    "lastName": "Irindi zina",
-    "userName": "Izina ry’ukoresha",
-    "phone": "Telefoni",
-    "role": "Uruhare"
+    "email": "Email address",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "userName": "Username",
+    "phone": "Phone",
+    "role": "Role"
   },
   "invite": {
-    "open": "Tumira umukoresha",
-    "title": "Tumira umukoresha",
-    "studio": "Sitidiyo",
-    "studioHint": "Si ngombwa. Hitamo sitidiyo kugira ngo ahite ahabwa uruhare muri yo.",
-    "noStudio": "Nta sitidiyo ubu",
-    "hint": "Amazina arakenewe kuri konti nshya. Niba imeri isanzwe ifite konti, yongerwa gusa muri sitidiyo.",
-    "submit": "Ohereza ubutumire",
-    "sending": "Biri gutumirwa…",
-    "addedExisting": "{{email}} asanzwe afite konti kandi yongewe muri sitidiyo"
+    "open": "Invite user",
+    "title": "Invite a user",
+    "studio": "Studio",
+    "studioHint": "Optional. Pick a studio to give them a role there right away.",
+    "noStudio": "No studio for now",
+    "hint": "Names are needed for new accounts. If the email already has an account, it is only added to the studio.",
+    "submit": "Send invite",
+    "sending": "Inviting…",
+    "addedExisting": "{{email}} already has an account and was added to the studio"
   },
   "edit": {
-    "title": "Hindura umukoresha",
-    "emailHint": "Ni yo akoresha yinjira.",
-    "submit": "Bika impinduka",
-    "saving": "Biri kubikwa…",
-    "saved": "Umukoresha yavuguruwe"
+    "title": "Edit user",
+    "emailHint": "They sign in with this address.",
+    "submit": "Save changes",
+    "saving": "Saving…",
+    "saved": "User updated"
   },
   "actions": {
-    "label": "Ibikorwa kuri {{name}}",
-    "edit": "Hindura amakuru",
-    "sendReset": "Ohereza guhindura ijambobanga",
-    "resendInvite": "Ongera wohereze ubutumire",
-    "signOut": "Musohore ahantu hose",
-    "enable": "Ongera ukoreshe konti",
-    "disable": "Hagarika konti"
+    "label": "Actions for {{name}}",
+    "edit": "Edit details",
+    "sendReset": "Send password reset",
+    "resendInvite": "Resend invite",
+    "signOut": "Sign out everywhere",
+    "enable": "Enable account",
+    "disable": "Disable account"
   },
   "confirm": {
     "disable": {
-      "title": "Uhagarika {{name}}?",
-      "body": "Asohorwa ahantu hose kandi ntashobora kwinjira kugeza konti yongeye gukoreshwa. Inshingano afite muri sitidiyo ziragumaho.",
-      "action": "Hagarika",
-      "done": "{{name}} yahagaritswe"
+      "title": "Disable {{name}}?",
+      "body": "They are signed out everywhere and cannot sign in until the account is enabled again. Their studio roles are kept.",
+      "action": "Disable",
+      "done": "{{name}} disabled"
     },
     "enable": {
-      "title": "Wongera gukoresha konti ya {{name}}?",
-      "body": "Azongera kwinjira akoresheje ijambobanga n’inshingano yari asanganywe.",
-      "action": "Ongera ukoreshe",
-      "done": "Konti ya {{name}} yongeye gukora"
+      "title": "Enable {{name}}?",
+      "body": "They can sign in again with their existing password and studio roles.",
+      "action": "Enable",
+      "done": "{{name}} enabled"
     },
     "signOut": {
-      "title": "Usohora {{name}} ahantu hose?",
-      "body": "Buri gikoresho kizasabwa kongera kwinjira. Paji zifunguye zishobora gukomeza gukora iminota igera kuri 30.",
-      "action": "Musohore",
-      "done": "{{name}} yasohowe ahantu hose"
+      "title": "Sign out {{name}} everywhere?",
+      "body": "Every device has to sign in again. Pages already open can keep working for up to 30 minutes.",
+      "action": "Sign out",
+      "done": "{{name}} signed out everywhere"
     }
   },
   "link": {
-    "inviteTitle": "Link y’ubutumire yabonetse",
-    "resetTitle": "Link yo guhindura ijambobanga yabonetse",
-    "emailed": "Link twayohereje kuri {{email}}. Ushobora no kuyimwoherereza ubwawe.",
-    "notEmailed": "Imeri ntiratunganywa kuri seriveri, bityo oherereza {{email}} iyi link ubwawe (urugero kuri WhatsApp).",
-    "label": "Link ikoreshwa rimwe",
-    "inviteHint": "Ikora rimwe gusa kandi irangira mu minsi 7. Uyifite wese ashobora gushyiraho ijambobanga, bityo yohereze uyu muntu wenyine.",
-    "resetHint": "Ikora rimwe gusa kandi irangira mu isaha 1. Uyifite wese ashobora gushyiraho ijambobanga, bityo yohereze uyu muntu wenyine.",
-    "done": "Ndangije"
+    "inviteTitle": "Invite link ready",
+    "resetTitle": "Password reset link ready",
+    "emailed": "We emailed the link to {{email}}. You can also share it yourself.",
+    "notEmailed": "Email isn't set up on the server, so share this link with {{email}} yourself (for example on WhatsApp).",
+    "label": "One-time link",
+    "inviteHint": "It works once and expires in 7 days. Anyone with the link can set the password, so send it only to this person.",
+    "resetHint": "It works once and expires in 1 hour. Anyone with the link can set the password, so send it only to this person.",
+    "done": "Done"
   }
 }
