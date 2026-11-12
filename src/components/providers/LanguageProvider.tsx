@@ -63,12 +63,19 @@ export const LanguageProvider = ({
 
   const setLanguage = useCallback((next: AppLanguage) => {
     const normalized = normalizeLanguage(next);
-    void i18n.changeLanguage(normalized);
+    if (normalized === normalizeLanguage(i18n.language)) return;
     try {
       localStorage.setItem(LANGUAGE_STORAGE_KEY, normalized);
+      // The language decides the studio, so reload to start clean on the new
+      // one: stream, chat socket and cached queries all belong to the old one.
+      // The detector reads the saved choice back on load.
+      window.location.reload();
+      return;
     } catch {
-      // Storage can be unavailable (private mode); detection still keeps it for the session.
+      // Storage unavailable (private mode): a reload would lose the choice,
+      // so switch in place instead.
     }
+    void i18n.changeLanguage(normalized);
     applyDocumentLanguage(normalized);
     setLanguageState(normalized);
   }, []);
