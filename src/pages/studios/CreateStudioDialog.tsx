@@ -85,7 +85,7 @@ export const CreateStudioDialog: React.FC<
     open: boolean;
     availableSlugs: readonly string[];
     onClose: () => void;
-    onCreated: (displayName: string) => void;
+    onCreated: (studioId: string, displayName: string) => void;
   }>
 > = ({ open, availableSlugs, onClose, onCreated }) => {
   const { t } = useTranslation('studios');
@@ -139,7 +139,7 @@ export const CreateStudioDialog: React.FC<
       const created = res.data?.createStudio?.studio;
       if (!created) return;
       reset();
-      onCreated(created.displayName);
+      onCreated(created.studioId, created.displayName);
     } catch (err) {
       setError(errorText(err, t('actionFailed')));
     }

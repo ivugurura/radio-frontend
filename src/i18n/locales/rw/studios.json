@@ -37,21 +37,27 @@
     "permanentHint": "Sitidiyo ikoresha imiterere y’ijwi y’urubuga (bitrate, sample rate, channels) kugira ngo indirimbo n’ibiganiro bya live bigende neza. Ububiko bwayo n’ibyangombwa bya encoder bihita bishyirwaho.",
     "submit": "Shyiraho sitidiyo",
     "creating": "Biri gushyirwaho…",
-    "done": "{{name}} yiteguye. Shyiramo indirimbo kandi utange ibyangombwa bya encoder kugira ngo ijye ku murongo.",
-    "noneAvailable": "Buri rurimi rwemewe rusanzwe rufite sitidiyo."
+    "done": "{{name}} iri ku murongo. Shyiramo indirimbo kandi utange ibyangombwa bya encoder kugira ngo utangire gutambutsa.",
+    "noneAvailable": "Buri rurimi rwemewe rusanzwe rufite sitidiyo.",
+    "pending": "{{name}} yashyizweho. Seriveri ya radiyo ntirabyemeza; ijya ku murongo mu minota 5."
   },
   "confirm": {
     "deactivate": {
       "title": "Uhagarika {{name}}?",
-      "body": "Mu minota 5 radiyo iva ku murongo kandi abayumva bagahagarikwa. Abumva uru rurimi bazumva sitidiyo y’ibanze. Abanyamuryango ntibazongera kuyigeraho kugeza yongeye gukoreshwa. Indirimbo, abanyamuryango n’imibare biragumaho.",
+      "body": "Radiyo ihita iva ku murongo kandi abayumva bakimurirwa kuri sitidiyo y’ibanze. Abanyamuryango ntibazongera kuyigeraho kugeza yongeye gukoreshwa. Indirimbo, abanyamuryango n’imibare biragumaho.",
       "action": "Hagarika",
-      "done": "{{name}} yahagaritswe"
+      "done": "{{name}} yavuye ku murongo",
+      "pending": "{{name}} yahagaritswe. Seriveri ya radiyo ntirabyemeza; iva ku murongo mu minota 5."
     },
     "activate": {
       "title": "Wongera gukoresha {{name}}?",
-      "body": "Mu minota 5 radiyo isubira ku murongo ifite indirimbo, abanyamuryango n’igenamiterere yari isanganywe.",
+      "body": "Radiyo ihita isubira ku murongo ifite indirimbo, abanyamuryango n’igenamiterere yari isanganywe.",
       "action": "Ongera uyikoreshe",
-      "done": "{{name}} yongeye gukora"
+      "done": "{{name}} yasubiye ku murongo",
+      "pending": "{{name}} yongeye gukoreshwa. Seriveri ya radiyo ntirabyemeza; ijya ku murongo mu minota 5."
     }
+  },
+  "applied": {
+    "checking": "Birimo guhinduka…"
   }
 }

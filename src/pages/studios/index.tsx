@@ -38,6 +38,7 @@ import { useLanguage } from '@components/providers';
 import { isSupportedLanguage } from '../../i18n/config';
 import ConfirmDialog from '../audio/ConfirmDialog';
 import { CreateStudioDialog } from './CreateStudioDialog';
+import { waitForStudioOnAir } from './onAir';
 import { studioLanguageLabel } from './labels';
 
 type StudioRow = StudiosQuery['studios'][number];
@@ -47,6 +48,17 @@ type PendingConfirm = { kind: ConfirmKind; studio: StudioRow };
 const hideBelow = (bp: 'sm' | 'md') => ({
   display: { xs: 'none', [bp]: 'table-cell' },
 });
+
+type ChipColor = 'success' | 'warning' | 'default';
+
+const statusChip = (
+  studio: StudioRow,
+  switching: boolean,
+): { color: ChipColor; key: string } => {
+  if (switching) return { color: 'warning', key: 'applied.checking' };
+  if (studio.isActive) return { color: 'success', key: 'status.active' };
+  return { color: 'default', key: 'status.inactive' };
+};
 
 const errorText = (err: unknown, fallback: string) =>
   err instanceof Error && err.message ? err.message : fallback;
@@ -122,12 +134,21 @@ const RowMenu = ({
   );
 };
 
+const StatusChip = ({
+  chip,
+}: Readonly<{ chip: ReturnType<typeof statusChip> }>) => {
+  const { t } = useTranslation('studios');
+  return <Chip size="small" color={chip.color} label={t(chip.key)} />;
+};
+
 export default function StudiosPage() {
   const { t, i18n } = useTranslation('studios');
   const navigate = useNavigate();
   const { setLanguage } = useLanguage();
   const [createOpen, setCreateOpen] = useState(false);
   const [confirm, setConfirm] = useState<PendingConfirm | null>(null);
+  // Studios whose change radio-studio hasn't applied yet.
+  const [switching, setSwitching] = useState<ReadonlySet<string>>(new Set());
 
   const { data, loading, error } = useStudiosQuery({
     fetchPolicy: 'cache-and-network',
@@ -158,19 +179,56 @@ export default function StudiosPage() {
     navigate('/admin/settings');
   };
 
+  const markSwitching = (studioId: string, on: boolean) =>
+    setSwitching((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(studioId);
+      else next.delete(studioId);
+      return next;
+    });
+
+  // The backend asks radio-studio to apply a change at once; confirm it by
+  // watching the stream server itself rather than trusting the request.
+  // Resolves whether it went on (or off) air in time.
+  const watchOnAir = async (studioId: string, onAir: boolean) => {
+    markSwitching(studioId, true);
+    try {
+      return await waitForStudioOnAir(studioId, onAir);
+    } finally {
+      markSwitching(studioId, false);
+    }
+  };
+
   const runConfirm = async () => {
     if (!confirm) return;
     const { kind, studio } = confirm;
+    const activate = kind === 'activate';
+    const name = studio.displayName;
     try {
       await setStudioActive({
-        variables: { studioId: studio.studioId, active: kind === 'activate' },
+        variables: { studioId: studio.studioId, active: activate },
       });
-      notifier.success(t(`confirm.${kind}.done`, { name: studio.displayName }));
     } catch (err) {
       notifier.error(errorText(err, t('actionFailed')));
-    } finally {
       setConfirm(null);
+      return;
     }
+    setConfirm(null);
+    const applied = await watchOnAir(studio.studioId, activate);
+    if (applied) {
+      notifier.success(t(`confirm.${kind}.done`, { name }));
+      return;
+    }
+    notifier.info(t(`confirm.${kind}.pending`, { name }));
+  };
+
+  const handleCreated = async (studioId: string, name: string) => {
+    setCreateOpen(false);
+    if (await watchOnAir(studioId, true)) {
+      notifier.success(t('create.done', { name }));
+      return;
+    }
+    notifier.info(t('create.pending', { name }));
   };
 
   const createButton = (
@@ -272,12 +330,8 @@ export default function StudiosPage() {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      size="small"
-                      color={studio.isActive ? 'success' : 'default'}
-                      label={t(
-                        studio.isActive ? 'status.active' : 'status.inactive',
-                      )}
+                    <StatusChip
+                      chip={statusChip(studio, switching.has(studio.studioId))}
                     />
                   </TableCell>
                   <TableCell align="right" sx={hideBelow('sm')}>
@@ -323,10 +377,7 @@ export default function StudiosPage() {
         open={createOpen}
         availableSlugs={availableSlugs}
         onClose={() => setCreateOpen(false)}
-        onCreated={(name) => {
-          setCreateOpen(false);
-          notifier.success(t('create.done', { name }));
-        }}
+        onCreated={(studioId, name) => void handleCreated(studioId, name)}
       />
       <ConfirmDialog
         open={confirm !== null}

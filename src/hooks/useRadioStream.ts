@@ -1,4 +1,5 @@
 import React from 'react';
+import { useApolloClient } from '@apollo/client/react';
 import { STUDIO_URL } from '@libs/constants';
 import { getOrCreateListenerClientId } from '@libs/chat';
 import { useStudioId } from '@components/providers';
@@ -72,6 +73,9 @@ const RECONNECT_MAX_DELAY_MS = 30000;
 // connection, even if the socket never reported an error.
 const STALL_TIMEOUT_MS = 15000;
 const STALL_CHECK_INTERVAL_MS = 5000;
+// At most one "which studios are on air?" refetch per this interval when the
+// studio's status endpoint answers 404.
+const STUDIO_REFETCH_MIN_INTERVAL_MS = 30000;
 
 const MEDIA_SESSION_ARTWORK: MediaImage[] = [
   { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -468,10 +472,14 @@ export function useRadioStream({
       return;
     }
     teardownStream();
-    const delay = Math.min(
+    const backoff = Math.min(
       RECONNECT_MAX_DELAY_MS,
       RECONNECT_BASE_DELAY_MS * 2 ** reconnectAttemptRef.current,
     );
+    // Random spread over the upper half: when the server drops everyone at
+    // once (a restart, a studio going off air), listeners don't all come back
+    // in the same instant.
+    const delay = backoff / 2 + Math.random() * (backoff / 2);
     reconnectAttemptRef.current += 1;
     setStatus('buffering');
     reconnectTimerRef.current = window.setTimeout(() => {
@@ -510,9 +518,16 @@ export function useRadioStream({
     }
   }, [isPlaying, isBuffering, play, stop]);
 
+  // Autoplay, and keep playing when the stream URL changes: switching
+  // language, or this studio going off air so the language falls back to the
+  // default studio, swaps the audio element, and a listener who was playing
+  // should hear the new studio without pressing play again.
   React.useEffect(() => {
-    if (autoPlay) play();
-  }, [autoPlay, streamUrl, play]);
+    if (autoPlay) shouldBePlayingRef.current = true;
+    if (!shouldBePlayingRef.current) return;
+    reconnectAttemptRef.current = 0;
+    connect();
+  }, [autoPlay, connect]);
 
   // A live MSE fetch doesn't recover on its own from a network change (Wi-Fi
   // <-> cellular handoff, brief drop/reconnect, etc.) — it just stalls or
@@ -611,6 +626,24 @@ export function useRadioStream({
 
   const toggleMute = React.useCallback(() => setMuted((m) => !m), []);
 
+  // radio-studio answers 404 once this studio is deactivated. Re-ask which
+  // studios are on air: the language then falls back to the default studio
+  // and playback moves there (see the autoplay effect). Throttled, since the
+  // studio can also be missing for a moment while it is being registered.
+  const apollo = useApolloClient();
+  const lastStudioRefetchRef = React.useRef(0);
+  const onStudioMissingRef = React.useRef(() => {});
+  React.useEffect(() => {
+    onStudioMissingRef.current = () => {
+      const now = Date.now();
+      if (now - lastStudioRefetchRef.current < STUDIO_REFETCH_MIN_INTERVAL_MS) {
+        return;
+      }
+      lastStudioRefetchRef.current = now;
+      void apollo.refetchQueries({ include: ['PublicStudios'] });
+    };
+  }, [apollo]);
+
   React.useEffect(() => {
     let isMounted = true;
 
@@ -631,6 +664,7 @@ export function useRadioStream({
     const fetchStatus = async () => {
       try {
         const response = await fetch(statusUrl, { cache: 'no-store' });
+        if (response.status === 404) onStudioMissingRef.current();
         if (!response.ok) throw new Error('status fetch failed');
         const payload = (await response.json()) as StatusResponse;
         if (!isMounted) return;

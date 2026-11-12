@@ -64,6 +64,11 @@ export const notifier = {
       position: 'bottom-left',
       toastId: msgId,
     }),
+  info: (msg: string, msgId = 15) =>
+    toast.info(msg, {
+      position: 'bottom-left',
+      toastId: msgId,
+    }),
 };
 
 export const getTrackUrl = (studioSlug: string, trackId: string) =>
