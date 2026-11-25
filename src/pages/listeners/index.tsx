@@ -10,7 +10,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+import { RefreshRounded as RefreshRoundedIcon } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import type { CountryCount } from '@graphql/graphql';
 import { useListenerOverviewQuery } from '@graphql/hooks';
