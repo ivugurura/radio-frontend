@@ -9,6 +9,7 @@ import {
 // main bundle; everything staff-only is split out and fetched on demand.
 import HomePage from './pages/Home';
 
+const EmbedPage = lazy(() => import('./pages/Embed'));
 const Layout = lazy(() => import('./components/Layout'));
 const Login = lazy(() => import('./pages/login'));
 const Dashboard = lazy(() => import('./pages/dashboard'));
@@ -32,6 +33,8 @@ export const AppRoutes = () => {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route index element={<HomePage />} />
+          {/* Bare player for iframes on other sites (rrv-web home page). */}
+          <Route path="embed" element={<EmbedPage />} />
           <Route path="login" element={<Login shouldRedirect />} />
           {/* One-time links from invite and reset emails. */}
           <Route

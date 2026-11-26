@@ -56,6 +56,8 @@ type Props = {
   title?: string;
   autoPlay?: boolean;
   showVolumeControl?: boolean;
+  /** Hero only: hide the station title, e.g. when the host page shows it. */
+  showTitle?: boolean;
 };
 
 function getPlaybackIcon(isPlaying: boolean, isBuffering: boolean) {
@@ -86,6 +88,7 @@ export const RadioStreamPlayer: React.FC<Props> = ({
   title = 'Radio Stream',
   autoPlay = false,
   showVolumeControl = false,
+  showTitle = true,
 }) => {
   const { t } = useTranslation('audio');
   const canSkip = useStudioAccess().can('CONTROL_PLAYBACK');
@@ -219,9 +222,11 @@ export const RadioStreamPlayer: React.FC<Props> = ({
 
   return (
     <Stack spacing={1.5} alignItems="center">
-      <Typography variant="h5" fontWeight={500} textAlign="center">
-        {title}
-      </Typography>
+      {showTitle && (
+        <Typography variant="h5" fontWeight={500} textAlign="center">
+          {title}
+        </Typography>
+      )}
       <IconButton
         onClick={togglePlayback}
         aria-label={isPlaying ? 'Stop radio' : 'Start radio'}
