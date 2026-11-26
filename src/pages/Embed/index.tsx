@@ -30,6 +30,10 @@ const EmbedPage: React.FC = () => {
       <GlobalStyles
         styles={{
           'html, body': { background: 'transparent !important' },
+          // Keep the document's scheme fixed at light, whatever the palette.
+          // The host iframe declares the same scheme; if the two differ, the
+          // browser paints an opaque backdrop behind this transparent page.
+          html: { colorScheme: 'light !important' },
           // App-wide toasts don't fit in a small iframe; the player shows
           // its own error state.
           '.Toastify': { display: 'none' },

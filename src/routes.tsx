@@ -8,8 +8,10 @@ import {
 // The public listener page is what most visitors open, so it ships in the
 // main bundle; everything staff-only is split out and fetched on demand.
 import HomePage from './pages/Home';
+// Shipped in the main bundle too: a lazy chunk would show the full-page
+// loader inside the host site's iframe before the player appears.
+import EmbedPage from './pages/Embed';
 
-const EmbedPage = lazy(() => import('./pages/Embed'));
 const Layout = lazy(() => import('./components/Layout'));
 const Login = lazy(() => import('./pages/login'));
 const Dashboard = lazy(() => import('./pages/dashboard'));
